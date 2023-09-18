@@ -275,7 +275,7 @@ class TInscriptionRepository extends ServiceEntityRepository
     }
 
     
-    public function getInscriptionsByAnneeAndPromoAndGroupe($promotion,$annee,$groupe)
+    public function getInscriptionsByAnneeAndPromoAndGroupe($promotion,$annee,$groupes)
     {
         // if ($groupe == Null) {
         //     # code...
@@ -287,10 +287,10 @@ class TInscriptionRepository extends ServiceEntityRepository
         ->leftJoin("inscription.groupe", "groupe")
         ->where('promotion = :promotion')
         ->andWhere("annee = :annee")
-        ->andWhere("groupe = :groupe")
+        ->andWhere("groupe in (:groupe)")
         ->andWhere("statut.id = 13")
         ->setParameter('promotion', $promotion)
-        ->setParameter('groupe', $groupe)
+        ->setParameter('groupe', $groupes)
         ->setParameter('annee', $annee)
         ->getQuery()
         ->getResult()

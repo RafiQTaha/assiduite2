@@ -1,0 +1,59 @@
+<div class="modal" role="dialog" id="ajout_modal" aria-modal="true"> 
+<div class="modal-dialog modal-md" style="max-width: 200px !important;" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Données Element</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"> 
+        <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- <div class="alert alert-info">Veuillez selectionner un ligne Pour Continuer Cette opération !!</div> -->
+        <form id="save">
+            <label for="designation">Désignation:</label>
+            <input type="text" class="form-control" name="designation" id="designation" />
+            <label for="nature">Nature:</label>
+            <select class="form-control" name="nature" id="nature">
+                <option value="">Choix Nature</option>
+                {% for nature in natures %}
+                    <option value="{{nature.id}}">{{nature.designation}}</option>
+                {% endfor %}
+            </select>
+            <label for="coefficient">Coefficient Epreuve CC : (*)</label>
+            <input type="float" class="form-control" name="coefficient" id="coefficient" />
+            <label for="coefficient_cc">Coefficient:</label>
+            <select class="form-control" name="coefficient_cc" id="coefficient_cc">
+                <option value="">Choix Coefficient Epreuve CC </option>
+                {% for i in 0..20 %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+            <label for="coefficient_tp">Coefficient Epreuve TP: (*)</label>
+            <select class="form-control" name="coefficient_tp" id="coefficient_tp">
+                <option value="">Choix Coefficient Epreuve TP </option>
+                {% for i in 0..20 %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+            <label for="coefficient_ef">Coefficient Epreuve EF (*)</label>
+            <select class="form-control" name="coefficient_ef" id="coefficient_ef">
+                <option value="">Choix Coefficient Epreuve EF </option>
+                {% for i in 0..20 %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+            <div class="d-flex align-items-center mt-2">
+                <label for="active" >Active:</label>
+                <input  type="checkbox"  class="mb-2 ml-4" name="active" id="active" />
+            </div>
+            <div class="d-flex align-items-center mt-2">
+                <label for="cours_document" >cours_document:</label>
+                <input  type="checkbox"  class="mb-2 ml-4" name="cours_document" id="cours_document" />
+            </div>
+            <button type="submit" class="btn btn-success mt-4"><i class="fas fa-check-circle"></i> Enregister</button>
+            {# <button type="button" id="save_document" class="btn btn-success mt-2"><i class="fas fa-check-circle"></i> Enregistrer</button> #}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

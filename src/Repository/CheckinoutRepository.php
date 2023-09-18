@@ -54,13 +54,54 @@ class CheckinoutRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Checkinout
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+   public function findOneBySNAndDateAndUserIdMin($sn,$userId,$date)
+   {
+       return $this->createQueryBuilder('c')
+           ->Where('c.sn in (:sn)')
+           ->andWhere('c.USERID = :userId')
+           ->andWhere('c.CHECKTIME <= :date')
+           ->setParameter('sn', $sn)
+           ->setParameter('userId', $userId)
+           ->setParameter('date', $date)
+           ->orderBy('c.CHECKTIME','DESC')
+           ->setMaxResults(1)
+           ->getQuery()
+           ->getOneOrNullResult()
+       ;
+    //    dd($return);
+   }
+
+   public function findOneBySNAndDateAndUserIdMax($sn,$userId,$date)
+   {
+       return $this->createQueryBuilder('c')
+           ->Where('c.sn in (:sn)')
+           ->andWhere('c.USERID = :userId')
+           ->andWhere('c.CHECKTIME >= :date')
+           ->setParameter('sn', $sn)
+           ->setParameter('userId', $userId)
+           ->setParameter('date', $date)
+           ->orderBy('c.CHECKTIME','ASC')
+           ->setMaxResults(1)
+           ->getQuery()
+           ->getOneOrNullResult()
+       ;
+    //    dd($return);
+   }
+
+   public function findOneBySNAndDateAndUserId($sn,$userId,$date)
+   {
+       return $this->createQueryBuilder('c')
+           ->Where('c.sn in (:sn)')
+           ->andWhere('c.USERID = :userId')
+           ->andWhere('c.CHECKTIME >= :date')
+           ->setParameter('sn', $sn)
+           ->setParameter('userId', $userId)
+           ->setParameter('date', $date)
+           ->orderBy('c.CHECKTIME','ASC')
+           ->setMaxResults(1)
+           ->getQuery()
+           ->getOneOrNullResult()
+       ;
+    //    dd($return);
+   }
 }
