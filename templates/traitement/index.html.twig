@@ -1,176 +1,187 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}Univ - Seances{% endblock %}
-
-
-{% block body %}
+{% extends 'base.html.twig' %} {% block title %}Univ - Seances{% endblock %} {%
+block body %}
 
 <style>
-    .small-box {
-        position: relative;
-        /* background-color: #ccc; */
-        text-align: center;
-        width: 40px;
-        height: 40px;
-        line-height: 50px;
-        font-size: 24px;
-        margin: 0 5px;
-        padding: 0;
-        /* float: left; */
-        border: 1px solid #ccc;
+  .small-box {
+    position: relative;
+    /* background-color: #ccc; */
+    text-align: center;
+    width: 40px;
+    height: 40px;
+    line-height: 50px;
+    font-size: 24px;
+    margin: 0 5px;
+    padding: 0;
+    /* float: left; */
+    border: 1px solid #ccc;
 
-        overflow: hidden;
-    }
-    .cat{
-        transition: all .8s ease-out;
-        /* margin-left: -6px; */
-        left: 50%;
-    }
-    .number{
-        position: absolute;
-        top:100%;
-    }
-    .lettre{
-        position: absolute;
-        bottom:0%;
-        left: 15px;
-        margin: -26px -9px;
-    }
-    .small-box.active .number{
-        top:0;
-    }
-    .small-box.active .lettre{
-        bottom:100%;
-    }
+    overflow: hidden;
+  }
+  .cat {
+    transition: all 0.8s ease-out;
+    /* margin-left: -6px; */
+    left: 50%;
+  }
+  .number {
+    position: absolute;
+    top: 100%;
+  }
+  .lettre {
+    position: absolute;
+    bottom: 0%;
+    left: 15px;
+    margin: -26px -9px;
+  }
+  .small-box.active .number {
+    top: 0;
+  }
+  .small-box.active .lettre {
+    bottom: 100%;
+  }
 </style>
 <div class="main-content">
-    <section class="section">
-        <div class="section-header">
-          <h1>Seances</h1>
-          <div class="section-header-breadcrumb">
-              <a href="#" class="btn btn-success ml-1" id="traiter"><i class="fas fa-edit"></i> Traiter</a>
-              {# <a href="#" class="btn btn-success ml-1" id="ajouter"><i class="fas fa-plus"></i>  Ajouter</a> #}
-              {# <a href="#" class="btn btn-success ml-1" id="ajouter"><i class="fas fa-plus"></i>  Aouter</a> #}
-              {# {% for operation in operations %}
-              <a href="{{operation.link}}" class="{{operation.classTag}}" id="{{operation.idTag}}"><i class="{{operation.icon}}"></i>  {{operation.designation}}</a>
-              {% endfor %} #}
-          </div>
-        </div>
+  <section class="section">
+    <div class="section-header">
+      <h1>Seances</h1>
+      <div class="section-header-breadcrumb">
+        {#
+        <a href="#" class="btn btn-success ml-1" id="traiter"
+          ><i class="fas fa-edit"></i> Traiter</a
+        >
+        #} {#
+        <a href="#" class="btn btn-success ml-1" id="ajouter"
+          ><i class="fas fa-plus"></i> Ajouter</a
+        >
+        #} {#
+        <a href="#" class="btn btn-success ml-1" id="ajouter"
+          ><i class="fas fa-plus"></i> Aouter</a
+        >
+        #} {% for operation in operations %}
+        <a
+          href="{{ operation.link }}"
+          class="{{ operation.classTag }}"
+          id="{{ operation.idTag }}"
+          ><i class="{{ operation.icon }}"></i> {{ operation.designation }}</a
+        >
+        {% endfor %}
+      </div>
+    </div>
 
-        <div class="section-body">
-        <div class="card">
-            <div class="card-header">
-            <h4>Tableau des Seances</h4>
-            </div>
-            <div class="card-body">
-            <div class="card-search" style="margin-bottom: 1.5rem;">
-                <div class="row">
-                    <div class="col-md-2">
-                        <label for="etablissement">Etablissement:</label>
-                        <select class="form-control" name="etablissement" id="etablissement">
-                            <option value="">Choix etablissement</option>
-                            {% for etablissement in etablissements %}
-                                <option value="{{etablissement.id}}">{{etablissement.designation}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="formation">Formation:</label>
-                        <select class="form-control" name="formation" id="formation">
-                           
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="promotion">Promotion:</label>
-                        <select class="form-control" name="promotion" id="promotion">
-                           
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="semestre">Semestre:</label>
-                        <select class="form-control" name="semestre" id="semestre">
-                           
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="module">Module:</label>
-                        <select class="form-control" name="module" id="module">
-                           
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="d-flex">
-                <div class="small-box a">
-                    <span class="cat lettre">A</span>
-                    <span class="cat number">0</span>
-                </div>
-                <div class="small-box b">
-                    <span class="cat lettre">B</span>
-                    <span class="cat number">0</span>
-                </div>
-                <div class="small-box c">
-                    <span class="cat lettre">C</span>
-                    <span class="cat number">0</span>
-                </div>
-                <div class="small-box d">
-                    <span class="cat lettre">D</span>
-                    <span class="cat number">0</span>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <table id="datatables_gestion_seances" class="table table-striped" style="width:100%">
-                <thead>
-                    <tr>
-                         <th>ID</th>
-                         <th>Date</th>
-                         <th>Salle</th>
-                        {# <th>etablissement</th>
-                        <th>formation</th>
-                        <th>Promotion</th>
-                        <th>Semestre</th>
-                        <th>Module</th>
-                        <th>Element</th> #}
-                    </tr>
-                </thead>
-                <tbody>
-                   
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>ID</th>
-                        <th>Date</th>
-                        <th>Salle</th>
-                        {# <th>etablissement</th>
-                        <th>formation</th>
-                        <th>Promotion</th>
-                        <th>Semestre</th>
-                        <th>Module</th>
-                        <th>Element</th> #}
-                    </tr>
-                </tfoot>
-            </table>
-            </div>
-            
+    <div class="section-body">
+      <div class="card">
+        <div class="card-header">
+          <h4>Tableau des Seances</h4>
         </div>
+        <div class="card-body">
+          <div class="card-search" style="margin-bottom: 1.5rem">
+            <div class="row">
+              <div class="col-md-2">
+                <label for="day">Jour:</label>
+                <input type="date" class="form-control" name="day" id="day" />
+              </div>
+              <div class="col-md-2">
+                <label for="etablissement">Etablissement:</label>
+                <select
+                  class="form-control"
+                  name="etablissement"
+                  id="etablissement"
+                >
+                  <option value="">Choix etablissement</option>
+                  {% for etablissement in etablissements %}
+                  <option value="{{ etablissement.id }}">
+                    {{ etablissement.designation }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label for="formation">Formation:</label>
+                <select
+                  class="form-control"
+                  name="formation"
+                  id="formation"
+                ></select>
+              </div>
+              <div class="col-md-2">
+                <label for="promotion">Promotion:</label>
+                <select
+                  class="form-control"
+                  name="promotion"
+                  id="promotion"
+                ></select>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex">
+            <div class="small-box a">
+              <span class="cat lettre">A</span>
+              <span class="cat number">0</span>
+            </div>
+            <div class="small-box b">
+              <span class="cat lettre">B</span>
+              <span class="cat number">0</span>
+            </div>
+            <div class="small-box c">
+              <span class="cat lettre">C</span>
+              <span class="cat number">0</span>
+            </div>
+            <div class="small-box d">
+              <span class="cat lettre">D</span>
+              <span class="cat number">0</span>
+            </div>
+            <div class="clearfix"></div>
+          </div>
+          <table
+            id="datatables_gestion_seances"
+            class="table table-striped"
+            style="width: 100%"
+          >
+            <thead>
+              <tr>
+                <th>Seance</th>
+                <th>Nature</th>
+                <th>Salle</th>
+                <th>Element</th>
+                <th>Enseignant</th>
+                <th>HD</th>
+                <th>HF</th>
+                <th>Groupe</th>
+                <th>Signé</th>
+                <th>Annulé</th>
+                <th>Existe</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr>
+                <th>Seance</th>
+                <th>Nature</th>
+                <th>Salle</th>
+                <th>Element</th>
+                <th>Enseignant</th>
+                <th>HD</th>
+                <th>HF</th>
+                <th>Groupe</th>
+                <th>Signé</th>
+                <th>Annulé</th>
+                <th>Existe</th>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 </div>
 
-
-
 <!--Modal Import Group-->
-{# {% include 'traitement/modals/ajouter.html.twig' %}
-{% include 'traitement/modals/modifier.html.twig' %} #}
-
-{% endblock %}
-
-{% block javascripts %}
-{{parent()}}
-{# {{ encore_entry_script_tags('element') }} #}
-
-{# <script src="/assets/js/etudiant/etudiant.js"></script> #}
+{# {% include 'traitement/modals/ajouter.html.twig' %} {% include
+'traitement/modals/modifier.html.twig' %} #} {% endblock %} {% block javascripts
+%}
+{{ parent() }}
+{# {{ encore_entry_script_tags("element") }} #} {#
+<script src="/assets/js/etudiant/etudiant.js"></script>
+#}
 <script src="/assets/js/traitement/traitement.js"></script>
 
 {% endblock %}
-
