@@ -5,44 +5,41 @@
 
 {% block body %}
 
-<style>
-    .small-box {
-        position: relative;
-        /* background-color: #ccc; */
-        text-align: center;
-        width: 40px;
-        height: 40px;
-        line-height: 50px;
-        font-size: 24px;
-        margin: 0 5px;
-        padding: 0;
-        /* float: left; */
-        border: 1px solid #ccc;
-
-        overflow: hidden;
-    }
-    .cat{
-        transition: all .8s ease-out;
-        /* margin-left: -6px; */
-        left: 50%;
-    }
-    .number{
-        position: absolute;
-        top:100%;
-    }
-    .lettre{
-        position: absolute;
-        bottom:0%;
-        left: 15px;
-        margin: -26px -9px;
-    }
-    .small-box.active .number{
-        top:0;
-    }
-    .small-box.active .lettre{
-        bottom:100%;
-    }
-</style>
+             <style>
+                .small-box {
+                    position: relative;
+                    /* background-color: #ccc; */
+                    text-align: center;
+                    width: 50px;
+                    height: 50px;
+                    line-height: 50px;
+                    font-size: 24px;
+                    margin: 0;
+                    padding: 0;
+                    float: left;
+                    border: 1px solid #ccc;
+                    overflow: hidden;
+                }
+                .cat{
+                    transition: all .8s ease-out;
+                }
+                .number{
+                    position: absolute;
+                    top:100%;
+                    left:15px;
+                }
+                .lettre{
+                    position: absolute;
+                    bottom:0%;
+                    left: 15px;
+                }
+                .small-box.active .number{
+                    top:0;
+                }
+                .small-box.active .lettre{
+                    bottom:100%;
+                }
+            </style>
 <div class="main-content">
     <section class="section">
         <div class="section-header">
