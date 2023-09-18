@@ -43,18 +43,18 @@ class TraitementController extends AbstractController
     #[Route('/', name: 'traitement')]
     public function index(Request $request)
     {
-        $operations = ApiController::check($this->getUser(), 'traitement', $this->em, $request);
-        if(!$operations) {
-            return $this->render("errors/403.html.twig");
-        }
+        // $operations = ApiController::check($this->getUser(), 'traitement', $this->em, $request);
+        // if(!$operations) {
+        //     return $this->render("errors/403.html.twig");
+        // }
         // return $this->render('parametre/element/index.html.twig', [
         return $this->render('traitement/index.html.twig', [
             'etablissements' => $this->em->getRepository(AcEtablissement::class)->findBy(['active' => 1]),
             // 'natures' => $this->em->getRepository(TypeElement::class)->findAll(),
-            'operations' => $operations
+            // 'operations' => $operations
         ]);
     }
-    #[Route('/list', name: 'parametre_element_list')]
+    #[Route('/list', name: 'assiduite_list')]
     public function list(Request $request)
     {
         $params = $request->query;
@@ -62,9 +62,12 @@ class TraitementController extends AbstractController
         $where = $totalRows = $sqlRequest = "";
         // $filtre = "where 1 = 1 and elm.active = 1";   
         $filtre = "where 1 = 1 ";   
+        // $filtre = "where 1 = 1 ";   
         // dd($params->all('columns')[0]['search']['value']);
         if (!empty($params->all('columns')[0]['search']['value'])) {
-            $filtre .= " and emp.start like '" . $params->all('columns')[0]['search']['value'] . "%' ";
+            $filtre .= " and date(emp.start) = '" . $params->all('columns')[0]['search']['value'] . "' ";
+        }else {
+            $filtre .= " and date(emp.start) = '" . date('Y-m-j') . "' ";
         }
         if (!empty($params->all('columns')[1]['search']['value'])) {
             $filtre .= " and etab.id = '" . $params->all('columns')[1]['search']['value'] . "' ";

@@ -226,7 +226,7 @@ $(document).ready(function () {
     try {
       $("body .small-box").removeClass("active");
       icon.remove("fa-edit").addClass("fa-spinner fa-spin ");
-      const request = await axios.post("/traitement/traiter/" + id_seance);
+      const request = await axios.post("/assiduite/traitement/traiter/" + id_seance);
       const response = request.data;
       // table.ajax.reload();
       // id_seance = false

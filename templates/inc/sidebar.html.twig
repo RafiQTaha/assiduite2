@@ -12,8 +12,7 @@
     </div>
     <ul class="sidebar-menu">
       <li class="menu-header">Dashboard</li>
-        {# {{dump(app.session.get('modules'))}} #}
-      {% for module in app.session.get('modules') %}
+      {# {% for module in app.session.get('modules') %}
       
       <li class="nav-item dropdown {% if getCurrentUrl == module.module.prefix %} active {% endif %}">
         <a href="#" class="nav-link has-dropdown"
@@ -25,8 +24,8 @@
           {% endfor %}
         </ul>
       </li>
-      {% endfor %}
-      {% if is_granted('ROLE_ADMIN') %}
+      {% endfor %} #}
+      {# {% if is_granted('ROLE_ADMIN') %}
       <li class="nav-item dropdown {% if getCurrentUrl == "parametre" %} active {% endif %}">
         <a href="#" class="nav-link has-dropdown">
           <i class="fas fa-users-cog"></i><span>Adminstration</span>
@@ -35,7 +34,7 @@
             <li><a class="nav-link {% if getCurrentUrl == "parametre" and secondCurrentUrl == "user" %} activeSecondUrl {% endif %}" href="{{path('parametre_user')}}">Users</a></li>
         </ul>
       </li>
-      {% endif %}
+      {% endif %} #}
     </ul>
   </aside>
 </div>
