@@ -22,15 +22,17 @@ use Symfony\Component\Routing\Annotation\Route;
 
 // use ZKLibrary;
 
-require '../zklibrary.php';
+//!! require '../zklibrary.php';
 
-require '../ZKLib.php';
+//!! require '../ZKLib.php';
+
+
 // require '../ZK/Nouveau dossier/zklibrary.php';
 
 
 // require __DIR__ . '../../../vendor/autoload.php';
 
-#[Route('/traitement')]
+#[Route('/assiduite/traitement')]
 class TraitementController extends AbstractController
 {
     private $em;
@@ -41,15 +43,15 @@ class TraitementController extends AbstractController
     #[Route('/', name: 'traitement')]
     public function index(Request $request)
     {
-        // $operations = ApiController::check($this->getUser(), 'parametre_element', $this->em, $request);
-        // if(!$operations) {
-        //     return $this->render("errors/403.html.twig");
-        // }
+        $operations = ApiController::check($this->getUser(), 'traitement', $this->em, $request);
+        if(!$operations) {
+            return $this->render("errors/403.html.twig");
+        }
         // return $this->render('parametre/element/index.html.twig', [
         return $this->render('traitement/index.html.twig', [
             'etablissements' => $this->em->getRepository(AcEtablissement::class)->findBy(['active' => 1]),
             // 'natures' => $this->em->getRepository(TypeElement::class)->findAll(),
-            // 'operations' => $operations
+            'operations' => $operations
         ]);
     }
     #[Route('/list', name: 'parametre_element_list')]
@@ -60,42 +62,53 @@ class TraitementController extends AbstractController
         $where = $totalRows = $sqlRequest = "";
         // $filtre = "where 1 = 1 and elm.active = 1";   
         $filtre = "where 1 = 1 ";   
-        // dd($params->all('columns')[0]);
-        // if (!empty($params->all('columns')[0]['search']['value'])) {
-        //     $filtre .= " and etab.id = '" . $params->all('columns')[0]['search']['value'] . "' ";
-        // }
-        // if (!empty($params->all('columns')[1]['search']['value'])) {
-        //     $filtre .= " and form.id = '" . $params->all('columns')[1]['search']['value'] . "' ";
-        // }
-        // if (!empty($params->all('columns')[2]['search']['value'])) {
-        //     $filtre .= " and prm.id = '" . $params->all('columns')[2]['search']['value'] . "' ";
-        // }
-        // if (!empty($params->all('columns')[3]['search']['value'])) {
-        //     $filtre .= " and sem.id = '" . $params->all('columns')[3]['search']['value'] . "' ";
-        // }
-        // if (!empty($params->all('columns')[4]['search']['value'])) {
-        //     $filtre .= " and mdl.id = '" . $params->all('columns')[4]['search']['value'] . "' ";
-        // }
+        // dd($params->all('columns')[0]['search']['value']);
+        if (!empty($params->all('columns')[0]['search']['value'])) {
+            $filtre .= " and emp.start like '" . $params->all('columns')[0]['search']['value'] . "%' ";
+        }
+        if (!empty($params->all('columns')[1]['search']['value'])) {
+            $filtre .= " and etab.id = '" . $params->all('columns')[1]['search']['value'] . "' ";
+        }
+        if (!empty($params->all('columns')[2]['search']['value'])) {
+            $filtre .= " and form.id = '" . $params->all('columns')[2]['search']['value'] . "' ";
+        }
+        if (!empty($params->all('columns')[3]['search']['value'])) {
+            $filtre .= " and prm.id = '" . $params->all('columns')[3]['search']['value'] . "' ";
+        }
+        
+
+        // dd($filtre);
         $columns = array(
             array( 'db' => 'emp.id','dt' => 0),
-            array( 'db' => 'emp.start','dt' => 1),
-            array( 'db' => 'sall.code','dt' => 2),
-            // array( 'db' => 'LOWER(etab.designation)','dt' => 1),
-            // array( 'db' => 'LOWER(form.designation)','dt' => 2),
-            // array( 'db' => 'LOWER(prm.designation)','dt' => 3),
-            // array( 'db' => 'LOWER(sem.designation)','dt' => 4),
-            // array( 'db' => 'LOWER(mdl.designation)','dt' => 5), 
-            // array( 'db' => 'elm.designation','dt' => 6), 
+            array( 'db' => 'nat.abreviation','dt' => 1),
+            array( 'db' => 'UPPER(sall.designation)','dt' => 2),
+            array( 'db' => 'elm.designation','dt' => 3),
+            array( 'db' => 'CONCAT(ens.nom," ", ens.prenom)','dt' => 4),
+            array( 'db' => 'emp.heur_db','dt' => 5),
+            array( 'db' => 'emp.heur_fin','dt' => 6),
+            array( 'db' => 'grp.niveau','dt' => 7),
+            array( 'db' => 'xs.signé','dt' => 8),
+            array( 'db' => 'xs.annulée','dt' => 9),
+            array( 'db' => 'xs.existe','dt' => 10),
         );
         $sql = "SELECT " . implode(", ", DatatablesController::Pluck($columns, 'db')) . "
         from pl_emptime emp
         left join psalles sall on sall.id = emp.xsalle_id
-        -- inner join ac_module mdl on mdl.id = elm.module_id
-        -- inner join ac_semestre sem on sem.id = mdl.semestre_id
-        -- inner join ac_promotion prm on prm.id = sem.promotion_id
-        -- inner join ac_formation form on form.id = prm.formation_id
-        -- inner join ac_etablissement etab on etab.id = form.etablissement_id
-        $filtre ";
+        left join pgroupe grp on grp.id = emp.groupe_id
+        inner join pl_emptimens empens on empens.seance_id = emp.id
+        inner join penseignant ens on ens.id = empens.enseignant_id
+        inner join pr_programmation prg on prg.id = emp.programmation_id
+        inner join pnature_epreuve nat on nat.id = prg.nature_epreuve_id
+        inner join ac_element elm on elm.id = prg.element_id
+        inner join ac_module mdl on mdl.id = elm.module_id
+        inner join ac_semestre sem on sem.id = mdl.semestre_id
+        inner join ac_promotion prm on prm.id = sem.promotion_id
+        inner join ac_formation form on form.id = prm.formation_id
+        inner join ac_etablissement etab on etab.id = form.etablissement_id
+
+        left join xseance xs on xs.id_séance = emp.id 
+
+        $filtre group by emp.id";
         // dd($sql);
         $totalRows .= $sql;
         $sqlRequest .= $sql;

@@ -75,7 +75,7 @@ class ApiController extends AbstractController
     public function getPromotion($formation): Response
     {   
         $promotions = $this->em->getRepository(AcPromotion::class)->findBy(['formation'=>$formation, 'active' => 1],['id'=>'ASC']);
-        dd($promotions);
+        // dd($promotions);
         $data = self::dropdown($promotions,'promotion');
         return new JsonResponse($data);
     }
