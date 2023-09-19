@@ -1,0 +1,52 @@
+<thead>
+    <tr>
+        <th>
+        </th>
+        <th>Seance
+        </th>
+        <th>Heure debut
+        </th>
+        <th>Heure Fin
+        </th>
+        <th>Etablissement
+        </th>
+        <th>Formation
+        </th>
+        <th>Promotion
+        </th>
+        <th>Groupe
+        </th>
+        <th>Salle
+        </th>
+        <th>Element Module
+        </th>
+        <th>Enseignant
+        </th>
+
+
+
+    </tr>
+</thead>
+<tbody>
+    {% for emp in emptimes %}
+        <tr>
+            <td><input type ='checkbox' class='check_seance' id ='{{emp.id}}' value="{{emp.id}}"></td>
+            <td>{{emp.id}}</td>
+            <td>{{emp.heurDb | date('H:i:s')}}</td>
+            <td>{{emp.heurFin | date('H:i:s')}}</td>
+            <td>{{emp.programmation.element.module.semestre.promotion.formation.etablissement.abreviation}}</td>
+            <td>{{emp.programmation.element.module.semestre.promotion.formation.abreviation}}</td>
+            <td>{{emp.programmation.element.module.semestre.promotion.designation}}</td>
+            <td>{% if emp.groupe %}
+                {{emp.groupe.niveau}}
+            {% else %}
+                -
+            {% endif %}</td>
+            <td>{{emp.salle.designation}}</td>
+            <td>{{emp.programmation.element.designation}}</td>
+            {% for ens in emp.emptimens %}
+                <td>{{ens.enseignant.nom}} {{ens.enseignant.prenom}}</td>  
+            {% endfor %}                             
+        </tr>
+    {% endfor %}
+</tbody>
