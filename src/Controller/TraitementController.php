@@ -450,6 +450,33 @@ class TraitementController extends AbstractController
         }
         $this->em->flush();
 
+        // insert into xseance
+        $IDSéance = $emptime->getId();
+        $Typeséance=$emptime->getProgrammation()->getNatureEpreuve()->getCode();
+        $IDEtablissement=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode();
+        $IDFormation=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode();
+        $IDPromotion=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode();
+        $IDAnnée=$emptime->getProgrammation()->getAnnee()->getCode();     
+        $AnnéeLib=$emptime->getProgrammation()->getAnnee()->getDesignation();
+        $IDSemestre=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode();
+        $EmpGroupe=$emptime->getGroupe()->getNiveau();
+        $IDModule=$emptime->getProgrammation()->getElement()->getModule()->getCode();
+        $IDElement=$emptime->getProgrammation()->getElement()->getId();
+        $IDEnseignant=$emptime->getemptimetimens()[0]->getEnseignant()->getCode();
+        $IDSalle=strtoupper($emptime->getSalle()->getCode());
+        // $Xseance->setStatut(1);
+        $DateSéance=$emptime->getStart()->format("Y-m-d");
+        $EmpSemaine=$emptime->getSemaine()->getId();
+        $HeureDebut=$emptime->getHeurDb()->format("H:i");
+        $HeureFin=$emptime->getHeurFin()->format("H:i");
+        $DateSys=(new \DateTime())->format("Y-m-d");
+
+        $requete = "INSERT INTO `xseance`(`id_séance`, `typeséance`, `id_etablissement`, `id_formation`, `id_promotion`, `id_année`, `année_lib`, `id_semestre`, `groupe`, `id_module`, `id_element`, `id_enseignant`, `id_salle`, `date_séance`, `semaine`, `heure_debut`, `heure_fin`, `date_sys`, `statut`) VALUES ('$IDSéance','$Typeséance','$IDEtablissement','$IDFormation','$IDPromotion','$IDAnnée','$AnnéeLib','$IDSemestre','$EmpGroupe','$IDModule','$IDElement','$IDEnseignant','$IDSalle','$DateSéance','$EmpSemaine','$HeureDebut','$HeureFin','$DateSys','1')";
+
+        // dd($requete);
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery();
+
         return new JsonResponse(['data'=>$abcd,'message'=>$counter .' Done from '. count($inscriptions),200]);
         // return new JsonResponse($counter .' Done from '. count($inscriptions),200);,200);
     }
