@@ -25,8 +25,22 @@ $(document).ready(function () {
     language: {
       url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
     },
+    preDrawCallback: function(settings) {
+        if ($.fn.DataTable.isDataTable('#datatables_gestion_seances')) {
+            var dt = $('#datatables_gestion_seances').DataTable();
+
+            //Abort previous ajax request if it is still in process.
+            var settings = dt.settings();
+            if (settings[0].jqXHR) {
+                settings[0].jqXHR.abort();
+            }
+        }
+    },
+    drawCallback: function () {
+        $("body tr#" + id_seance).addClass('active_databales');
+    },
   });
-  $("#etablissement").select2();
+  $("select").select2();
   $("body").on("click", "#datatables_gestion_seances tbody tr", function () {
     // const input = $(this).find("input");
 
@@ -128,97 +142,6 @@ $(document).ready(function () {
     }
 
   })
-  // $("#modifier").on("click", async function(){
-  //     if(!id_seance){
-  //         Toast.fire({
-  //           icon: 'error',
-  //           title: 'Veuillez selectioner une ligne!',
-  //         })
-  //         return;
-  //     }
-  //     const icon = $("#modifier i");
-
-  //     try {
-  //         icon.remove('fa-edit').addClass("fa-spinner fa-spin ");
-  //         const request = await axios.get('/parametre/element/details/'+id_seance);
-  //         const response = request.data;
-  //         console.log(response)
-  //         icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
-  //         $("body #modifier_modal #udpate").html(response)
-  //         $('select').select2();
-  //         $("#modifier_modal").modal("show")
-  //     } catch (error) {
-  //         console.log(error, error.response);
-  //         const message = error.response.data;
-  //         Toast.fire({
-  //             icon: 'error',
-  //             title: message,
-  //           })
-  //         icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
-  //     }
-
-  // })
-  // $("#save").on("submit", async (e) => {
-  //     e.preventDefault();
-  //     var formData = new FormData($("#save")[0])
-  //     formData.append("module_id", $("#module").val());
-  //     const icon = $("#save i");
-  //     try {
-  //         icon.remove('fa-check-circle').addClass("fa-spinner fa-spin ");
-  //         const request = await axios.post('/parametre/element/new', formData);
-  //         const response = request.data;
-  //         icon.addClass('fa-check-circle').removeClass("fa-spinner fa-spin ");
-  //         $('#save')[0].reset();
-  //         table.ajax.reload();
-  //         id_seance = false;
-  //         $("#ajout_modal").modal("hide")
-  //         Toast.fire({
-  //             icon: 'success',
-  //             title: response,
-  //         })
-  //     } catch (error) {
-  //         console.log(error, error.response);
-  //         const message = error.response.data;
-  //         Toast.fire({
-  //             icon: 'error',
-  //             title: message,
-  //           })
-  //         icon.addClass('fa-check-circle').removeClass("fa-spinner fa-spin ");
-  //     }
-  // })
-  // $("#udpate").on("submit", async (e) => {
-  //     e.preventDefault();
-  //     var formData = new FormData($("#udpate")[0])
-  //     const icon = $("#udpate i");
-  //     try {
-  //         icon.remove('fa-check-circle').addClass("fa-spinner fa-spin ");
-  //         const request = await axios.post('/parametre/element/update/'+id_seance, formData);
-  //         const response = request.data;
-  //         icon.addClass('fa-check-circle').removeClass("fa-spinner fa-spin ");
-  //         id_seance = false;
-  //         table.ajax.reload();
-  //         $("#modifier_modal").modal("hide")
-  //         Toast.fire({
-  //             icon: 'success',
-  //             title: response,
-  //           })
-  //         icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
-  //     } catch (error) {
-  //         console.log(error, error.response);
-  //         const message = error.response.data;
-  //         Toast.fire({
-  //             icon: 'error',
-  //             title: message,
-  //           })
-  //         icon.addClass('fa-check-circle').removeClass("fa-spinner fa-spin ");
-  //     }
-  // })
-
-  // $('body').on('click','#extraction_architecture', async function (e) {
-  //     e.preventDefault();
-  //     const icon = $("#extraction_architecture i");
-  //     window.open('/parametre/element/extraction_architecture', '_blank');
-  // })
 
   $("#traiter").on("click", async function () {
     if (!id_seance) {
@@ -238,7 +161,7 @@ $(document).ready(function () {
       const request = await axios.post("/assiduite/traitement/traiter/" + id_seance);
       const response = request.data;
       table.ajax.reload();
-      // id_seance = false
+    //   id_seance = false
       icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
       Toast.fire({
         icon: "success",
