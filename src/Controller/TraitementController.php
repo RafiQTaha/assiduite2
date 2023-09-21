@@ -65,7 +65,7 @@ class TraitementController extends AbstractController
         // dd($params);
         $where = $totalRows = $sqlRequest = "";
         // $filtre = "where 1 = 1 and elm.active = 1";   
-        $filtre = "where 1 = 1 ";   
+        $filtre = " where 1 = 1 ";   
         // $filtre = "where 1 = 1 ";   
         // dd($params->all('columns')[0]['search']['value']);
         if (!empty($params->all('columns')[0]['search']['value'])) {
@@ -115,7 +115,7 @@ class TraitementController extends AbstractController
 
         left join xseance xs on xs.id_séance = emp.id 
 
-        $filtre group by emp.id";
+        $filtre group by emp.id ";
         // dd($sql);
         $totalRows .= $sql;
         $sqlRequest .= $sql;
