@@ -1,41 +1,45 @@
-{% extends 'base.html.twig' %} 
-{% block title %}Univ - Seances{% endblock %} 
-{% block body %}
+{% extends 'base.html.twig' %} {% block title %}Univ - Seances{% endblock %} {%
+block body %}
 
 <style>
-    .small-box {
-        position: relative;
-        /* background-color: #ccc; */
-        text-align: center;
-        width: 50px;
-        height: 50px;
-        line-height: 50px;
-        font-size: 24px;
-        margin: 0;
-        padding: 0;
-        float: left;
-        border: 1px solid #ccc;
-        overflow: hidden;
-    }
-    .cat{
-        transition: all .8s ease-out;
-    }
-    .number{
-        position: absolute;
-        top:100%;
-        left:15px;
-    }
-    .lettre{
-        position: absolute;
-        bottom:0%;
-        left: 15px;
-    }
-    .small-box.active .number{
-        top:0;
-    }
-    .small-box.active .lettre{
-        bottom:100%;
-    }
+  .small-box {
+    position: relative;
+    /* background-color: #ccc; */
+    text-align: center;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    font-size: 24px;
+    margin: 0;
+    padding: 0;
+    float: left;
+    border: 1px solid #ccc;
+    overflow: hidden;
+  }
+
+  .cat {
+    transition: all 0.8s ease-out;
+  }
+
+  .number {
+    position: absolute;
+    top: 100%;
+    left: 5px;
+  }
+
+  .lettre {
+    position: absolute;
+    bottom: 0%;
+    left: 5px;
+  }
+
+  .small-box.active .number {
+    top: 0;
+  }
+
+  .small-box.active .lettre {
+    bottom: 100%;
+  }
 </style>
 <div class="main-content">
   <section class="section">
@@ -44,7 +48,8 @@
       <div class="section-header-breadcrumb">
         <a href="#" class="btn btn-success ml-1" id="traiter"><i class="fas fa-edit"></i> Traiter</a>
         {# {% for operation in operations %}
-        <a href="{{ operation.link }}" class="{{ operation.classTag }}" id="{{ operation.idTag }}" ><i class="{{ operation.icon }}"></i> {{ operation.designation }}</a>
+        <a href="{{ operation.link }}" class="{{ operation.classTag }}" id="{{ operation.idTag }}"><i
+            class="{{ operation.icon }}"></i> {{ operation.designation }}</a>
         {% endfor %} #}
       </div>
     </div>
@@ -57,11 +62,11 @@
         <div class="card-body">
           <div class="card-search" style="margin-bottom: 1.5rem">
             <div class="row">
-              <div class="col-md-2">
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
                 <label for="day">Jour:</label>
-                <input type="date" class="form-control" name="day" id="day" value = "{{ 'now' | date('Y-m-d')}}"/>
+                <input type="date" class="form-control" name="day" id="day" value="{{ 'now' | date('Y-m-d')}}" />
               </div>
-              <div class="col-md-2">
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
                 <label for="etablissement">Etablissement:</label>
                 <select class="form-control" name="etablissement" id="etablissement">
                   <option value="">Choix etablissement</option>
@@ -72,15 +77,38 @@
                   {% endfor %}
                 </select>
               </div>
-              <div class="col-md-2">
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
                 <label for="formation">Formation:</label>
-                <select class="form-control" name="formation" id="formation" >
+                <select class="form-control" name="formation" id="formation"></select>
+              </div>
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+                <label for="promotion">Promotion:</label>
+                <select class="form-control" name="promotion" id="promotion"></select>
+              </div>
+              <div class="col-md-1" style="padding-right: 5px !important;padding-left: 5px !important;">
+                <label for="salles">Salles:</label>
+                <select class="form-control" name="salles" id="salles">
+                  <option value="">Choix salle</option>
+                  {% for salle in salles %}
+                  <option value="{{ salle.id }}">
+                    {{ salle.designation }}
+                  </option>
+                  {% endfor %}
                 </select>
               </div>
-              <div class="col-md-2">
-                <label for="promotion">Promotion:</label>
-                <select class="form-control" name="promotion" id="promotion">
-                </select>
+              <div class="col-md-2" style="padding-top: 21px; padding-right: 5px !important;padding-left: 5px !important;">
+                  <button id="modifiersalle" type="button" class="btn btn-outline-warning btn-rounded waves-effect" style="    display: inline-block;"><i class="fas fa-edit"></i>&nbsp;&nbsp;Modifier</button>
+                  <button id="parlot" data-toggle="modal" data-target="#parlot_modal" type="button" class="btn btn-outline-info btn-rounded waves-effect" style="    display: inline-block;"><i class="fas fa-clock"></i>&nbsp;&nbsp;Par lot</button>
+              </div>
+              <div class="col-md-1" style="padding-top: 21px; padding-right: 5px !important;padding-left: 5px !important;">
+                <a class="float-left" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fas fa-ellipsis-v" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                </a>
+                <div class="dropdown-menu custom-dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="#">Action</a>
+                  <a class="dropdown-item" href="#">Another action</a>
+                  <a class="dropdown-item" href="#">Something else here</a>
+                </div>
               </div>
             </div>
           </div>
@@ -103,38 +131,37 @@
             </div>
             <div class="clearfix"></div>
           </div>
-          <table id="datatables_gestion_seances" class="table table-striped" style="width: 100%" >
+          <table id="datatables_gestion_seances" class="table table-striped" style="width: 100%">
             <thead>
-                <tr>
-                    <th>Seance</th>
-                    <th>Nature</th>
-                    <th>Salle</th>
-                    <th>Element</th>
-                    <th>Enseignant</th>
-                    <th>HD</th>
-                    <th>HF</th>
-                    <th>Groupe</th>
-                    <th>Signé</th>
-                    <th>Annulé</th>
-                    <th>Existe</th>
-                </tr>
+              <tr>
+                <th>Seance</th>
+                <th>Nature</th>
+                <th>Salle</th>
+                <th>Element</th>
+                <th>Enseignant</th>
+                <th>HD</th>
+                <th>HF</th>
+                <th>Groupe</th>
+                <th>Signé</th>
+                <th>Annulé</th>
+                <th>Existe</th>
+              </tr>
             </thead>
-            <tbody>
-            </tbody>
+            <tbody></tbody>
             <tfoot>
-                <tr>
-                    <th>Seance</th>
-                    <th>Nature</th>
-                    <th>Salle</th>
-                    <th>Element</th>
-                    <th>Enseignant</th>
-                    <th>HD</th>
-                    <th>HF</th>
-                    <th>Groupe</th>
-                    <th>Signé</th>
-                    <th>Annulé</th>
-                    <th>Existe</th>
-                </tr>
+              <tr>
+                <th>Seance</th>
+                <th>Nature</th>
+                <th>Salle</th>
+                <th>Element</th>
+                <th>Enseignant</th>
+                <th>HD</th>
+                <th>HF</th>
+                <th>Groupe</th>
+                <th>Signé</th>
+                <th>Annulé</th>
+                <th>Existe</th>
+              </tr>
             </tfoot>
           </table>
         </div>
@@ -144,11 +171,11 @@
 </div>
 
 <!--Modal Import Group-->
-{# {% include 'traitement/modals/ajouter.html.twig' %} {% include
-'traitement/modals/modifier.html.twig' %} #} 
-{% endblock %} {% block javascripts %}
+{% include 'traitement/modals/parlot.html.twig' %}
+{% endblock %} {% block javascripts
+%}
 {{ parent() }}
-{# {{ encore_entry_script_tags("traitement") }} #} 
+{# {{ encore_entry_script_tags("traitement") }} #}
 <script src="/assets/js/traitement/traitement.js"></script>
 
 {% endblock %}

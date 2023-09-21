@@ -1382,7 +1382,7 @@ table tr:hover .table-links {
 
 .tab-content > .tab-pane {
   padding: 1rem 0;
-  // line-height: 24px;
+   /* line-height: 24px; */
 }
 
 .tab-bordered .tab-pane {
@@ -2446,6 +2446,10 @@ h6 .badge {
 }
 .dropdown-menu.show {
   display: block !important;
+}
+.custom-dropdown-menu.show {
+  right: 0;
+  left: auto;
 }
 .dropdown-menu a {
   font-size: 1.2rem !important;

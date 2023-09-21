@@ -85,40 +85,49 @@ $(document).ready(function () {
     }
     // $("#semestre").html(response).select2();
   });
-  //   $("#semestre").on("change", async function () {
-  //     const id_semestre = $(this).val();
+  
+  $("#modifiersalle").on("click", async () => {
+      // alert($("#formation").val())
+    var salle = $("#salles").val();
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    if(!salle){
+        Toast.fire({
+          icon: 'error',
+          title: 'Veuillez choissir une salle!',
+        })
+        return;
+    }
+      
+    const icon = $("#modifiersalle i");
 
-  //     if (id_semestre != "") {
-  //       table.columns(4).search(id_semestre).draw();
-  //       const request = await axios.get("/api/module/" + id_semestre);
-  //       response = request.data;
-  //     } else {
-  //       table.columns(4).search("").draw();
-  //     }
-  //     $("#module").html(response).select2();
-  //   });
-  //   $("#module").on("change", async function () {
-  //     const id_module = $(this).val();
+    try {
+        icon.remove('fa-edit').addClass("fa-spinner fa-spin ");
+        const request = await axios.get('/assiduite/traitement/modifiersalle/'+id_seance+'/'+salle);
+        const response = request.data;
+        console.log(response);
+        Toast.fire({
+          icon: 'success',
+          title: 'La salle est bien modifiée!',
+        })
+        icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
+        table.ajax.reload();
+    } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+          })
+        icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
+    }
 
-  //     if (id_module != "") {
-  //       table.columns(5).search(id_module).draw();
-  //     } else {
-  //       table.columns(5).search("").draw();
-  //     }
-  //   });
-  // $("#ajouter").on("click", () => {
-  //     // alert($("#formation").val())
-  //     if(!$("#module").val() || $("#module").val() == ""){
-  //         Toast.fire({
-  //           icon: 'error',
-  //           title: 'Veuillez choissir un module!',
-  //         })
-  //         return;
-  //     }
-  //     $("#ajout_modal").modal("show")
-  //     $("select").select2();
-
-  // })
+  })
   // $("#modifier").on("click", async function(){
   //     if(!id_seance){
   //         Toast.fire({
@@ -228,7 +237,7 @@ $(document).ready(function () {
       icon.remove("fa-edit").addClass("fa-spinner fa-spin ");
       const request = await axios.post("/assiduite/traitement/traiter/" + id_seance);
       const response = request.data;
-      // table.ajax.reload();
+      table.ajax.reload();
       // id_seance = false
       icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
       Toast.fire({
@@ -252,4 +261,95 @@ $(document).ready(function () {
     }
     // }
   });
+
+  
+  $("body #parlot_search").on("click", async function (e) {
+    e.preventDefault()
+    var hd = $("body #hd").val();
+    var hf = $("body #hf").val();
+    var date = $("body #day").val();
+    // var date = $("body #datetime").val();
+    // console.log(hd, hf);
+
+    if (!hd) {
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez remplir la date Debut !',
+        });
+      return;
+    }
+    if (!hf) {
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez remplir la date Fin !',
+        });
+      return;
+    }
+
+    const icon = $("#parlot_search i");
+
+    try {
+        icon.remove('fa-search').addClass("fa-spinner fa-spin ");
+        const request = await axios.get('/assiduite/traitement/parlot/'+hd+"/"+hf+"/"+date);
+        const response = request.data;
+
+        $('body #parlot_datatable').html(response.html);
+
+        if ($.fn.DataTable.isDataTable("body #parlot_datatable")) {
+          $("body #parlot_datatable").DataTable().clear().destroy();
+        }
+
+        $("body #parlot_datatable").DataTable({
+          language: {
+            url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
+          },
+        });
+
+
+        icon.addClass('fa-search').removeClass("fa-spinner fa-spin ");
+        table.ajax.reload();
+    } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+          })
+        icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
+    }
+  });
+  // var seances = [];
+  // $("#check").on("click", async function (e) {
+  //   e.preventDefault();
+    
+  //   $("#parlot_datatable input[type='checkbox']").each(function () {
+  //     if ($(this).is(":checked")) {
+  //       seances.push($(this).attr("id"));
+  //     }else {
+  //       $(this).prop("checked", true);
+  //       seances.push($(this).attr("id"));
+  //     }
+  //   });
+  //   console.log(seances);
+  // });
+
+  // !!!!!!! heree
+  seances = [];
+  $("body").on("click", "#check", function () {
+    // alert('test')
+    const se = $("body .check_seance");
+    if ($("#check").prop("checked") == true) {
+        se.prop("checked", true);
+        se.map(function () {
+          seances.push(this.value);
+        });
+        $("#check").prop("checked", false);
+        // console.log(admissions);
+    } else {
+        se.prop("checked", false);
+        seances = [];
+    }
+    console.log(seances);
+});
+
 });
