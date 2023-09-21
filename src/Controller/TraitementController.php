@@ -191,7 +191,7 @@ class TraitementController extends AbstractController
         // dd($pointeuses);
         foreach ($pointeuses as $pointeuse) {
             $id_pointeuse = $pointeuse["id_pointeuse"];
-            $requete = "SELECT * FROM `machines` where sn = '$id_pointeuse'";
+            $requete = "SELECT * FROM `machines` where sn = '$id_pointeuse' LIMIT 1";
 
             $stmt = $this->emAssiduite->getConnection()->prepare($requete);
             $newstmt = $stmt->executeQuery();   
@@ -213,7 +213,7 @@ class TraitementController extends AbstractController
 
                     $badgenumber = $attendace['id'];
 
-                    $requete = "SELECT * FROM `userinfo` where badgenumber = '$badgenumber'";
+                    $requete = "SELECT * FROM `userinfo` where badgenumber = '$badgenumber' LIMIT 1";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
@@ -232,7 +232,7 @@ class TraitementController extends AbstractController
                         $memoinfo = $promotion->getFormation()->getEtablissement()->getAbreviation();
                         // dd($CHECKTIME);
 
-                        $requete = "SELECT * FROM `checkinout` WHERE sn = '$sn' AND userid = '$userid' AND checktime = '$CHECKTIME'";
+                        $requete = "SELECT * FROM `checkinout` WHERE sn = '$sn' AND userid = '$userid' AND checktime = '$CHECKTIME' LIMIT 1";
 
                         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                         $newstmt = $stmt->executeQuery();   
@@ -316,14 +316,14 @@ class TraitementController extends AbstractController
             $id_module = $element->getModule()->getCode();
             $id_annee = $annee->getCode();
 
-            $requete = "SELECT * FROM `xseance_capitaliser` where id_admission = '$id_admission' and id_module = '$id_module' and id_année = '$id_annee'";
+            $requete = "SELECT * FROM `xseance_capitaliser` where id_admission = '$id_admission' and id_module = '$id_module' and id_année = '$id_annee' LIMIT 1";
             $stmt = $this->emAssiduite->getConnection()->prepare($requete);
             $newstmt = $stmt->executeQuery();   
             $capitaliseExist = $newstmt->fetchAll();
             
             $street = $inscription->getAdmission()->getCode();
             if (!$capitaliseExist) {
-                $requete = "SELECT * FROM `userinfo` where street = '$street'";
+                $requete = "SELECT * FROM `userinfo` where street = '$street' LIMIT 1";
 
                 $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                 $newstmt = $stmt->executeQuery();   
