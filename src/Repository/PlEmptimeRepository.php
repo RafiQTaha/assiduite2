@@ -200,6 +200,25 @@ class PlEmptimeRepository extends ServiceEntityRepository
         ;
     }
 
+    public function getEmptimeByHdHf($hd, $hf, $todayDate)
+    {
+        return $this->createQueryBuilder('e')
+            ->where('e.heur_db = :hd')
+            ->andWhere('e.heur_fin = :hf')
+            ->andWhere('e.heur_fin <= :hf')
+            ->andWhere('e.start LIKE :date')
+            ->andWhere("e.active = 1")
+            ->andWhere("e.annuler = 0")
+            ->setParameter('hd', $hd)
+            ->setParameter('hf', $hf)
+            ->setParameter('date', $todayDate)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+
+
     public function getEmptimeBySemestreAndGroupeAndSemaine($semestre,$groupe,$semaine)
     {
         return $this->createQueryBuilder('e')
