@@ -4516,6 +4516,15 @@ table.dataTable thead th,
 table.dataTable thead td {
   border-bottom: 1px solid #ddd !important;
 }
+
+table.dataTable tr.green{
+  background: rgb(149 237 149 / 85%);
+}
+
+table.dataTable tr.red{
+  background: rgba(237, 149, 149, 0.85);
+}
+
 table.dataTable.no-footer {
   border-bottom: 1px solid #ddd !important;
 }

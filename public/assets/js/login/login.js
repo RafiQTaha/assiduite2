@@ -1,4 +1,4 @@
-import "../../styles/components/login/login.scss";
+// import "../../styles/components/login/login.scss";
 
 const signUpButton = document.getElementById("signUp");
 const signInButton = document.getElementById("signIn");

@@ -39,6 +39,13 @@ $(document).ready(function () {
     drawCallback: function () {
         $("body tr#" + id_seance).addClass('active_databales');
     },
+    "columnDefs": [
+            {
+                "targets": [11], // The column index you want to hide (zero-based index)
+                "visible": false, // Hide the column
+                "searchable": false // Exclude the column from search
+            }
+        ]
   });
   $("select").select2();
   $("body").on("click", "#datatables_gestion_seances tbody tr", function () {
@@ -273,6 +280,272 @@ $(document).ready(function () {
         seances = [];
     }
     console.log(seances);
-});
+  });
+
+  $("#reinitialiser").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    var confirmation = confirm("Voulez-vous vraiment reinitialiser cette seance!");
+    if (confirmation) {
+      const icon = $("#reinitialiser i");
+
+      try {
+          icon.remove('fa-minus').addClass("fa-spinner fa-spin ");
+          const request = await axios.get('/assiduite/traitement/reinitialiser/'+id_seance);
+          const response = request.data;
+          console.log(response);
+          Toast.fire({
+            icon: 'success',
+            title: 'La seance est bien reinitialiser!',
+          })
+          icon.addClass('fa-minus').removeClass("fa-spinner fa-spin ");
+          table.ajax.reload();
+      } catch (error) {
+          console.log(error, error.response);
+          const message = error.response.data;
+          Toast.fire({
+              icon: 'error',
+              title: message,
+            })
+          icon.addClass('fa-minus').removeClass("fa-spinner fa-spin ");
+      }
+    }
+
+  })
+
+  $("#signer").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    const icon = $("#signer i");
+  
+    try {
+        icon.remove('fa-signature').addClass("fa-spinner fa-spin ");
+        const request = await axios.get('/assiduite/traitement/signer/'+id_seance);
+        const response = request.data;
+        console.log(response);
+        Toast.fire({
+          icon: 'success',
+          title: 'La seance est signée!',
+        })
+        icon.addClass('fa-signature').removeClass("fa-spinner fa-spin ");
+        table.ajax.reload();
+    } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+          })
+        icon.addClass('fa-signature').removeClass("fa-spinner fa-spin ");
+    }
+  
+  })
+
+  $("#existe").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    const icon = $("#existe i");
+  
+    try {
+        icon.remove('fa-thumbtack').addClass("fa-spinner fa-spin ");
+        const request = await axios.get('/assiduite/traitement/existe/'+id_seance);
+        const response = request.data;
+        console.log(response);
+        Toast.fire({
+          icon: 'success',
+          title: 'La seance existe!',
+        })
+        icon.addClass('fa-thumbtack').removeClass("fa-spinner fa-spin ");
+        table.ajax.reload();
+    } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+          })
+        icon.addClass('fa-thumbtack').removeClass("fa-spinner fa-spin ");
+    }
+  
+  })
+
+  $("#verouiller").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    var confirmation = confirm("Voulez-vous vraiment verouiller cette seance!");
+    if (confirmation) {
+      const icon = $("#verouiller i");
+  
+      try {
+          icon.remove('fa-lock').addClass("fa-spinner fa-spin ");
+          const request = await axios.get('/assiduite/traitement/verouiller/'+id_seance);
+          const response = request.data;
+          console.log(response);
+          Toast.fire({
+            icon: 'success',
+            title: 'La seance est bien verouillée!',
+          })
+          icon.addClass('fa-lock').removeClass("fa-spinner fa-spin ");
+          table.ajax.reload();
+      } catch (error) {
+          console.log(error, error.response);
+          const message = error.response.data;
+          Toast.fire({
+              icon: 'error',
+              title: message,
+            })
+          icon.addClass('fa-lock').removeClass("fa-spinner fa-spin ");
+      }
+    }
+  })
+
+  $("#annuler").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    var confirmation = confirm("Voulez-vous vraiment annuler cette seance!");
+    if (confirmation) {
+      const icon = $("#existe i");
+  
+      try {
+          icon.remove('fa-window-close').addClass("fa-spinner fa-spin ");
+          const request = await axios.get('/assiduite/traitement/annuler/'+id_seance);
+          const response = request.data;
+          console.log(response);
+          Toast.fire({
+            icon: 'success',
+            title: 'La seance est bien annulée!',
+          })
+          icon.addClass('fa-window-close').removeClass("fa-spinner fa-spin ");
+          table.ajax.reload();
+      } catch (error) {
+          console.log(error.response.data);
+          const message = error.response.data.error;
+          Toast.fire({
+              icon: 'error',
+              title: message,
+            })
+          icon.addClass('fa-window-close').removeClass("fa-spinner fa-spin ");
+      }
+    }
+  })
+
+  $("#scan").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    window.open(
+      "/assiduite/traitement/open/"+id_seance,
+      "_blank"
+    );
+  
+  })
+
+  $("#imprimer").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    window.open(
+      "/assiduite/traitement/imprimer/"+id_seance,
+      "_blank"
+    );
+  
+  })
+
+  $("#z").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    const icon = $("#z i");
+
+    try {
+        icon.remove('fa-edit').addClass("fa-spinner fa-spin ");
+        const request = await axios.get('/assiduite/traitement/z/'+id_seance);
+        const response = request.data;
+        console.log(response);
+        Toast.fire({
+          icon: 'success',
+          title: 'les catégories sont changées en Z!',
+        })
+        icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
+        table.ajax.reload();
+    } catch (error) {
+        console.log(error.response.data);
+        const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+          })
+        icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
+    }
+  })
+
+  $("#s").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    const icon = $("#s i");
+
+    try {
+        icon.remove('fa-edit').addClass("fa-spinner fa-spin ");
+        const request = await axios.get('/assiduite/traitement/s/'+id_seance);
+        const response = request.data;
+        console.log(response);
+        Toast.fire({
+          icon: 'success',
+          title: 'les catégories sont changées en S!',
+        })
+        icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
+        table.ajax.reload();
+    } catch (error) {
+        console.log(error.response.data);
+        const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+          })
+        icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
+    }
+  })
 
 });

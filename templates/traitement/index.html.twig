@@ -39,7 +39,20 @@ block body %}
     <div class="section-header">
       <h1>Seances</h1>
       <div class="section-header-breadcrumb">
-        <a href="#" class="btn btn-success ml-1" id="traiter"><i class="fas fa-edit"></i> Traiter</a>
+        <a href="#" id="synthese" class="btn btn-primary ml-1"><i class="fas fa-chart-bar"></i> Synthése</a>
+        <a href="#" id="z" class="btn btn-primary ml-1"><i class="fas fa-edit"></i> Z</a>
+        <a href="#" id="s" class="btn btn-primary ml-1"><i class="fas fa-edit"></i> S</a>
+        <a href="#" id="imprimer" class="btn btn-secondary ml-1"><i class="fas fa-print"></i> Imprimer</a>
+        <a href="#" id="verouiller" class="btn btn-danger ml-1"><i class="fas fa-lock"></i> Verouiller</a>
+        <a href="#" id="retraiter" class="btn btn-success ml-1"><i class="fas fa-redo"></i> Retraiter</a>
+        <a href="#" id="scan" class="btn btn-secondary ml-1"><i class="fas fa-file"></i> Scan</a>
+        <a href="#" id="annuler" class="btn btn-danger ml-1"><i class="fas fa-window-close"></i> Annuler</a>
+        <a href="#" id="signer" class="btn btn-primary ml-1"><i class="fas fa-signature"></i> Signer</a>
+        <a href="#" id="existe" class="btn btn-primary ml-1"><i class="fas fa-thumbtack"></i> Existe</a>
+        <a href="#" id="reinitialiser" class="btn btn-danger ml-1"><i class="fas fa-minus"></i> Réinitialiser</a>
+        <a href="#" id="modifiersalle" class="btn btn-warning ml-1"><i class="fas fa-edit"></i> Modifier Salle</a>
+        <a href="#" class="btn btn-success ml-1" id="traiter"><i class="fas fa-clock"></i> Traiter</a>
+
         {# {% for operation in operations %}
         <a href="{{ operation.link }}" class="{{ operation.classTag }}" id="{{ operation.idTag }}"><i
             class="{{ operation.icon }}"></i> {{ operation.designation }}</a>
@@ -90,18 +103,7 @@ block body %}
                 </select>
               </div>
               <div class="col-md-2" style="padding-top: 21px; padding-right: 5px !important;padding-left: 5px !important;">
-                  <button id="modifiersalle" type="button" class="btn btn-outline-warning btn-rounded waves-effect" style="    display: inline-block;"><i class="fas fa-edit"></i>&nbsp;&nbsp;Modifier</button>
                   <button id="parlot" data-toggle="modal" data-target="#parlot_modal" type="button" class="btn btn-outline-info btn-rounded waves-effect" style="    display: inline-block;"><i class="fas fa-clock"></i>&nbsp;&nbsp;Par lot</button>
-              </div>
-              <div class="col-md-1" style="padding-top: 21px; padding-right: 5px !important;padding-left: 5px !important;">
-                <a class="float-left" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fas fa-ellipsis-v" data-bs-toggle="dropdown" aria-expanded="false"></i>
-                </a>
-                <div class="dropdown-menu custom-dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </div>
               </div>
             </div>
           </div>

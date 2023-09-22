@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.column {
+  float: left;
+  padding: 10px;
+}
+
+.left {
+  width: 65%;
+}
+
+.right {
+  width: 25%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+body { margin-top: 0px;margin-bottom: 0px;
+font-size:12px;
+ }
+ #customers {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+ 
+
+
+}
+
+#customers td, #customers th {
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+#customers tr:nth-child(even){background-color: #f2f2f2;}
+
+#customers tr:hover {background-color: #ddd;}
+
+#customers th {
+    font-size:10px;
+ 
+  text-align: left;
+  background-color: lightblue;
+  color: black;
+  
+}
+
+       .page-number:before {
+  content: "Page " counter(page);
+}
+</style>
+</head>
+{% set page = 0 %}
+
+<body>
+
+<div>
+<table class="table" width="100%"  id="customers">
+    <thead>
+      <tr>
+        <th >N°</th>
+        <th >ID ETUDIANT</th>
+        <th>NOM</th>        
+        <th>PRENOM</th>
+        <th>HEURE POIN</th>  
+        <th style="text-align:center;">OBSERVATION</th>
+        <th style="text-align:center;">Categorie Ens</th>
+
+
+
+        
+
+      </tr>
+      
+      </thead>
+      <tbody>
+    <tr  style="background:lightgreen; text-align:center !important;letter-spacing:1.5px;">
+    <td align="center" colspan=7>Categories: A</td>
+    </tr>
+      {% set count = 0 %}
+    {% for et in etudiantA %}
+    {% set count = count + 1 %}
+   
+      <tr>
+      <td >{{ count }}</td>
+        <td >{{et.id_admission}} </td>
+        <td>{{et.Nom}} </td>
+        <td>{{et.Prénom}}</td>
+          <td>{{et.Heure_Pointage}}</td>
+        <td style="text-align:center;">{{et.Categorie}}</td>
+         <td></td>
+      </tr> 
+       
+    
+{% endfor %}
+
+ <tr style="background:#FFFACD; text-align:center;letter-spacing:1.5px;">
+    <td align="center"  colspan=7>Categories: B</td>
+    </tr>
+    {% for B in etudiantB %}
+    {% set count = count + 1 %}
+      <tr>
+      <td>{{ count }}</td>
+        <td >{{B.id_admission}} </td>
+        <td>{{B.Nom}} </td>
+        <td>{{B.Prénom}}</td>
+          <td>{{B.Heure_Pointage}}</td>
+        <td style="text-align:center;">{{B.Categorie}}</td>
+        <td></td>
+        
+      </tr> 
+       
+    
+{% endfor %}
+<tr style="background:#FFA500; text-align:center;letter-spacing:1.5px;">
+    <td align="center"  colspan=7>Categories: C</td>
+    </tr>
+    {% for C in etudiantC %}
+    {% set count = count + 1 %}
+      <tr>
+      <td>{{ count }}</td>
+        <td >{{C.id_admission}} </td>
+        <td>{{C.Nom}} </td>
+        <td>{{C.Prénom}}</td>
+          <td>{{C.Heure_Pointage}}</td>
+        <td style="text-align:center;">{{C.Categorie}}</td>
+         <td></td>
+      </tr> 
+       
+    
+{% endfor %}
+<tr style="background:#FF4500; text-align:center;letter-spacing:1.5px;">
+    <td align="center"  colspan=7>Categories: D</td>
+    </tr>
+    {% for D in etudiantD %}
+    {% set count = count + 1 %}
+      <tr>
+      <td>{{ count }}</td>
+        <td >{{D.id_admission}} </td>
+        <td>{{D.Nom}} </td>
+        <td>{{D.Prénom}}</td>
+          <td>{{D.Heure_Pointage}}</td>
+        <td style="text-align:center;">{{D.Categorie}}</td>
+         <td></td>
+      </tr> 
+       
+    
+{% endfor %}
+    </tbody>
+      </table>
+      </div>
+   
+</body>
+</html>
+
+
