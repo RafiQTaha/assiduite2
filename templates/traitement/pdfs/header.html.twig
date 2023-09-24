@@ -1,0 +1,75 @@
+<style>
+
+</style>
+<image src="{{ asset('assets/img/logo/Logo_UIASS_bkack2.png') }}" >
+<table style="width: 100%;" cellspacing="0">
+    <tbody>
+
+        <tr>
+            <td style="width:45%; text-align:center"><img style="width:200px;margin: 0 auto;" src="{{ asset('assets/img/logo/Logo_UIASS_bkack2.png') }}" alt="Logo"></td>
+            <td style="width:1%;"></td>
+            <td style="width:80%;"><h1>FEUILLE D'APPEL </h1></td>
+        </tr>
+        <tr>
+           <td style="width:25%; text-align:center"></td>
+            <td style="width:1%;"></td>
+            <td  style="width:50%;"><h3>{{ emptime.programmation.element.module.semestre.promotion.formation.etablissement.designation }}</h3></td>
+        </tr>
+        <tr>
+           <td style="width:25%; text-align:center"></td>
+            <td style="width:1%;"></td>
+            <td  style="width:70%;"><h3>{{ emptime.programmation.element.module.semestre.promotion.formation.designation }}</h3></td>
+        </tr>
+        <tr>
+           <td style="width:25%; text-align:center"></td>
+            <td style="width:1%;"></td>
+            <td  style="width:80%;"><h3>{{ emptime.programmation.element.module.semestre.promotion.designation }}</ph3></td>
+        </tr>
+    
+    </tbody>
+
+</table>
+<br/>
+<div class="row">
+  <div class="column left" >
+  <div style="display: grid; grid-template-columns: 1fr; width: 100%; gap: 10px;" class="grid-container">
+
+  <div style="display: flex; flex-direction: column; border: 1px solid #ccc; padding: 10px;" class="item">
+    <div style="margin-bottom: 5px;font-weight: bold; border-bottom: 1px solid #000;">
+      ID_Séance / Date: {{emptime.id}} / {{emptime.start |date('Y-m-d')}} /   HD: {{emptime.heurDb | date('H:i')}} HF: {{emptime.heurFin | date('H:i')}}
+    </div>
+    <div style="margin-bottom: 5px; font-weight:bold; border-bottom: 1px solid #000;">
+      MODULE/ELEMENT : 
+    </div>
+    <div style="margin-bottom: 5px; ">
+       {{emptime.programmation.element.module.designation}} - {{emptime.programmation.element.designation}}
+    </div>
+    <div style="margin-bottom: 5px; font-weight: bold; border-bottom: 1px solid #000;">
+      PROFESSEUR : 
+    </div>
+    <div style="margin-bottom: 5px; ">
+      {# {{emptime.emptimens.enseignant.nom}} / {{emptime.emptimens.enseignant.prenom}} #}
+    </div>
+    <div style="margin-bottom: 5px; font-weight: bold; border-bottom: 1px solid #000;">
+      CLASSE/SALLE : 
+    </div>
+    <div style="margin-bottom: 5px; ">
+      {# {{emptime.salle.designation}} / {{emptime.group.niveau}} #}
+    </div>
+  </div>
+
+</div>
+
+  </div>
+   <div class="column right" >
+   
+  <div style="font-size:10px;">
+A:{{A}}<hr/>
+B: {{B}}<hr/>
+C: {{C}}<hr/>
+D: {{D}}<hr/> 
+Total: {{Total}} 
+
+  </div>
+  </div>
+  </div>
