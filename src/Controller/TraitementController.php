@@ -306,6 +306,7 @@ class TraitementController extends AbstractController
         $abcd = ['A'=>0,'B'=>0,'C'=>0,'D'=>0];
         $date = clone $emptime->getStart();
         $date->modify($AA.' min');
+        $check_ = $date->format("Y-m-d H:i:s"); //!!!!!!!!!!!!!!!!!!!!!!!!!!
         foreach ($inscriptions as $inscription) {
             // $capitaliseExist = $this->em->getRepository(XseanceCapitaliser::class)->findOneBy([
             //     'ID_Admission'=>$inscription->getAdmission()->getCode(),
@@ -332,16 +333,15 @@ class TraitementController extends AbstractController
                 // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['street'=>$inscription->getAdmission()->getCode()]);
                 $checkinout = null;
                 $cat = "D";
-                $userid = $userInfo[0]["userid"];
                 $CHECKTIME = $attendace['timestamp'];
                 
                 $sn = array_map(function($item) {
                     return "'$item'";
                 }, $sns);
                 $sn = implode(',', $sn);
-                $checktime = $date->format("Y-m-d H:i:s");
                 if ($userInfo) {
-                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime = '$checktime' AND sn in ($sn) ORDER BY checktime DESC LIMIT 1";
+                    $userid = $userInfo[0]["userid"];
+                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
@@ -352,18 +352,18 @@ class TraitementController extends AbstractController
                 
                 
                 if ($checkinout) {
-                    $checktime = new \DateTime($checkinout[0]["checktime"]);
-                    $interval = ($checktime->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
+                    $checktime_ = new \DateTime($checkinout[0]["checktime"]);
+                    $interval = ($checktime_->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
                     
                     if ($interval == 0) {
                         $cat = "A";
-                    }elseif ($emptime->getStart() > $checkinout->getCHECKTIME()) {
+                    }elseif ($emptime->getStart() > $checktime_) {
                         if ($interval >= $AA) {
                             $cat = "A";
                         }else {
                             $cat = "D";
                         }
-                    }elseif ($emptime->getStart() < $checkinout->getCHECKTIME()) {
+                    }elseif ($emptime->getStart() < $checktime_) {
                         if ($interval <= $A) {
                             $cat = "A";
                         }elseif ($interval <= $B) {
@@ -462,7 +462,7 @@ class TraitementController extends AbstractController
         $EmpGroupe=$emptime->getGroupe()->getNiveau();
         $IDModule=$emptime->getProgrammation()->getElement()->getModule()->getCode();
         $IDElement=$emptime->getProgrammation()->getElement()->getId();
-        $IDEnseignant=$emptime->getemptimetimens()[0]->getEnseignant()->getCode();
+        $IDEnseignant=$emptime->getemptimens()[0]->getEnseignant()->getCode();
         $IDSalle=strtoupper($emptime->getSalle()->getCode());
         // $Xseance->setStatut(1);
         $DateSéance=$emptime->getStart()->format("Y-m-d");
