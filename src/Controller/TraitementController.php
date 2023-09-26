@@ -2,24 +2,26 @@
 
 namespace App\Controller;
 
+use DateTime;
+use Mpdf\Mpdf;
 use App\Entity\AcAnnee;
-use App\Entity\AcEtablissement;
+use App\Entity\PSalles;
+use App\Entity\Xseance;
+use App\Entity\Machines;
+use App\Entity\Userinfo;
+use App\Entity\PlEmptime;
 use App\Entity\Checkinout;
 use App\Entity\ISeanceSalle;
-use App\Entity\Machines;
-use App\Entity\PlEmptime;
-use App\Entity\PSalles;
 use App\Entity\TInscription;
-use App\Entity\Userinfo;
+use App\Entity\AcEtablissement;
 use App\Entity\XseanceAbsences;
 use App\Entity\XseanceCapitaliser;
-use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 // use ZKLibrary;
 
@@ -97,6 +99,7 @@ class TraitementController extends AbstractController
             array( 'db' => 'xs.signé','dt' => 8),
             array( 'db' => 'xs.annulée','dt' => 9),
             array( 'db' => 'xs.existe','dt' => 10),
+            array( 'db' => 'xs.statut','dt' => 11),
         );
         $sql = "SELECT " . implode(", ", DatatablesController::Pluck($columns, 'db')) . "
         from pl_emptime emp
@@ -142,13 +145,33 @@ class TraitementController extends AbstractController
         foreach ($result as $key => $row) {
             $nestedData = array();
             $cd = $row['id'];
-            // dd($row);
             foreach (array_values($row) as $key => $value) {
+                if ($key == 8) {
+                    if ($value == "1") {
+                        $value = "<i class='fas fa-check-circle'></i>";
+                    }
+                }
+                if ($key == 9 ) {
+                    if ($value == "1") {
+                        $value = "<i class='fas fa-check-circle'></i>";
+                    }
+                }
+                if ($key == 10 ) {
+                    if ($value == "1") {
+                        $value = "<i class='fas fa-check-circle'></i>";
+                    }
+                }
                 $nestedData[] = $value;
-                
             }
             $nestedData["DT_RowId"] = $cd;
-            // $nestedData["DT_RowClass"] = $cd;
+            if($row["statut"] == 1 ){
+                $nestedData["DT_RowClass"] = "green";
+            }elseif($row["statut"] == 2 ){
+                $nestedData["DT_RowClass"] = "red";
+            }else{
+                $nestedData["DT_RowClass"] = "";
+            }
+
             $data[] = $nestedData;
             $i++;
         }
@@ -306,6 +329,7 @@ class TraitementController extends AbstractController
         $abcd = ['A'=>0,'B'=>0,'C'=>0,'D'=>0];
         $date = clone $emptime->getStart();
         $date->modify($AA.' min');
+        $check_ = $date->format("Y-m-d H:i:s"); //!!!!!!!!!!!!!!!!!!!!!!!!!!
         foreach ($inscriptions as $inscription) {
             // $capitaliseExist = $this->em->getRepository(XseanceCapitaliser::class)->findOneBy([
             //     'ID_Admission'=>$inscription->getAdmission()->getCode(),
@@ -332,16 +356,15 @@ class TraitementController extends AbstractController
                 // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['street'=>$inscription->getAdmission()->getCode()]);
                 $checkinout = null;
                 $cat = "D";
-                $userid = $userInfo[0]["userid"];
                 $CHECKTIME = $attendace['timestamp'];
                 
                 $sn = array_map(function($item) {
                     return "'$item'";
                 }, $sns);
                 $sn = implode(',', $sn);
-                $checktime = $date->format("Y-m-d H:i:s");
                 if ($userInfo) {
-                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime = '$checktime' AND sn in ($sn) ORDER BY checktime DESC LIMIT 1";
+                    $userid = $userInfo[0]["userid"];
+                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
@@ -352,18 +375,18 @@ class TraitementController extends AbstractController
                 
                 
                 if ($checkinout) {
-                    $checktime = new \DateTime($checkinout[0]["checktime"]);
-                    $interval = ($checktime->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
+                    $checktime_ = new \DateTime($checkinout[0]["checktime"]);
+                    $interval = ($checktime_->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
                     
                     if ($interval == 0) {
                         $cat = "A";
-                    }elseif ($emptime->getStart() > $checkinout->getCHECKTIME()) {
+                    }elseif ($emptime->getStart() > $checktime_) {
                         if ($interval >= $AA) {
                             $cat = "A";
                         }else {
                             $cat = "D";
                         }
-                    }elseif ($emptime->getStart() < $checkinout->getCHECKTIME()) {
+                    }elseif ($emptime->getStart() < $checktime_) {
                         if ($interval <= $A) {
                             $cat = "A";
                         }elseif ($interval <= $B) {
@@ -450,6 +473,31 @@ class TraitementController extends AbstractController
         }
         $this->em->flush();
 
+//conflis fixed like this 👇 
+//         $Xseance = new Xseance();
+//         $Xseance->setTypeséance($emptime->getProgrammation()->getNatureEpreuve()->getCode());
+//         $Xseance->setIDEtablissement($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode());
+//         $Xseance->setIDFormation($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode());
+//         $Xseance->setIDPromotion($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode());
+//         $Xseance->setIDAnnée($emptime->getProgrammation()->getAnnee()->getCode());
+//         $Xseance->setAnnéeLib($emptime->getProgrammation()->getAnnee()->getDesignation());
+//         $Xseance->setIDSemestre($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode());
+//         $Xseance->setGroupe($emptime->getGroupe()->getNiveau());
+//         $Xseance->setIDModule($emptime->getProgrammation()->getElement()->getModule()->getCode());
+//         $Xseance->setIDElement($emptime->getProgrammation()->getElement()->getId());
+//         $Xseance->setIDEnseignant($emptime->getemptimetimens()[0]->getEnseignant()->getCode());
+//         $Xseance->setIDSalle(strtoupper($emptime->getSalle()->getCode()));
+//         $Xseance->setDateSéance($emptime->getStart()->format("Y-m-d"));
+//         $Xseance->setSemaine($emptime->getSemaine()->getId());
+//         $Xseance->setHeureDebut($emptime->getHeurDb()->format("H:i"));
+//         $Xseance->setHeureFin($emptime->getHeurFin()->format("H:i"));
+//         $Xseance->setDateSys(new \DateTime());
+//         $Xseance->setIDSéance($emptime->getId());
+//         $Xseance->setStatut(1);
+
+//         $this->em->persist($Xseance);
+//         $this->em->flush();
+
         // insert into xseance
         $IDSéance = $emptime->getId();
         $Typeséance=$emptime->getProgrammation()->getNatureEpreuve()->getCode();
@@ -462,7 +510,7 @@ class TraitementController extends AbstractController
         $EmpGroupe=$emptime->getGroupe()->getNiveau();
         $IDModule=$emptime->getProgrammation()->getElement()->getModule()->getCode();
         $IDElement=$emptime->getProgrammation()->getElement()->getId();
-        $IDEnseignant=$emptime->getemptimetimens()[0]->getEnseignant()->getCode();
+        $IDEnseignant=$emptime->getemptimens()[0]->getEnseignant()->getCode();
         $IDSalle=strtoupper($emptime->getSalle()->getCode());
         // $Xseance->setStatut(1);
         $DateSéance=$emptime->getStart()->format("Y-m-d");
@@ -473,15 +521,90 @@ class TraitementController extends AbstractController
 
         $requete = "INSERT INTO `xseance`(`id_séance`, `typeséance`, `id_etablissement`, `id_formation`, `id_promotion`, `id_année`, `année_lib`, `id_semestre`, `groupe`, `id_module`, `id_element`, `id_enseignant`, `id_salle`, `date_séance`, `semaine`, `heure_debut`, `heure_fin`, `date_sys`, `statut`) VALUES ('$IDSéance','$Typeséance','$IDEtablissement','$IDFormation','$IDPromotion','$IDAnnée','$AnnéeLib','$IDSemestre','$EmpGroupe','$IDModule','$IDElement','$IDEnseignant','$IDSalle','$DateSéance','$EmpSemaine','$HeureDebut','$HeureFin','$DateSys','1')";
 
-        // dd($requete);
-        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-        $newstmt = $stmt->executeQuery();
+
+        // // insert into xseance
+   
+
+        // $requete = "INSERT INTO `xseance`(`id_séance`, `typeséance`, `id_etablissement`, `id_formation`, `id_promotion`, `id_année`, `année_lib`, `id_semestre`, `groupe`, `id_module`, `id_element`, `id_enseignant`, `id_salle`, `date_séance`, `semaine`, `heure_debut`, `heure_fin`, `date_sys`, `statut`) VALUES ('$IDSéance','$Typeséance','$IDEtablissement','$IDFormation','$IDPromotion','$IDAnnée','$AnnéeLib','$IDSemestre','$EmpGroupe','$IDModule','$IDElement','$IDEnseignant','$IDSalle','$DateSéance','$EmpSemaine','$HeureDebut','$HeureFin','$DateSys','1')";
+
+        // // dd($requete);
+        // $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        // $newstmt = $stmt->executeQuery();
 
         return new JsonResponse(['data'=>$abcd,'message'=>$counter .' Done from '. count($inscriptions),200]);
         // return new JsonResponse($counter .' Done from '. count($inscriptions),200);,200);
     }
 
-    // !! modification salle
+    #[Route('/reinitialiser/{seance}', name: 'reinitialiser_seance')]
+    public function reinitialiser(Request $request, $seance)
+    {
+        $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
+        if ($Xseance) {
+            $Xseance->setStatut(0);
+            $this->em->flush();
+        }
+        $XseanceAbsence = $this->em->getRepository(XseanceAbsences::class)->findBy(["ID_Séance" => $seance]);
+        // !! heeeere talk to taha !!!!!!!!!!!!!!!!!!!!!
+        $this->em->flush();
+        return new JsonResponse("Bien Modifier",200);
+    }
+
+    #[Route('/existe/{seance}', name: 'existe_seance')]
+    public function existe(Request $request, $seance)
+    {
+        $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
+        if ($Xseance) {
+            $Xseance->setExiste(1);
+            $this->em->flush();
+        }else{
+            return new JsonResponse(['error' => 'no Xséance'], 500);
+        }
+        return new JsonResponse("Séance existe",200);
+    }
+    #[Route('/annuler/{seance}', name: 'annuler_seance')]
+    public function annuler(Request $request, $seance)
+    {
+        $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
+
+        if ($Xseance) {
+            if ($Xseance->getStatut() == "2") {
+                return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
+            }
+            if ($Xseance->getStatut() != "1") {
+                return new JsonResponse(['error' => 'La séance est pas encore traitée!'], 500);
+            }
+            $Xseance->setAnnulée(1);
+            $this->em->flush();
+        }else{
+            return new JsonResponse(['error' => 'no Xséance'], 500);
+        }
+        return new JsonResponse("Séance existe",200);
+    }
+    #[Route('/signer/{seance}', name: 'signer_seance')]
+    public function existsignere(Request $request, $seance)
+    {
+        $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
+        if ($Xseance) {
+            $Xseance->setSigné(1);
+            $this->em->flush();
+        }else{
+            return new JsonResponse(['error' => 'no Xséance'], 500);
+        }
+        return new JsonResponse("Séance existe",200);
+    }
+
+    #[Route('/verouiller/{seance}', name: 'verouiller_seance')]
+    public function verouiller(Request $request, $seance)
+    {
+        $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
+        if ($Xseance) {
+            $Xseance->setStatut(2);
+            $this->em->flush();
+        }else{
+            return new JsonResponse(['error' => 'no Xséance'], 500);
+        }
+        return new JsonResponse("Séance existe",200);
+    }
 
     #[Route('/modifiersalle/{seance}/{salle}', name: 'modifier_salle')]
     public function modifierSalle(Request $request, $seance, $salle)
@@ -493,10 +616,6 @@ class TraitementController extends AbstractController
         $this->em->flush();
         return new JsonResponse("Bien Modifier",200);
     }
-
-    // !!
-
-    // !! parlot
 
     #[Route('/parlot/{hd}/{hf}/{day}', name: 'affichage_parlot')]
     public function affichage_parlot(Request $request,$hd,$hf,$day)
@@ -513,10 +632,149 @@ class TraitementController extends AbstractController
 
         return new JsonResponse(['html' => $html]);
     }
+    
+    #[Route('/open/{seance}', name: 'scan_seance')]
+    public function open(Request $request, $seance)
+    {
 
-    // !!
-    // public function GetArrayABCD($cat){
+
+        $seance = (int)($seance);
+        $file = '\\\172.20.0.54\uiass\pdf\\'.$seance.'.pdf';
+        $filname = '"'.$seance.'"hello.pdf';
+        // dd($file);
+        header('Content-type: application/pdf');
+        header('Content-Disposition: inline; filename="' . $filname . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Accept-Ranges: bytes');
+        @readfile($file);
+        return new JsonResponse('pdf not found ');
+    }
+
+    #[Route('/z/{seance}', name: 'z_seance')]
+    public function z(Request $request, $seance)
+    {
+        $requete = "UPDATE `xseance_absences` SET `categorie`='Z' WHERE `id_séance` = '$seance'";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery();
         
-    // }
+        return new JsonResponse("Bien Modifier",200);
+    }
+
+    #[Route('/s/{seance}', name: 's_seance')]
+    public function s(Request $request, $seance)
+    {
+        $requete = "UPDATE `xseance_absences` SET `categorie`='S' WHERE `id_séance` = '$seance'";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery();
+        
+        return new JsonResponse("Bien Modifier",200);
+    }
+
+    #[Route('/imprimer/{seance}', name: 'imprimer_seance')]
+    public function imprimer(Request $request, $seance)
+    {
+        $TodayDate= new \DateTime();
+        $date= date_format($TodayDate, 'Y-m-d');
+        setlocale(LC_TIME, "fr_FR", "French");
+        $date2 = strftime("%A %d %B %G", strtotime($date)); 
+        // $requete = "UPDATE `xseance_absences` SET `categorie`='S' WHERE `id_séance` = '$seance'";
+        $emptime = $this->em->getRepository(PlEmptime::class)->find($seance);
+        // dd($emptime->getEmptimens()->getEnseignant());
+
+        
+        $requete= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.Categorie='A'";
+        // dd($requete);
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery();
+        $etudiantA = $newstmt->fetchAll();
+
+        $requete2= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.Categorie='B'";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete2);
+        $newstmt = $stmt->executeQuery();
+        $etudiantB = $newstmt->fetchAll();
+
+        $requete3= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.Categorie='C'";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete3);
+        $newstmt = $stmt->executeQuery();
+        $etudiantC = $newstmt->fetchAll();
+
+        $requete4= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.Categorie='D'";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete4);
+        $newstmt = $stmt->executeQuery();
+        $etudiantD = $newstmt->fetchAll();
+
+        $A= count($etudiantA);
+        $B= count($etudiantB);
+        $C= count($etudiantC);
+        $D= count($etudiantD);
+
+        $total = $A + $B + $C + $D;
+        // dd($A, $B, $C, $D, $total); 
+
+        $html = $this->render('traitement/pdfs/feuilleAppel.html.twig' , [
+            "emptime" => $emptime,
+            "etudiantA" =>$etudiantA,
+            "etudiantB" =>$etudiantB,
+            "etudiantC" =>$etudiantC,
+            "etudiantD" =>$etudiantD,
+            "A" => $A,
+            "B" => $B,
+            "C" => $C,
+            "D" => $D,
+            "date" =>$date2,
+        ])->getContent();
+        
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'margin_top' => 100,
+        ]);            
+        $mpdf->SetTitle('Feuil');
+        $mpdf->SetJS('this.print()');
+        // $mpdf->showImageErrors = true;
+        
+        $mpdf->SetHTMLHeader(
+            $this->render("traitement/pdfs/header.html.twig"
+            , [
+                "emptime" => $emptime,
+                "A" => $A,
+                "B" => $B,
+                "C" => $C,
+                "D" => $D,
+                "Total" =>$total,
+                "date" =>$date2,
+                
+            ])->getContent()
+        );
+
+        $mpdf->SetHTMLFooter(
+            $this->render("traitement/pdfs/footer.html.twig"
+            , [
+                "emptime" => $emptime,
+                "date" =>$date2,
+                
+            ])->getContent()
+        );
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('fueil' , 'I');
+        
+    
+        
+        // return new JsonResponse("Bien Modifier",200);
+    }
+
 
 }
