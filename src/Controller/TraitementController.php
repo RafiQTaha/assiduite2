@@ -32,11 +32,11 @@ use PhpOffice\PhpSpreadsheet\Style\Font;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 // use ZKLibrary;
-// !!
+
+
 require '../zklibrary.php';
 
 require '../ZKLib.php';
-// !!
 
 // require '../ZK/Nouveau dossier/zklibrary.php';
 
@@ -347,6 +347,7 @@ class TraitementController extends AbstractController
         $abcd = ['A'=>0,'B'=>0,'C'=>0,'D'=>0];
         $date = clone $emptime->getStart();
         $date->modify($AA.' min');
+        $check_ = $date->format("Y-m-d H:i:s"); //!!!!!!!!!!!!!!!!!!!!!!!!!!
         foreach ($inscriptions as $inscription) {
             // $capitaliseExist = $this->em->getRepository(XseanceCapitaliser::class)->findOneBy([
             //     'ID_Admission'=>$inscription->getAdmission()->getCode(),
@@ -381,10 +382,10 @@ class TraitementController extends AbstractController
                     return "'$item'";
                 }, $sns);
                 $sn = implode(',', $sn);
-                $checktime = $date->format("Y-m-d H:i:s");
                 if ($userInfo) {
                     $userid = $userInfo[0]["userid"];
                     $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime = '$checktime' AND sn in ($sn) ORDER BY checktime DESC LIMIT 1";
+//                     $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
@@ -395,18 +396,18 @@ class TraitementController extends AbstractController
                 
                 
                 if ($checkinout) {
-                    $checktime = new \DateTime($checkinout[0]["checktime"]);
-                    $interval = ($checktime->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
+                    $checktime_ = new \DateTime($checkinout[0]["checktime"]);
+                    $interval = ($checktime_->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
                     
                     if ($interval == 0) {
                         $cat = "A";
-                    }elseif ($emptime->getStart() > $checkinout->getCHECKTIME()) {
+                    }elseif ($emptime->getStart() > $checktime_) {
                         if ($interval >= $AA) {
                             $cat = "A";
                         }else {
                             $cat = "D";
                         }
-                    }elseif ($emptime->getStart() < $checkinout->getCHECKTIME()) {
+                    }elseif ($emptime->getStart() < $checktime_) {
                         if ($interval <= $A) {
                             $cat = "A";
                         }elseif ($interval <= $B) {
@@ -516,29 +517,54 @@ class TraitementController extends AbstractController
         }
         $this->em->flush();
 
-        $Xseance = new Xseance();
-        $Xseance->setTypeséance($emptime->getProgrammation()->getNatureEpreuve()->getCode());
-        $Xseance->setIDEtablissement($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode());
-        $Xseance->setIDFormation($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode());
-        $Xseance->setIDPromotion($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode());
-        $Xseance->setIDAnnée($emptime->getProgrammation()->getAnnee()->getCode());
-        $Xseance->setAnnéeLib($emptime->getProgrammation()->getAnnee()->getDesignation());
-        $Xseance->setIDSemestre($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode());
-        $Xseance->setGroupe($emptime->getGroupe()->getNiveau());
-        $Xseance->setIDModule($emptime->getProgrammation()->getElement()->getModule()->getCode());
-        $Xseance->setIDElement($emptime->getProgrammation()->getElement()->getId());
-        $Xseance->setIDEnseignant($emptime->getemptimetimens()[0]->getEnseignant()->getCode());
-        $Xseance->setIDSalle(strtoupper($emptime->getSalle()->getCode()));
-        $Xseance->setDateSéance($emptime->getStart()->format("Y-m-d"));
-        $Xseance->setSemaine($emptime->getSemaine()->getId());
-        $Xseance->setHeureDebut($emptime->getHeurDb()->format("H:i"));
-        $Xseance->setHeureFin($emptime->getHeurFin()->format("H:i"));
-        $Xseance->setDateSys(new \DateTime());
-        $Xseance->setIDSéance($emptime->getId());
-        $Xseance->setStatut(1);
+//conflis fixed like this 👇 
+//         $Xseance = new Xseance();
+//         $Xseance->setTypeséance($emptime->getProgrammation()->getNatureEpreuve()->getCode());
+//         $Xseance->setIDEtablissement($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode());
+//         $Xseance->setIDFormation($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode());
+//         $Xseance->setIDPromotion($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode());
+//         $Xseance->setIDAnnée($emptime->getProgrammation()->getAnnee()->getCode());
+//         $Xseance->setAnnéeLib($emptime->getProgrammation()->getAnnee()->getDesignation());
+//         $Xseance->setIDSemestre($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode());
+//         $Xseance->setGroupe($emptime->getGroupe()->getNiveau());
+//         $Xseance->setIDModule($emptime->getProgrammation()->getElement()->getModule()->getCode());
+//         $Xseance->setIDElement($emptime->getProgrammation()->getElement()->getId());
+//         $Xseance->setIDEnseignant($emptime->getemptimetimens()[0]->getEnseignant()->getCode());
+//         $Xseance->setIDSalle(strtoupper($emptime->getSalle()->getCode()));
+//         $Xseance->setDateSéance($emptime->getStart()->format("Y-m-d"));
+//         $Xseance->setSemaine($emptime->getSemaine()->getId());
+//         $Xseance->setHeureDebut($emptime->getHeurDb()->format("H:i"));
+//         $Xseance->setHeureFin($emptime->getHeurFin()->format("H:i"));
+//         $Xseance->setDateSys(new \DateTime());
+//         $Xseance->setIDSéance($emptime->getId());
+//         $Xseance->setStatut(1);
 
-        $this->em->persist($Xseance);
-        $this->em->flush();
+//         $this->em->persist($Xseance);
+//         $this->em->flush();
+
+        // insert into xseance
+        $IDSéance = $emptime->getId();
+        $Typeséance=$emptime->getProgrammation()->getNatureEpreuve()->getCode();
+        $IDEtablissement=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode();
+        $IDFormation=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode();
+        $IDPromotion=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode();
+        $IDAnnée=$emptime->getProgrammation()->getAnnee()->getCode();     
+        $AnnéeLib=$emptime->getProgrammation()->getAnnee()->getDesignation();
+        $IDSemestre=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode();
+        $EmpGroupe=$emptime->getGroupe()->getNiveau();
+        $IDModule=$emptime->getProgrammation()->getElement()->getModule()->getCode();
+        $IDElement=$emptime->getProgrammation()->getElement()->getId();
+        $IDEnseignant=$emptime->getemptimens()[0]->getEnseignant()->getCode();
+        $IDSalle=strtoupper($emptime->getSalle()->getCode());
+        // $Xseance->setStatut(1);
+        $DateSéance=$emptime->getStart()->format("Y-m-d");
+        $EmpSemaine=$emptime->getSemaine()->getId();
+        $HeureDebut=$emptime->getHeurDb()->format("H:i");
+        $HeureFin=$emptime->getHeurFin()->format("H:i");
+        $DateSys=(new \DateTime())->format("Y-m-d");
+
+        $requete = "INSERT INTO `xseance`(`id_séance`, `typeséance`, `id_etablissement`, `id_formation`, `id_promotion`, `id_année`, `année_lib`, `id_semestre`, `groupe`, `id_module`, `id_element`, `id_enseignant`, `id_salle`, `date_séance`, `semaine`, `heure_debut`, `heure_fin`, `date_sys`, `statut`) VALUES ('$IDSéance','$Typeséance','$IDEtablissement','$IDFormation','$IDPromotion','$IDAnnée','$AnnéeLib','$IDSemestre','$EmpGroupe','$IDModule','$IDElement','$IDEnseignant','$IDSalle','$DateSéance','$EmpSemaine','$HeureDebut','$HeureFin','$DateSys','1')";
+
 
         // // insert into xseance
    
