@@ -14,21 +14,29 @@ use App\Entity\Checkinout;
 use App\Entity\ISeanceSalle;
 use App\Entity\TInscription;
 use App\Entity\AcEtablissement;
+use App\Entity\TAdmission;
 use App\Entity\XseanceAbsences;
 use App\Entity\XseanceCapitaliser;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Doctrine\Persistence\ManagerRegistry;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 // use ZKLibrary;
-
+// !!
 require '../zklibrary.php';
 
 require '../ZKLib.php';
-
+// !!
 
 // require '../ZK/Nouveau dossier/zklibrary.php';
 
@@ -662,18 +670,18 @@ class TraitementController extends AbstractController
     {
 
         $emptime = $this->em->getRepository(PlEmptime::class)->find($seance);
+        $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance" => $emptime]);
         $element = $emptime->getProgrammation()->getElement();
         $promotion = $element->getModule()->getSemestre()->getPromotion();
         $annee = $this->em->getRepository(AcAnnee::class)->getActiveAnneeByFormation($promotion->getFormation());
 
-        $XseanceAbsence = $this->em->getRepository(XseanceAbsences::class)->findBy([
-            'ID_Séance'=>$emptime->getId(),
-            'active'=> 1
-        ]);
-
+        
         $etudiants = [];
-
-        if($XseanceAbsence){
+        if($Xseance->getStatut() == 1 or $Xseance->getStatut() == 2){
+            $XseanceAbsence = $this->em->getRepository(XseanceAbsences::class)->findBy([
+                'ID_Séance'=>$emptime->getId(),
+                'active'=> 1
+            ]);
             array_push($etudiants, $XseanceAbsence);
             $html = $this->renderView('traitement/tables/etudiant.html.twig', ['etudiants' => $etudiants[0], 'type' => "xabs"]);
         }else{
@@ -881,6 +889,133 @@ class TraitementController extends AbstractController
     
         
         // return new JsonResponse("Bien Modifier",200);
+    }
+
+    #[Route('/planing/{day}', name: 'planing_seance')]
+    public function planing(Request $request, $day)
+    {
+
+
+        
+        $styleFirstRow = [
+            'font' => [
+                'bold' => true,
+                'size' => 14, // Adjust the font size as needed
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '0070C0', // Blue color
+                ],
+            ],
+        ];
+        
+        $styleSecondRow = [
+            'font' => [
+                'bold' => false, // No bold for subsequent rows
+                'size' => 12, // Adjust the font size as needed
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'BDD7EE', // Lighter blue color
+                ],
+            ],
+        ];
+
+        $styleSubsequentRows = [
+            'font' => [
+                'bold' => false, // No bold for subsequent rows
+                'size' => 12, // Adjust the font size as needed
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true, // Enable text wrapping
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'BDD7EE', // Lighter blue color
+                ],
+            ],
+        ];
+
+        // $todayDate = $day->format('Y-m-d');
+        $todayDate = $day . '%';
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', $day);
+        $sheet->setCellValue('A2', 'Séance');
+        $sheet->setCellValue('B2', 'HD');
+        $sheet->setCellValue('C2', 'HF');
+        $sheet->setCellValue('D2', 'ETABLISSEMENT');
+        $sheet->setCellValue('E2', 'FORMATION');
+        $sheet->setCellValue('F2', 'PROMOTION');
+        $sheet->setCellValue('G2', 'GROUPE');
+        $sheet->setCellValue('H2', 'SALLE');
+        $sheet->setCellValue('I2', 'ENSEIGNANT');
+
+        $sheet->getStyle('A1:I1')->applyFromArray($styleFirstRow);
+        $sheet->getStyle('A2:I2')->applyFromArray($styleSecondRow);
+
+        $sheet->mergeCells('A1:I1');
+
+        $sheet->getColumnDimension('A')->setWidth(15);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getColumnDimension('C')->setWidth(15);
+        $sheet->getColumnDimension('D')->setWidth(15);
+        $sheet->getColumnDimension('E')->setWidth(15);
+        $sheet->getColumnDimension('F')->setWidth(20);
+        $sheet->getColumnDimension('G')->setWidth(15);
+        $sheet->getColumnDimension('H')->setWidth(15);
+        $sheet->getColumnDimension('I')->setWidth(30);
+        $i=3;
+        $count = 1 ;
+        $emptimes = $this->em->getRepository(PlEmptime::class)->getEmptimeByDay($todayDate);
+        foreach ($emptimes as $emptime) {
+            $sheet->setCellValue('A'.$i, $emptime->getId());
+            $sheet->setCellValue('B'.$i, $emptime->getHeurDb()->format('H:i'));
+            $sheet->setCellValue('C'.$i, $emptime->getHeurFin()->format('H:i'));
+            $sheet->setCellValue('D'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getAbreviation());
+            $sheet->setCellValue('E'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getAbreviation());
+            $sheet->setCellValue('F'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getDesignation());
+            $sheet->setCellValue('G'.$i, $emptime->getGroupe() ? $emptime->getGroupe()->getNiveau() : "");
+            $sheet->setCellValue('H'.$i, $emptime->getXSalle()->getDesignation());
+            $sheet->setCellValue('I'.$i, $emptime->getEmptimens()[0]->getEnseignant()->getNom()." ".$emptime->getEmptimens()[0]->getEnseignant()->getPrenom());
+            
+            
+            $i++;
+        }
+
+            
+        $this->em->flush();
+        $fileName = null;
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Planing_seances.xlsx';
+        $temp_file = tempnam(sys_get_temp_dir(), $fileName);
+        $writer->save($temp_file);
+        return $this->file($temp_file, $fileName, ResponseHeaderBag::DISPOSITION_INLINE);
+    }
+
+    #[Route('/etudiant_details/{admission}', name: 'administration_epreuve_edit')]
+    public function administrationEpreuveEdit($admission) {
+        $admission = $this->em->getRepository(TAdmission::class)->find($admission);
+        $inscription = $this->em->getRepository(TInscription::class)->findOneBy(["admission" => $admission]);
+        dd($inscription);
+        // $html = $this->renderView('administration_epreuve/pages/epreuve_edit.html.twig', [
+        //     'epreuve' => $epreuve,
+        //     'enseignants' => $enseignants
+        // ]);
+        return new JsonResponse($html);
     }
 
 

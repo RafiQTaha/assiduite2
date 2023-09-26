@@ -83,27 +83,24 @@ $(document).ready(function () {
   });
 
   $("body").on("dblclick", "#datatables_gestion_seances tbody tr", async function () {
-    // const input = $(this).find("input");
 
       id_seance = $(this).attr("id");
-
-      
       try {
         const request = await axios.get('/assiduite/traitement/etudiants/'+id_seance);
         const response = request.data;
         
-        $('body #etudiant-modal #etudaint_table').html(response.html);
+        $('#etudiant_datatable').html(response.html);
         
-        if ($.fn.DataTable.isDataTable("body #etudiant-modal #etudaint_table")) {
-          $("body #etudiant-modal #etudaint_table").DataTable().clear().destroy();
+        if ($.fn.DataTable.isDataTable("body #etudiant_datatable")) {
+          $("body #etudiant_datatable").DataTable().clear().destroy();
         }
         
-        $("body #etudaint_table").DataTable({
+        $("#modal-etudiant").modal("show");
+        $("body #etudiant_datatable").DataTable({
           language: {
             url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
           },
         });
-        $("body #modal-etudiant").modal("show");
     } catch (error) {
         console.log(error, error.response);
         const message = error.response.data.error;
@@ -113,6 +110,61 @@ $(document).ready(function () {
         })
     }
   });
+
+  // $("body").on("click", "#etudiant_datatable tbody tr", async function () {
+  //   // const input = $(this).find("input");
+
+  //   if ($(this).hasClass("active_databales")) {
+  //     $(this).removeClass("active_databales");
+  //     id_etudiant = null;
+  //     $("body .small-box").removeClass("active");
+  //   } else {
+  //     $("#etudiant_datatable tbody tr").removeClass("active_databales");
+  //     $(this).addClass("active_databales");
+  //     id_seance = $(this).attr("id");
+  //     try {
+  //       $("body .small-box").removeClass("active");
+  //       const request = await axios.post("/assiduite/traitement/count/" + id_seance);
+  //       const response = request.data;
+  //       console.log(response.data['A'])
+  //       $("body .a").find(".number").text(response.data["A"]);
+  //       $("body .b").find(".number").text(response.data["B"]);
+  //       $("body .c").find(".number").text(response.data["C"]);
+  //       $("body .d").find(".number").text(response.data["D"]);
+  //       $("body .small-box").addClass("active");
+  //     } catch (error) {
+  //       console.log(error, error.response);
+  //       const message = error.response.data;
+  //       Toast.fire({
+  //         icon: "error",
+  //         title: message,
+  //       });
+  //       // icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+  //     }
+  //   }
+    
+  // });
+
+  $("body").on("dblclick", "#etudiant_datatable tbody tr", async function () {
+
+    admission = $(this).attr("admission");
+    try {
+      const request = await axios.get('/assiduite/traitement/etudiant_details/'+admission);
+      const response = request.data;
+      
+      $("##modal-detail-etudiant #edit_etudiant").html(response);    
+
+      
+      $("#modal-detail-etudiant").modal("show");
+  } catch (error) {
+      console.log(error, error.response);
+      const message = error.response.data.error;
+      Toast.fire({
+          icon: 'error',
+          title: message,
+      })
+  }
+});
 
   $("#day").on("change", async function () {
     const day = $(this).val();
@@ -642,5 +694,18 @@ $(document).ready(function () {
         icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
     }
   })
+
+  $('body').on('click', '#planing', function(e){
+    e.preventDefault();
+    var today = $("body #day").val();
+    if(!today) {
+        Toast.fire({
+            icon: 'error',
+            title: 'Veuillez selection une date!',
+        })
+        return;
+    }
+    window.open('/assiduite/traitement/planing/'+today, '_blank');
+})
 
 });
