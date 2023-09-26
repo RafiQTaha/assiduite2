@@ -1,0 +1,35 @@
+<div class="col-md-12" style="">
+    <fieldset>
+        <div class="col-md-12 row" style="margin:0">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Etablissement  :</label>
+                    <select class="form-control " style="width: 100%" name="id_etablissement" id='etablissement'>
+                        <option value="" selected>Choix Etablissement</option>
+                        {# {% for etablissement in etablissements %}
+                            <option value="{{etablissement.id}}">{{etablissement.designation}}</option>
+                        {% endfor %} #}
+                    </select>
+                </div>
+            </div> 
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Formation  :</label>
+                    <select class="form-control " style="width: 100%" name="id_formation" id='formation'>
+                        <option value=""  disabled selected>Choix de Formation</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Promotion  :</label>
+                    <select class="form-control " style="width: 100%" name="id_promotion" id='promotion'>
+                        <option value=""  disabled selected>Choix de Promotion</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>
+<button type="submit" class="btn btn-primary mb-4 float-right mr-5" ><i class="fas fa-check"></i> Enregister</button>
+{# <button type="submit" class="btn btn-success float-right" style="margin-top:25px" ><i class="fas fa-check"></i> Enregister</button> #}

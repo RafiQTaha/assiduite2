@@ -48,13 +48,13 @@
       PROFESSEUR : 
     </div>
     <div style="margin-bottom: 5px; ">
-      {# {{emptime.emptimens.enseignant.nom}} / {{emptime.emptimens.enseignant.prenom}} #}
+      {{emptime.emptimens[0].enseignant.nom}} / {{emptime.emptimens[0].enseignant.prenom}}
     </div>
     <div style="margin-bottom: 5px; font-weight: bold; border-bottom: 1px solid #000;">
       CLASSE/SALLE : 
     </div>
     <div style="margin-bottom: 5px; ">
-      {# {{emptime.salle.designation}} / {{emptime.group.niveau}} #}
+      {{emptime.salle.designation}} / {% if emptime.groupe %} {{emptime.groupe.niveau}} {% else %} - {% endif %}
     </div>
   </div>
 
@@ -64,7 +64,7 @@
    <div class="column right" >
    
   <div style="font-size:10px;">
-A:{{A}}<hr/>
+A: {{A}}<hr/>
 B: {{B}}<hr/>
 C: {{C}}<hr/>
 D: {{D}}<hr/> 

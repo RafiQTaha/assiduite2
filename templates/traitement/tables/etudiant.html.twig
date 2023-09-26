@@ -1,0 +1,48 @@
+<thead>
+    <tr>
+        <th>Admission
+        </th>
+        <th>Etudiant
+        </th>
+        <th>Pointage
+        </th>
+        <th>Cat Si
+        </th>
+        <th>Cat Enseignant
+        </th>
+        <th>Cat Retraitement
+        </th>
+        <th>Cat F
+        </th>
+
+    </tr>
+</thead>
+<tbody>
+    {% if type == "ins" %}
+
+        {# {% for etu in etudiants %}
+            <tr>
+                <td>{{etu.admission.code}}</td>
+                <td>{{etu.Nom}} {{etu.Prénom}}</td>
+                <td>{{etu.DatePointage | date('H:i:s')}}</td>
+                <td>{{etu.Categorie}}</td>                         
+                <td>{{etu.CategorieEnseig}}</td>                         
+                <td>{{etu.Categoriesi}}</td>                         
+                <td>{{etu.Categorief}}</td>                         
+            </tr>
+        {% endfor %} #}
+        
+    {% else %}
+        {% for etu in etudiants %}
+            <tr admission={{etu.IDAdmission}}>
+                <td>{{etu.IDAdmission}}</td>
+                <td>{{etu.Nom}} {{etu.Prénom}}</td>
+                <td>{{etu.DatePointage | date('H:i:s')}}</td>
+                <td>{{etu.Categorie}}</td>                         
+                <td>{{etu.CategorieEnseig}}</td>                         
+                <td>{{etu.Categoriesi}}</td>                         
+                <td>{{etu.Categorief}}</td>                         
+            </tr>
+        {% endfor %}
+    {% endif %}
+</tbody>

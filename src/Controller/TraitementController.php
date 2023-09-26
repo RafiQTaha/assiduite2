@@ -14,21 +14,29 @@ use App\Entity\Checkinout;
 use App\Entity\ISeanceSalle;
 use App\Entity\TInscription;
 use App\Entity\AcEtablissement;
+use App\Entity\TAdmission;
 use App\Entity\XseanceAbsences;
 use App\Entity\XseanceCapitaliser;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Doctrine\Persistence\ManagerRegistry;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 // use ZKLibrary;
 
-// require '../zklibrary.php';
 
-// require '../ZKLib.php';
+require '../zklibrary.php';
 
+require '../ZKLib.php';
 
 // require '../ZK/Nouveau dossier/zklibrary.php';
 
@@ -187,15 +195,25 @@ class TraitementController extends AbstractController
     }
 
 
-    #[Route('/traiter/{emptime}', name: 'traiter')]
-    public function traiter($emptime)
+    #[Route('/traiter/{emptime}/{type}', name: 'traiter')]
+    public function traiter($emptime, $type)
     {
-        
+        if($type == 2){ //!!retraitement
+            $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance" => $emptime]);
+            if ($Xseance) {
+                if ($Xseance->getStatut() == "2") {
+                    return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
+                }
+                if ($Xseance->getStatut() != "1") {
+                    return new JsonResponse(['error' => 'La séance est pas encore traitée!'], 500);
+                }
+            }
+        }    
         // $abcd = ['A'=>201,'B'=>0,'C'=>0,'D'=>1];
         // return new JsonResponse(['data'=>$abcd,'message'=>'test',200]);
         $emptime = $this->em->getRepository(PlEmptime::class)->find($emptime);
 
-
+        // dd("hi");
         $element = $emptime->getProgrammation()->getElement();
         $promotion = $element->getModule()->getSemestre()->getPromotion();
         $salle = $emptime->getXsalle();
@@ -353,6 +371,8 @@ class TraitementController extends AbstractController
                 $newstmt = $stmt->executeQuery();   
                 $userInfo = $newstmt->fetchAll();
 
+                // dd($userInfo);
+
                 // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['street'=>$inscription->getAdmission()->getCode()]);
                 $checkinout = null;
                 $cat = "D";
@@ -364,7 +384,8 @@ class TraitementController extends AbstractController
                 $sn = implode(',', $sn);
                 if ($userInfo) {
                     $userid = $userInfo[0]["userid"];
-                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
+                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime = '$checktime' AND sn in ($sn) ORDER BY checktime DESC LIMIT 1";
+//                     $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
@@ -410,37 +431,12 @@ class TraitementController extends AbstractController
                 'ID_Séance'=>$emptime->getId(),
             ]);
             
-            if (!$xAbseanceExist) {
-                $xAbseance = new XseanceAbsences();
-                $xAbseance->setIDAdmission($inscription->getAdmission()->getCode());
-                $xAbseance->setIDSéance($emptime->getId());
-                $xAbseance->setNom($inscription->getAdmission()->getPreinscription()->getEtudiant()->getNom());
-                $xAbseance->setPrénom($inscription->getAdmission()->getPreinscription()->getEtudiant()->getPrenom());
-                $xAbseance->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
-                $xAbseance->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
-                $xAbseance->setCategorie($cat);
-                $this->em->persist($xAbseance);
-
-                // insert xseance in local database
-
-                $id_admission = $inscription->getAdmission()->getCode();
-                $id_seance = $emptime->getId();
-                $nom = addslashes($inscription->getAdmission()->getPreinscription()->getEtudiant()->getNom());
-                $prenom = addslashes($inscription->getAdmission()->getPreinscription()->getEtudiant()->getPrenom());
-                $date = $checkinout != null ? $checkinout[0]["checktime"] : $emptime->getStart()->format('Y-m-d');
-                $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
-                $categorie = $cat;
-
-                $requete = "INSERT INTO `xseance_absences`(`id_admission`, `id_séance`, `nom`, `prénom`, `date_pointage`, `heure_pointage`, `categorie`) VALUES ('$id_admission','$id_seance','$nom','$prenom','$date','$pointage','$categorie')";
-
-                // dd($requete);
-                $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-                $newstmt = $stmt->executeQuery();
-
-            }else {
+            
+            if($type == 2){ //!!retraitement
+                    
                 $xAbseanceExist->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
                 $xAbseanceExist->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
-                $xAbseanceExist->setCategorie($cat);
+                $xAbseanceExist->setCategorieSi($cat);
 
                 // update in local
 
@@ -454,7 +450,55 @@ class TraitementController extends AbstractController
                 // dd($requete);
                 $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                 $newstmt = $stmt->executeQuery(); 
+
+            }else{ //!!traitements
+                if (!$xAbseanceExist) {
+                    $xAbseance = new XseanceAbsences();
+                    $xAbseance->setIDAdmission($inscription->getAdmission()->getCode());
+                    $xAbseance->setIDSéance($emptime->getId());
+                    $xAbseance->setNom($inscription->getAdmission()->getPreinscription()->getEtudiant()->getNom());
+                    $xAbseance->setPrénom($inscription->getAdmission()->getPreinscription()->getEtudiant()->getPrenom());
+                    $xAbseance->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
+                    $xAbseance->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
+                    $xAbseance->setCategorie($cat);
+                    $this->em->persist($xAbseance);
+    
+                    // insert xseance in local database
+    
+                    $id_admission = $inscription->getAdmission()->getCode();
+                    $id_seance = $emptime->getId();
+                    $nom = addslashes($inscription->getAdmission()->getPreinscription()->getEtudiant()->getNom());
+                    $prenom = addslashes($inscription->getAdmission()->getPreinscription()->getEtudiant()->getPrenom());
+                    $date = $checkinout != null ? $checkinout[0]["checktime"] : $emptime->getStart()->format('Y-m-d');
+                    $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
+                    $categorie = $cat;
+    
+                    $requete = "INSERT INTO `xseance_absences`(`id_admission`, `id_séance`, `nom`, `prénom`, `date_pointage`, `heure_pointage`, `categorie`) VALUES ('$id_admission','$id_seance','$nom','$prenom','$date','$pointage','$categorie')";
+    
+                    // dd($requete);
+                    $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+                    $newstmt = $stmt->executeQuery();
+    
+                }else {
+                    $xAbseanceExist->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
+                    $xAbseanceExist->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
+                    $xAbseanceExist->setCategorie($cat);
+    
+                    // update in local
+    
+                    $id_admission = $inscription->getAdmission()->getCode();
+                    $id_seance = $emptime->getId();
+                    $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
+                    $categorie = $cat;
+    
+                    $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie' WHERE `id_séance` = '$id_seance' AND `id_admission` = '$id_admission'";
+    
+                    // dd($requete);
+                    $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+                    $newstmt = $stmt->executeQuery(); 
+                }
             }
+            
             $counter++;
             switch ($cat) {
                 case 'A':
@@ -540,13 +584,27 @@ class TraitementController extends AbstractController
     {
         $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
         if ($Xseance) {
-            $Xseance->setStatut(0);
-            $this->em->flush();
+            if ($Xseance->getStatut() == "2") {
+                return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
+            }
+            if ($Xseance->getStatut() != "1") {
+                return new JsonResponse(['error' => 'La séance est pas encore traitée!'], 500);
+            }
+        }else{
+            return new JsonResponse(['error' => 'no Xséance'], 500);
         }
         $XseanceAbsence = $this->em->getRepository(XseanceAbsences::class)->findBy(["ID_Séance" => $seance]);
-        // !! heeeere talk to taha !!!!!!!!!!!!!!!!!!!!!
+        foreach($XseanceAbsence as $Xs){
+            $Xs->setActive(0);
+        }
         $this->em->flush();
-        return new JsonResponse("Bien Modifier",200);
+        $requete = "UPDATE `xseance_absences` SET `active` = 0 WHERE `id_séance` = '$seance' ";
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery(); 
+
+        $Xseance->setStatut(0);
+        $this->em->flush();
+        return new JsonResponse("Bien Réinitialisée",200);
     }
 
     #[Route('/existe/{seance}', name: 'existe_seance')]
@@ -632,6 +690,37 @@ class TraitementController extends AbstractController
 
         return new JsonResponse(['html' => $html]);
     }
+
+    #[Route('/etudiants/{seance}', name: 'etudiant_seance')]
+    public function etudiant_seance(Request $request,$seance)
+    {
+
+        $emptime = $this->em->getRepository(PlEmptime::class)->find($seance);
+        $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance" => $emptime]);
+        $element = $emptime->getProgrammation()->getElement();
+        $promotion = $element->getModule()->getSemestre()->getPromotion();
+        $annee = $this->em->getRepository(AcAnnee::class)->getActiveAnneeByFormation($promotion->getFormation());
+
+        
+        $etudiants = [];
+        if($Xseance->getStatut() == 1 or $Xseance->getStatut() == 2){
+            $XseanceAbsence = $this->em->getRepository(XseanceAbsences::class)->findBy([
+                'ID_Séance'=>$emptime->getId(),
+                'active'=> 1
+            ]);
+            array_push($etudiants, $XseanceAbsence);
+            $html = $this->renderView('traitement/tables/etudiant.html.twig', ['etudiants' => $etudiants[0], 'type' => "xabs"]);
+        }else{
+            $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoNoGroup($promotion,$annee);
+            array_push($etudiants, $inscriptions);
+            $html = $this->renderView('traitement/tables/etudiant.html.twig', ['etudiants' => $etudiants[0], 'type' => "ins"]);
+        }
+
+        // dd($etudiants);
+
+
+        return new JsonResponse(['html' => $html]);
+    }
     
     #[Route('/open/{seance}', name: 'scan_seance')]
     public function open(Request $request, $seance)
@@ -648,6 +737,58 @@ class TraitementController extends AbstractController
         header('Accept-Ranges: bytes');
         @readfile($file);
         return new JsonResponse('pdf not found ');
+    }
+
+    #[Route('/count/{seance}', name: 'count_seance')]
+    public function count(Request $request, $seance)
+    {
+        $abcd = ['A'=>0,'B'=>0,'C'=>0,'D'=>0];
+        $requete= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.Categorie='A'";
+        // dd($requete);
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery();
+        $etudiantA = $newstmt->fetchAll();
+
+        $requete2= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.Categorie='B'";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete2);
+        $newstmt = $stmt->executeQuery();
+        $etudiantB = $newstmt->fetchAll();
+
+        $requete3= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.Categorie='C'";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete3);
+        $newstmt = $stmt->executeQuery();
+        $etudiantC = $newstmt->fetchAll();
+
+        $requete4= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.Categorie='D'";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete4);
+        $newstmt = $stmt->executeQuery();
+        $etudiantD = $newstmt->fetchAll();
+
+        $A= count($etudiantA);
+        $B= count($etudiantB);
+        $C= count($etudiantC);
+        $D= count($etudiantD);
+
+        $abcd["A"] = $A;
+        $abcd["B"] = $B;
+        $abcd["C"] = $C;
+        $abcd["D"] = $D;
+
+        // dd($abcd);
+
+        return new JsonResponse(['data'=>$abcd,200]);
     }
 
     #[Route('/z/{seance}', name: 'z_seance')]
@@ -681,7 +822,7 @@ class TraitementController extends AbstractController
         $date2 = strftime("%A %d %B %G", strtotime($date)); 
         // $requete = "UPDATE `xseance_absences` SET `categorie`='S' WHERE `id_séance` = '$seance'";
         $emptime = $this->em->getRepository(PlEmptime::class)->find($seance);
-        // dd($emptime->getEmptimens()->getEnseignant());
+        // dd($emptime->getGroupe());
 
         
         $requete= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.Categorie
@@ -774,6 +915,133 @@ class TraitementController extends AbstractController
     
         
         // return new JsonResponse("Bien Modifier",200);
+    }
+
+    #[Route('/planing/{day}', name: 'planing_seance')]
+    public function planing(Request $request, $day)
+    {
+
+
+        
+        $styleFirstRow = [
+            'font' => [
+                'bold' => true,
+                'size' => 14, // Adjust the font size as needed
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '0070C0', // Blue color
+                ],
+            ],
+        ];
+        
+        $styleSecondRow = [
+            'font' => [
+                'bold' => false, // No bold for subsequent rows
+                'size' => 12, // Adjust the font size as needed
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'BDD7EE', // Lighter blue color
+                ],
+            ],
+        ];
+
+        $styleSubsequentRows = [
+            'font' => [
+                'bold' => false, // No bold for subsequent rows
+                'size' => 12, // Adjust the font size as needed
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true, // Enable text wrapping
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'BDD7EE', // Lighter blue color
+                ],
+            ],
+        ];
+
+        // $todayDate = $day->format('Y-m-d');
+        $todayDate = $day . '%';
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', $day);
+        $sheet->setCellValue('A2', 'Séance');
+        $sheet->setCellValue('B2', 'HD');
+        $sheet->setCellValue('C2', 'HF');
+        $sheet->setCellValue('D2', 'ETABLISSEMENT');
+        $sheet->setCellValue('E2', 'FORMATION');
+        $sheet->setCellValue('F2', 'PROMOTION');
+        $sheet->setCellValue('G2', 'GROUPE');
+        $sheet->setCellValue('H2', 'SALLE');
+        $sheet->setCellValue('I2', 'ENSEIGNANT');
+
+        $sheet->getStyle('A1:I1')->applyFromArray($styleFirstRow);
+        $sheet->getStyle('A2:I2')->applyFromArray($styleSecondRow);
+
+        $sheet->mergeCells('A1:I1');
+
+        $sheet->getColumnDimension('A')->setWidth(15);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getColumnDimension('C')->setWidth(15);
+        $sheet->getColumnDimension('D')->setWidth(15);
+        $sheet->getColumnDimension('E')->setWidth(15);
+        $sheet->getColumnDimension('F')->setWidth(20);
+        $sheet->getColumnDimension('G')->setWidth(15);
+        $sheet->getColumnDimension('H')->setWidth(15);
+        $sheet->getColumnDimension('I')->setWidth(30);
+        $i=3;
+        $count = 1 ;
+        $emptimes = $this->em->getRepository(PlEmptime::class)->getEmptimeByDay($todayDate);
+        foreach ($emptimes as $emptime) {
+            $sheet->setCellValue('A'.$i, $emptime->getId());
+            $sheet->setCellValue('B'.$i, $emptime->getHeurDb()->format('H:i'));
+            $sheet->setCellValue('C'.$i, $emptime->getHeurFin()->format('H:i'));
+            $sheet->setCellValue('D'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getAbreviation());
+            $sheet->setCellValue('E'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getAbreviation());
+            $sheet->setCellValue('F'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getDesignation());
+            $sheet->setCellValue('G'.$i, $emptime->getGroupe() ? $emptime->getGroupe()->getNiveau() : "");
+            $sheet->setCellValue('H'.$i, $emptime->getXSalle()->getDesignation());
+            $sheet->setCellValue('I'.$i, $emptime->getEmptimens()[0]->getEnseignant()->getNom()." ".$emptime->getEmptimens()[0]->getEnseignant()->getPrenom());
+            
+            
+            $i++;
+        }
+
+            
+        $this->em->flush();
+        $fileName = null;
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Planing_seances.xlsx';
+        $temp_file = tempnam(sys_get_temp_dir(), $fileName);
+        $writer->save($temp_file);
+        return $this->file($temp_file, $fileName, ResponseHeaderBag::DISPOSITION_INLINE);
+    }
+
+    #[Route('/etudiant_details/{admission}', name: 'administration_epreuve_edit')]
+    public function administrationEpreuveEdit($admission) {
+        $admission = $this->em->getRepository(TAdmission::class)->find($admission);
+        $inscription = $this->em->getRepository(TInscription::class)->findOneBy(["admission" => $admission]);
+        dd($inscription);
+        // $html = $this->renderView('administration_epreuve/pages/epreuve_edit.html.twig', [
+        //     'epreuve' => $epreuve,
+        //     'enseignants' => $enseignants
+        // ]);
+        return new JsonResponse($html);
     }
 
 
