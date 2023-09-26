@@ -70,6 +70,9 @@ class XseanceAbsences
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $Categorie_f;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private $active;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -299,6 +302,18 @@ class XseanceAbsences
     public function setCategorieF(?string $Categorie_f): self
     {
         $this->Categorie_f = $Categorie_f;
+
+        return $this;
+    }
+    
+    public function getActive(): ?int
+    {
+        return $this->active;
+    }
+
+    public function setActive(?int $active): self
+    {
+        $this->active = $active;
 
         return $this;
     }

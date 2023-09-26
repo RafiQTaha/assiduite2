@@ -48,19 +48,72 @@ $(document).ready(function () {
         ]
   });
   $("select").select2();
-  $("body").on("click", "#datatables_gestion_seances tbody tr", function () {
+  $("body").on("click", "#datatables_gestion_seances tbody tr", async function () {
     // const input = $(this).find("input");
 
     if ($(this).hasClass("active_databales")) {
       $(this).removeClass("active_databales");
       id_seance = null;
+      $("body .small-box").removeClass("active");
     } else {
       $("#datatables_gestion_seances tbody tr").removeClass("active_databales");
       $(this).addClass("active_databales");
       id_seance = $(this).attr("id");
+      try {
+        $("body .small-box").removeClass("active");
+        const request = await axios.post("/assiduite/traitement/count/" + id_seance);
+        const response = request.data;
+        console.log(response.data['A'])
+        $("body .a").find(".number").text(response.data["A"]);
+        $("body .b").find(".number").text(response.data["B"]);
+        $("body .c").find(".number").text(response.data["C"]);
+        $("body .d").find(".number").text(response.data["D"]);
+        $("body .small-box").addClass("active");
+      } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data;
+        Toast.fire({
+          icon: "error",
+          title: message,
+        });
+        // icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+      }
     }
-    $("body .small-box").removeClass("active");
+    
   });
+
+  $("body").on("dblclick", "#datatables_gestion_seances tbody tr", async function () {
+    // const input = $(this).find("input");
+
+      id_seance = $(this).attr("id");
+
+      
+      try {
+        const request = await axios.get('/assiduite/traitement/etudiants/'+id_seance);
+        const response = request.data;
+        
+        $('body #etudiant-modal #etudaint_table').html(response.html);
+        
+        if ($.fn.DataTable.isDataTable("body #etudiant-modal #etudaint_table")) {
+          $("body #etudiant-modal #etudaint_table").DataTable().clear().destroy();
+        }
+        
+        $("body #etudaint_table").DataTable({
+          language: {
+            url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
+          },
+        });
+        $("body #modal-etudiant").modal("show");
+    } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+        })
+    }
+  });
+
   $("#day").on("change", async function () {
     const day = $(this).val();
     if (day || day != "") {
@@ -165,7 +218,7 @@ $(document).ready(function () {
     try {
       $("body .small-box").removeClass("active");
       icon.remove("fa-edit").addClass("fa-spinner fa-spin ");
-      const request = await axios.post("/assiduite/traitement/traiter/" + id_seance);
+      const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
       const response = request.data;
       table.ajax.reload();
     //   id_seance = false
@@ -190,6 +243,48 @@ $(document).ready(function () {
       icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
     }
     // }
+  });
+
+  $("#retraiter").on("click", async function () {
+    if (!id_seance) {
+      Toast.fire({
+        icon: "error",
+        title: "Veuillez selectioner une ligne!",
+      });
+      return;
+    }
+    const icon = $("#retraiter i");
+    // alert(id_seance)
+    var res = confirm('Vous voulez vraiment retraiter cette seance ?');
+    if(res == 1){
+      try {
+        $("body .small-box").removeClass("active");
+        icon.remove("fa-edit").addClass("fa-spinner fa-spin ");
+        const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
+        const response = request.data;
+        table.ajax.reload();
+      //   id_seance = false
+        icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+        Toast.fire({
+          icon: "success",
+          title: response.message,
+        });
+        // console.log(response.data['A'])
+        $("body .a").find(".number").text(response.data["A"]);
+        $("body .b").find(".number").text(response.data["B"]);
+        $("body .c").find(".number").text(response.data["C"]);
+        $("body .d").find(".number").text(response.data["D"]);
+        $("body .small-box").addClass("active");
+      } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+        })
+        icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+      }
+    }
   });
 
   
@@ -240,11 +335,11 @@ $(document).ready(function () {
         table.ajax.reload();
     } catch (error) {
         console.log(error, error.response);
-        const message = error.response.data;
+        const message = error.response.data.error;
         Toast.fire({
             icon: 'error',
             title: message,
-          })
+        })
         icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
     }
   });
@@ -307,11 +402,11 @@ $(document).ready(function () {
           table.ajax.reload();
       } catch (error) {
           console.log(error, error.response);
-          const message = error.response.data;
-          Toast.fire({
-              icon: 'error',
-              title: message,
-            })
+          const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+        })
           icon.addClass('fa-minus').removeClass("fa-spinner fa-spin ");
       }
     }
@@ -341,11 +436,11 @@ $(document).ready(function () {
         table.ajax.reload();
     } catch (error) {
         console.log(error, error.response);
-        const message = error.response.data;
+        const message = error.response.data.error;
         Toast.fire({
             icon: 'error',
             title: message,
-          })
+        })
         icon.addClass('fa-signature').removeClass("fa-spinner fa-spin ");
     }
   
@@ -374,11 +469,11 @@ $(document).ready(function () {
         table.ajax.reload();
     } catch (error) {
         console.log(error, error.response);
-        const message = error.response.data;
+        const message = error.response.data.error;
         Toast.fire({
             icon: 'error',
             title: message,
-          })
+        })
         icon.addClass('fa-thumbtack').removeClass("fa-spinner fa-spin ");
     }
   
@@ -409,11 +504,11 @@ $(document).ready(function () {
           table.ajax.reload();
       } catch (error) {
           console.log(error, error.response);
-          const message = error.response.data;
-          Toast.fire({
-              icon: 'error',
-              title: message,
-            })
+          const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+        })
           icon.addClass('fa-lock').removeClass("fa-spinner fa-spin ");
       }
     }
@@ -445,10 +540,10 @@ $(document).ready(function () {
       } catch (error) {
           console.log(error.response.data);
           const message = error.response.data.error;
-          Toast.fire({
-              icon: 'error',
-              title: message,
-            })
+        Toast.fire({
+            icon: 'error',
+            title: message,
+        })
           icon.addClass('fa-window-close').removeClass("fa-spinner fa-spin ");
       }
     }
