@@ -20,17 +20,17 @@
 <tbody>
     {% if type == "ins" %}
 
-        {# {% for etu in etudiants %}
+        {% for etu in etudiants %}
             <tr>
                 <td>{{etu.admission.code}}</td>
-                <td>{{etu.Nom}} {{etu.Prénom}}</td>
-                <td>{{etu.DatePointage | date('H:i:s')}}</td>
-                <td>{{etu.Categorie}}</td>                         
-                <td>{{etu.CategorieEnseig}}</td>                         
-                <td>{{etu.Categoriesi}}</td>                         
-                <td>{{etu.Categorief}}</td>                         
+                <td>{{etu.admission.preinscription.etudiant.nom}} {{etu.admission.preinscription.etudiant.prenom}}</td>
+                <td> - </td>
+                <td> - </td>                         
+                <td> - </td>                         
+                <td> - </td>                         
+                <td> - </td>                         
             </tr>
-        {% endfor %} #}
+        {% endfor %}
         
     {% else %}
         {% for etu in etudiants %}

@@ -1,0 +1,28 @@
+<div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+    <label for="hd">Séance:</label>
+    <input type="text" class="form-control" name="name" id="name" readonly value="{{emptime.id}}" />
+</div>
+<div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+    <label for="hd">Nature / Salle:</label>
+    <input type="text" class="form-control" name="name" id="name" readonly value="{{emptime.programmation.NatureEpreuve.abreviation}} / {% if emptime.salle %} {{emptime.salle.designation}} {% else %} - {% endif %}" />
+</div>
+<div class="col-md-1" style="padding-right: 5px !important;padding-left: 5px !important;">
+    <label for="hd">Heure Debut:</label>
+    <input type="text" class="form-control" name="heurdb" id="heurdb" readonly value="{{emptime.heurDb | date("H:i")}}" />
+</div>
+<div class="col-md-1" style="padding-right: 5px !important;padding-left: 5px !important;">
+    <label for="hd">Heure Fin:</label>
+    <input type="text" class="form-control" name="heurfn" id="heurfn" readonly value="{{emptime.heurFin | date("H:i")}}" />
+</div>
+<div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+    <label for="hd">Enseignant:</label>
+    <input type="text" class="form-control" name="enseignant" id="enseignant" readonly value="{{ emptime.emptimens[0].enseignant.nom}} {{emptime.emptimens[0].enseignant.prenom }}" />
+</div>
+<div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+    <label for="hd">Groupe:</label>
+    <input type="text" class="form-control" name="enseignant" id="enseignant" readonly value="{% if emptime.groupe %}{{ emptime.groupe.niveau }} {% else %} - {% endif %}" />
+</div>
+<div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+    <label for="hd" style="height: 67%"></label>
+    <button class="btn btn-outline-primary btn-lg" id="pointage_seance"><i class="fas fa-search"></i>Pointage</button>
+</div>

@@ -89,7 +89,8 @@ $(document).ready(function () {
         const request = await axios.get('/assiduite/traitement/etudiants/'+id_seance);
         const response = request.data;
         
-        $('#etudiant_datatable').html(response.html);
+        $('#infos_seance').html(response.html1);
+        $('#etudiant_datatable').html(response.html2);
         
         if ($.fn.DataTable.isDataTable("body #etudiant_datatable")) {
           $("body #etudiant_datatable").DataTable().clear().destroy();
@@ -148,17 +149,19 @@ $(document).ready(function () {
   $("body").on("dblclick", "#etudiant_datatable tbody tr", async function () {
 
     admission = $(this).attr("admission");
+    console.log(admission);
+    
     try {
-      const request = await axios.get('/assiduite/traitement/etudiant_details/'+admission);
+      const request = await axios.get('/assiduite/traitement/etudiant_details/'+admission + "/" + id_seance);
       const response = request.data;
       
-      $("##modal-detail-etudiant #edit_etudiant").html(response);    
+      $("#etudiant_details #edit_etudiant").html(response);    
 
       
-      $("#modal-detail-etudiant").modal("show");
+      $("#etudiant_details").modal("show");
   } catch (error) {
       console.log(error, error.response);
-      const message = error.response.data.error;
+      const message = error.response;
       Toast.fire({
           icon: 'error',
           title: message,
@@ -706,6 +709,30 @@ $(document).ready(function () {
         return;
     }
     window.open('/assiduite/traitement/planing/'+today, '_blank');
+})
+
+$('#edit_etudiant').on('submit', async function(e){
+  e.preventDefault();
+  
+  const icon = $("#edit_etudiant button i");
+  icon.removeClass('fa-check').addClass("fa-spinner fa-spin");
+  let formData = new FormData($(this)[0]);
+  try {
+      const request = await axios.post('/assiduite/traitement/update_etudiant',formData);
+      const response = request.data;
+      icon.addClass('fa-check').removeClass("fa-spinner fa-spin ");
+      $("#etudiant_details").modal("hide")
+      $("body #etudiant_datatable").ajax.reload(null, false)
+  } catch (error) {
+      console.log(error)
+      const message = error.response.data;
+      Toast.fire({
+          icon: 'error',
+          title: message,
+      }) 
+      icon.addClass('fa-check').removeClass("fa-spinner fa-spin ");
+
+  }
 })
 
 });
