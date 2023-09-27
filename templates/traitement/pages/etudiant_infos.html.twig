@@ -3,32 +3,60 @@
         <div class="col-md-12 row" style="margin:0">
             <div class="col-md-4">
                 <div class="form-group">
-                    <label>Etablissement  :</label>
-                    <select class="form-control " style="width: 100%" name="id_etablissement" id='etablissement'>
-                        <option value="" selected>Choix Etablissement</option>
-                        {# {% for etablissement in etablissements %}
-                            <option value="{{etablissement.id}}">{{etablissement.designation}}</option>
-                        {% endfor %} #}
-                    </select>
+                    <label>Séance  :</label>
+                    <input type="text" class="form-control" name="seance" id="seance" readonly value="{{xabs.IDSéance}}" />
                 </div>
             </div> 
             <div class="col-md-4">
                 <div class="form-group">
-                    <label>Formation  :</label>
-                    <select class="form-control " style="width: 100%" name="id_formation" id='formation'>
-                        <option value=""  disabled selected>Choix de Formation</option>
+                    <label>Admission  :</label>
+                    <input type="text" class="form-control" name="admission" id="admission" readonly value="{{xabs.IDAdmission}}" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Nom et prénom  :</label>
+                    <input type="text" class="form-control" name="name" id="name" readonly value="{{xabs.nom}} {{xabs.prénom}}" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 row" style="margin:0">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Catégorie :</label>
+                    <input type="text" class="form-control" name="categorie" id="categorie" readonly value="{% if xabs.getCategorieSi %} {{ xabs0getCategorieSi }} {% else %} {{xabs.getCategorie}} {% endif %}" />
+                </div>
+            </div> 
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Catégorie enseignant  :</label>
+                    <select class="form-control " style="width: 100%" name="cat_Ens" id='cat_Ens'>
+                        <option value="" selected>Choix de categorie</option>
+                        <option value="PEE">PEE</option>
+                        <option value="AD">AD</option>
+                        <option value="BD">BD</option>
+                        <option value="S">S</option>
+                        <option value="Z">Z</option>
                     </select>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-group">
-                    <label>Promotion  :</label>
-                    <select class="form-control " style="width: 100%" name="id_promotion" id='promotion'>
-                        <option value=""  disabled selected>Choix de Promotion</option>
-                    </select>
+                    <label>Heur pointage  :</label>
+                    <input type="text" class="form-control" name="categorie" id="categorie" readonly value="{{ xabs.HeurePointage | date('H:i') }}" />
                 </div>
             </div>
         </div>
+        <div class="col-md-12 row" style="margin:0">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Observation :</label>
+                    {# <textarea type="text" class="form-control" name="observation" id="observation" value=""> <textarea/> #}
+                    <textarea class="form-control" name="observation" id="observation"></textarea>
+                </div>
+            </div> 
+        </div>
+        
     </fieldset>
 </div>
 <button type="submit" class="btn btn-primary mb-4 float-right mr-5" ><i class="fas fa-check"></i> Enregister</button>

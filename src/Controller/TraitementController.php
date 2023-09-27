@@ -701,25 +701,27 @@ class TraitementController extends AbstractController
         $promotion = $element->getModule()->getSemestre()->getPromotion();
         $annee = $this->em->getRepository(AcAnnee::class)->getActiveAnneeByFormation($promotion->getFormation());
 
+        $html1 = $this->renderView('traitement/pages/infos_seance.html.twig', ['emptime' => $emptime]);
         
         $etudiants = [];
-        if($Xseance->getStatut() == 1 or $Xseance->getStatut() == 2){
+        if(!$Xseance){
+            $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoNoGroup($promotion,$annee);
+            array_push($etudiants, $inscriptions);
+            // dd($inscriptions);
+            $html2 = $this->renderView('traitement/tables/etudiant.html.twig', ['etudiants' => $etudiants[0], 'type' => "ins"]);
+        }else if($Xseance->getStatut() == 1 or $Xseance->getStatut() == 2){
             $XseanceAbsence = $this->em->getRepository(XseanceAbsences::class)->findBy([
                 'ID_Séance'=>$emptime->getId(),
                 'active'=> 1
             ]);
             array_push($etudiants, $XseanceAbsence);
-            $html = $this->renderView('traitement/tables/etudiant.html.twig', ['etudiants' => $etudiants[0], 'type' => "xabs"]);
-        }else{
-            $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoNoGroup($promotion,$annee);
-            array_push($etudiants, $inscriptions);
-            $html = $this->renderView('traitement/tables/etudiant.html.twig', ['etudiants' => $etudiants[0], 'type' => "ins"]);
+            $html2 = $this->renderView('traitement/tables/etudiant.html.twig', ['etudiants' => $etudiants[0], 'type' => "xabs"]);
         }
 
         // dd($etudiants);
 
 
-        return new JsonResponse(['html' => $html]);
+        return new JsonResponse(['html1' => $html1, 'html2' => $html2]);
     }
     
     #[Route('/open/{seance}', name: 'scan_seance')]
@@ -1032,16 +1034,41 @@ class TraitementController extends AbstractController
         return $this->file($temp_file, $fileName, ResponseHeaderBag::DISPOSITION_INLINE);
     }
 
-    #[Route('/etudiant_details/{admission}', name: 'administration_epreuve_edit')]
-    public function administrationEpreuveEdit($admission) {
-        $admission = $this->em->getRepository(TAdmission::class)->find($admission);
-        $inscription = $this->em->getRepository(TInscription::class)->findOneBy(["admission" => $admission]);
-        dd($inscription);
-        // $html = $this->renderView('administration_epreuve/pages/epreuve_edit.html.twig', [
-        //     'epreuve' => $epreuve,
-        //     'enseignants' => $enseignants
-        // ]);
+    #[Route('/etudiant_details/{admission}/{seance}', name: 'administration_epreuve_edit')]
+    public function administrationEpreuveEdit($admission, $seance) {
+        $XseanceAbsence = $this->em->getRepository(XseanceAbsences::class)->findOneBy([
+            'ID_Admission'=>$admission,
+            'ID_Séance'=>$seance,
+        ]);
+        // dd($admission,$XseanceAbsence);
+        $html = $this->renderView('traitement/pages/etudiant_infos.html.twig', [
+            'xabs' => $XseanceAbsence
+        ]);
         return new JsonResponse($html);
+    }
+
+    #[Route('/update_etudiant', name: 'update_etudiant')]
+    public function update_etudiant(Request $request) {
+        // dd($request);
+       
+        if(empty($request->get('cat_Ens')) or empty($request->get('observation'))) {
+            return new JsonResponse("Veuillez remplir tous les champs!", 500);
+        }
+        if(empty($request->get('seance')) or empty($request->get('admission'))) {
+            return new JsonResponse("No informations", 500);
+        }
+        $XseanceAbsence = $this->em->getRepository(XseanceAbsences::class)->findOneBy([
+            'ID_Admission'=>$request->get('admission'),
+            'ID_Séance'=>$request->get('seance'),
+        ]);
+
+        $XseanceAbsence->setCategorieEnseig($request->get('cat_Ens'));
+        $XseanceAbsence->setObs($request->get('observation'));
+
+        $this->em->flush();
+        return new JsonResponse('Bien enregistre',200);
+
+        
     }
 
 
