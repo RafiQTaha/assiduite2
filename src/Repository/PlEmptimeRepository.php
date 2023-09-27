@@ -229,6 +229,32 @@ class PlEmptimeRepository extends ServiceEntityRepository
         ;
     }
 
+    public function getEmptimeByCurrentDay()
+    {
+        $date =date('Y-m-d')."%";
+        return $this->createQueryBuilder('e')
+            ->innerJoin("e.programmation", "programmation")
+            ->innerJoin("programmation.element", "element")
+            ->innerJoin("element.module", "module")
+            ->innerJoin("module.semestre", "semestre")
+            ->innerJoin("semestre.promotion", "promotion")
+            ->innerJoin("promotion.formation", "formation")
+            ->innerJoin("formation.etablissement", "etablissement")
+            ->where('e.start like :date')
+            ->andWhere("e.active = 1")
+            ->andWhere("e.annuler = 0")
+            ->andWhere("e.xsalle is not NULL")
+            ->andWhere("formation.designation not like 'Résidanat%' ")
+            ->andWhere("etablissement.id != 25 ")
+            // ->andWhere("e.annuler = 0")
+            // ->setParameter('date', $todayDate)
+            ->groupBy('e.xsalle')
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
 
 
     public function getEmptimeBySemestreAndGroupeAndSemaine($semestre,$groupe,$semaine)

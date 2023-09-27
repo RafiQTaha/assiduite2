@@ -34,9 +34,9 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 // use ZKLibrary;
 
 
-require '../zklibrary.php';
+// require '../zklibrary.php';
 
-require '../ZKLib.php';
+// require '../ZKLib.php';
 
 // require '../ZK/Nouveau dossier/zklibrary.php';
 
