@@ -11,25 +11,23 @@ use App\Entity\Machines;
 use App\Entity\Userinfo;
 use App\Entity\PlEmptime;
 use App\Entity\Checkinout;
+use App\Entity\TAdmission;
 use App\Entity\ISeanceSalle;
 use App\Entity\TInscription;
 use App\Entity\AcEtablissement;
-use App\Entity\TAdmission;
 use App\Entity\XseanceAbsences;
 use App\Entity\XseanceCapitaliser;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Doctrine\Persistence\ManagerRegistry;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Font;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 // use ZKLibrary;
 
