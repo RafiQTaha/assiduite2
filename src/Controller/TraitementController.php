@@ -46,10 +46,12 @@ class TraitementController extends AbstractController
 {
     private $em;
     private $emAssiduite;
+    private $emPointage;
     public function __construct(ManagerRegistry $doctrine)
     {
         $this->em = $doctrine->getManager();
         $this->emAssiduite = $doctrine->getManager('assiduite');
+        $this->emPointage = $doctrine->getManager('pointage');
     }
     #[Route('/', name: 'traitement')]
     public function index(Request $request)
@@ -192,7 +194,6 @@ class TraitementController extends AbstractController
         return new Response(json_encode($json_data));
     }
 
-
     #[Route('/traiter/{emptime}/{type}', name: 'traiter')]
     public function traiter($emptime, $type)
     {
@@ -206,102 +207,66 @@ class TraitementController extends AbstractController
                     return new JsonResponse(['error' => 'La séance est pas encore traitée!'], 500);
                 }
             }
-        }    
-        // $abcd = ['A'=>201,'B'=>0,'C'=>0,'D'=>1];
-        // return new JsonResponse(['data'=>$abcd,'message'=>'test',200]);
-        $emptime = $this->em->getRepository(PlEmptime::class)->find($emptime);
+        }
 
-        // dd("hi");
+        $emptime = $this->em->getRepository(PlEmptime::class)->find($emptime);
         $element = $emptime->getProgrammation()->getElement();
         $promotion = $element->getModule()->getSemestre()->getPromotion();
         $salle = $emptime->getXsalle();
-        // dd($salle->getCode());
-        // $pointeuses = $this->em->getRepository(ISeanceSalle::class)->findBy(['code_salle'=>$salle->getCode()]);
-
+        $ID_Séance = $emptime->getId();
         $code_salle = $salle->getCode();
-        $requete = "SELECT * FROM `iseance_salle` where code_salle like '$code_salle'";
+
+        $requete = "SELECT m.* FROM `machines` m INNER JOIN iseance_salle iss on iss.id_pointeuse = m.sn where iss.code_salle = '$code_salle'";
 
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $pointeuses = $newstmt->fetchAll();
-
         $sns = [];
+        // $sns ="";
         $dateSeance = $emptime->getStart()->format('Y-m-d');
-        // dd($pointeuses);
-        foreach ($pointeuses as $pointeuse) {
-            $id_pointeuse = $pointeuse["id_pointeuse"];
-            $requete = "SELECT * FROM `machines` where sn = '$id_pointeuse' LIMIT 1";
+        if (!$pointeuses) {
+            dd($pointeuses);
+        }
+        foreach ($pointeuses as $machine) {
+            $sn = $machine["sn"];
+            $requete = "SELECT * FROM `checkinout` where sn = '$sn' and checktime like '$dateSeance%'";
 
-            $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+            $stmt = $this->emPointage->getConnection()->prepare($requete);
             $newstmt = $stmt->executeQuery();   
-            $machine = $newstmt->fetchAll();
-
-            // $machine = $this->em->getRepository(Machines::class)->findOneBy(['sn'=>$pointeuse->getIdPointeuse()]);
-            if (!$machine) {
-                continue;
-            }
-            $zk = new \ZKLibrary($machine[0]["ip"], 4370);
-            $zk->connect();
-            $attendaces = $zk->getAttendance($dateSeance);
-            // dd($attendaces);
-            // dd($pointeuse->getIdPointeuse(),$attendaces[0]['timestamp']);
-            $zk->disconnect();
-            if ($attendaces) {
-                foreach ($attendaces as $attendace) {
+            $pointages = $newstmt->fetchAll();
+            // dd($pointages);
+            if ($pointages) {
+                foreach ($pointages as $pointage) {
                     // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['Badgenumber'=>$attendace['id']]);
 
-                    $badgenumber = $attendace['id'];
+                    $id_checkinout = $pointage["id"];
+                    $userid = $pointage["userid"];
+                    $checktime = $pointage["checktime"];
+                    $memoinfo = $pointage["memoinfo"];
+                    $sn = $pointage["sn"];
 
-                    $requete = "SELECT * FROM `userinfo` where badgenumber = '$badgenumber' LIMIT 1";
+                    //** checks if there is that checkinout in local database 'assiduite' **//
+                    $requete = "SELECT * FROM `checkinout` where id = $id_checkinout LIMIT 1";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
-                    $userInfo = $newstmt->fetchAll();
+                    $checkinout = $newstmt->fetchAll();
 
-                    if ($userInfo) {
-                        // $checkIIN = $this->em->getRepository(Checkinout::class)->findOneBy([
-                        //     'sn' => $pointeuse->getIdPointeuse(),
-                        //     'USERID' => $userInfo->getUSERID(),
-                        //     'CHECKTIME' => new DateTime($attendace['timestamp']),
-                        // ]);
+                    // dd($requete);
 
-                        $sn = $pointeuse["id_pointeuse"];
-                        $userid = $userInfo[0]["userid"];
-                        $CHECKTIME = $attendace['timestamp'];
-                        $memoinfo = $promotion->getFormation()->getEtablissement()->getAbreviation();
-                        // dd($CHECKTIME);
-
-                        $requete = "SELECT * FROM `checkinout` WHERE sn = '$sn' AND userid = '$userid' AND checktime = '$CHECKTIME' LIMIT 1";
+                    if(!$checkinout){
+                        $requete = "INSERT INTO `checkinout`(`id`,`userid`, `checktime`, `memoinfo`, `sn`) VALUES ('$id_checkinout','$userid','$checktime','$memoinfo','$sn')";
 
                         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-                        $newstmt = $stmt->executeQuery();   
-                        $checkIIN = $newstmt->fetchAll();
-
-                        // dd($checkIIN);
-
-                        // if ($attendace['id'] == 9299) {
-                        //     dd($checkIIN,$pointeuse->getIdPointeuse(),$userInfo->getUSERID());
-                        // }
-                        if (!$checkIIN) {
-                            $requete = "INSERT INTO `checkinout`(`userid`, `checktime`, `memoinfo`, `sn`) VALUES ('$userid','$CHECKTIME','$memoinfo','$sn')";
-
-                            $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-                            $newstmt = $stmt->executeQuery();   
-                            $result = $newstmt->fetchAll();
-
-                            // $checkin = new Checkinout();
-                            // $checkin->setUSERID($userInfo->getUSERID());
-                            // $checkin->setCHECKTIME(new DateTime($attendace['timestamp']));
-                            // $checkin->setMemoinfo($promotion->getFormation()->getEtablissement()->getAbreviation());
-                            // $checkin->setSN($pointeuse->getIdPointeuse());
-                            // $this->em->persist($checkin);
-                        }
+                        $newstmt = $stmt->executeQuery();
                     }
                 }
             }
-            array_push($sns,$pointeuse["id_pointeuse"]);
+            // $sns .= "'$sn',";
+            array_push($sns,$sn);
         }
-        // $this->em->flush();
+        // dd($sns);
+        // dd("hi");
 
         $groupes = [];
         $annee = $this->em->getRepository(AcAnnee::class)->getActiveAnneeByFormation($promotion->getFormation());
@@ -346,6 +311,7 @@ class TraitementController extends AbstractController
         $date = clone $emptime->getStart();
         $date->modify($AA.' min');
         $check_ = $date->format("Y-m-d H:i:s"); //!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // dd($inscriptions);
         foreach ($inscriptions as $inscription) {
             // $capitaliseExist = $this->em->getRepository(XseanceCapitaliser::class)->findOneBy([
             //     'ID_Admission'=>$inscription->getAdmission()->getCode(),
@@ -374,28 +340,27 @@ class TraitementController extends AbstractController
                 // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['street'=>$inscription->getAdmission()->getCode()]);
                 $checkinout = null;
                 $cat = "D";
-                $CHECKTIME = $attendace['timestamp'];
-                
                 $sn = array_map(function($item) {
                     return "'$item'";
                 }, $sns);
                 $sn = implode(',', $sn);
                 if ($userInfo) {
                     $userid = $userInfo[0]["userid"];
-                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime = '$checktime' AND sn in ($sn) ORDER BY checktime DESC LIMIT 1";
-//                     $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
-
+                    // $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime like '$dateSeance%' AND sn in ($sn) ORDER BY checktime DESC";
+                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
+                    
+                    // dd($requete);
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
                     $checkinout = $newstmt->fetchAll();
                     // $checkinout = $this->em->getRepository(Checkinout::class)->findOneBySNAndDateAndUserId($sns,$userInfo->getUSERID(),$date);
-                    // dd($checkinout);
                 }
                 
                 
                 if ($checkinout) {
                     $checktime_ = new \DateTime($checkinout[0]["checktime"]);
                     $interval = ($checktime_->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
+                    
                     
                     if ($interval == 0) {
                         $cat = "A";
@@ -416,27 +381,19 @@ class TraitementController extends AbstractController
                             $cat = "D";
                         }
                     }
-                    
-                    // if ($userInfo->getUSERID() == 54012) {
-                    //     dd($interval,$cat);
-                    // }
                 }
             }else {
                 $cat = 'P';
             }
-            $xAbseanceExist = $this->em->getRepository(XseanceAbsences::class)->findOneBy([
-                'ID_Admission'=>$inscription->getAdmission()->getCode(),
-                'ID_Séance'=>$emptime->getId(),
-            ]);
+
+            $requete = "SELECT * FROM `xseance_absences` where id_admission = '$id_admission' and id_séance = '$ID_Séance' LIMIT 1";
+
+            $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+            $newstmt = $stmt->executeQuery();   
+            $xAbseanceExist = $newstmt->fetchAll();
             
             
             if($type == 2){ //!!retraitement
-                    
-                $xAbseanceExist->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
-                $xAbseanceExist->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
-                $xAbseanceExist->setCategorieSi($cat);
-
-                // update in local
 
                 $id_admission = $inscription->getAdmission()->getCode();
                 $id_seance = $emptime->getId();
@@ -445,23 +402,11 @@ class TraitementController extends AbstractController
 
                 $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie' WHERE `id_séance` = '$id_seance' AND `id_admission` = '$id_admission'";
 
-                // dd($requete);
                 $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                 $newstmt = $stmt->executeQuery(); 
 
             }else{ //!!traitements
                 if (!$xAbseanceExist) {
-                    $xAbseance = new XseanceAbsences();
-                    $xAbseance->setIDAdmission($inscription->getAdmission()->getCode());
-                    $xAbseance->setIDSéance($emptime->getId());
-                    $xAbseance->setNom($inscription->getAdmission()->getPreinscription()->getEtudiant()->getNom());
-                    $xAbseance->setPrénom($inscription->getAdmission()->getPreinscription()->getEtudiant()->getPrenom());
-                    $xAbseance->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
-                    $xAbseance->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
-                    $xAbseance->setCategorie($cat);
-                    $this->em->persist($xAbseance);
-    
-                    // insert xseance in local database
     
                     $id_admission = $inscription->getAdmission()->getCode();
                     $id_seance = $emptime->getId();
@@ -472,26 +417,20 @@ class TraitementController extends AbstractController
                     $categorie = $cat;
     
                     $requete = "INSERT INTO `xseance_absences`(`id_admission`, `id_séance`, `nom`, `prénom`, `date_pointage`, `heure_pointage`, `categorie`) VALUES ('$id_admission','$id_seance','$nom','$prenom','$date','$pointage','$categorie')";
-    
-                    // dd($requete);
+
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();
     
                 }else {
-                    $xAbseanceExist->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
-                    $xAbseanceExist->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
-                    $xAbseanceExist->setCategorie($cat);
-    
-                    // update in local
     
                     $id_admission = $inscription->getAdmission()->getCode();
                     $id_seance = $emptime->getId();
+                    // $checkinout != null && dd($checkinout);
                     $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
                     $categorie = $cat;
     
                     $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie' WHERE `id_séance` = '$id_seance' AND `id_admission` = '$id_admission'";
-    
-                    // dd($requete);
+
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery(); 
                 }
@@ -515,32 +454,6 @@ class TraitementController extends AbstractController
         }
         $this->em->flush();
 
-//conflis fixed like this 👇 
-//         $Xseance = new Xseance();
-//         $Xseance->setTypeséance($emptime->getProgrammation()->getNatureEpreuve()->getCode());
-//         $Xseance->setIDEtablissement($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode());
-//         $Xseance->setIDFormation($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode());
-//         $Xseance->setIDPromotion($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode());
-//         $Xseance->setIDAnnée($emptime->getProgrammation()->getAnnee()->getCode());
-//         $Xseance->setAnnéeLib($emptime->getProgrammation()->getAnnee()->getDesignation());
-//         $Xseance->setIDSemestre($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode());
-//         $Xseance->setGroupe($emptime->getGroupe()->getNiveau());
-//         $Xseance->setIDModule($emptime->getProgrammation()->getElement()->getModule()->getCode());
-//         $Xseance->setIDElement($emptime->getProgrammation()->getElement()->getId());
-//         $Xseance->setIDEnseignant($emptime->getemptimetimens()[0]->getEnseignant()->getCode());
-//         $Xseance->setIDSalle(strtoupper($emptime->getSalle()->getCode()));
-//         $Xseance->setDateSéance($emptime->getStart()->format("Y-m-d"));
-//         $Xseance->setSemaine($emptime->getSemaine()->getId());
-//         $Xseance->setHeureDebut($emptime->getHeurDb()->format("H:i"));
-//         $Xseance->setHeureFin($emptime->getHeurFin()->format("H:i"));
-//         $Xseance->setDateSys(new \DateTime());
-//         $Xseance->setIDSéance($emptime->getId());
-//         $Xseance->setStatut(1);
-
-//         $this->em->persist($Xseance);
-//         $this->em->flush();
-
-        // insert into xseance
         $IDSéance = $emptime->getId();
         $Typeséance=$emptime->getProgrammation()->getNatureEpreuve()->getCode();
         $IDEtablissement=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode();
@@ -549,7 +462,7 @@ class TraitementController extends AbstractController
         $IDAnnée=$emptime->getProgrammation()->getAnnee()->getCode();     
         $AnnéeLib=$emptime->getProgrammation()->getAnnee()->getDesignation();
         $IDSemestre=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode();
-        $EmpGroupe=$emptime->getGroupe()->getNiveau();
+        $EmpGroupe=$emptime->getGroupe()?$emptime->getGroupe()->getNiveau():"";
         $IDModule=$emptime->getProgrammation()->getElement()->getModule()->getCode();
         $IDElement=$emptime->getProgrammation()->getElement()->getId();
         $IDEnseignant=$emptime->getemptimens()[0]->getEnseignant()->getCode();
@@ -562,20 +475,396 @@ class TraitementController extends AbstractController
         $DateSys=(new \DateTime())->format("Y-m-d");
 
         $requete = "INSERT INTO `xseance`(`id_séance`, `typeséance`, `id_etablissement`, `id_formation`, `id_promotion`, `id_année`, `année_lib`, `id_semestre`, `groupe`, `id_module`, `id_element`, `id_enseignant`, `id_salle`, `date_séance`, `semaine`, `heure_debut`, `heure_fin`, `date_sys`, `statut`) VALUES ('$IDSéance','$Typeséance','$IDEtablissement','$IDFormation','$IDPromotion','$IDAnnée','$AnnéeLib','$IDSemestre','$EmpGroupe','$IDModule','$IDElement','$IDEnseignant','$IDSalle','$DateSéance','$EmpSemaine','$HeureDebut','$HeureFin','$DateSys','1')";
-
-
-        // // insert into xseance
-   
-
-        // $requete = "INSERT INTO `xseance`(`id_séance`, `typeséance`, `id_etablissement`, `id_formation`, `id_promotion`, `id_année`, `année_lib`, `id_semestre`, `groupe`, `id_module`, `id_element`, `id_enseignant`, `id_salle`, `date_séance`, `semaine`, `heure_debut`, `heure_fin`, `date_sys`, `statut`) VALUES ('$IDSéance','$Typeséance','$IDEtablissement','$IDFormation','$IDPromotion','$IDAnnée','$AnnéeLib','$IDSemestre','$EmpGroupe','$IDModule','$IDElement','$IDEnseignant','$IDSalle','$DateSéance','$EmpSemaine','$HeureDebut','$HeureFin','$DateSys','1')";
-
-        // // dd($requete);
-        // $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-        // $newstmt = $stmt->executeQuery();
-
+        $stmt = $this->em->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery(); 
         return new JsonResponse(['data'=>$abcd,'message'=>$counter .' Done from '. count($inscriptions),200]);
         // return new JsonResponse($counter .' Done from '. count($inscriptions),200);,200);
     }
+
+
+//     #[Route('/traiter/{emptime}/{type}', name: 'traiter')]
+//     public function traiter($emptime, $type)
+//     {
+//         if($type == 2){ //!!retraitement
+//             $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance" => $emptime]);
+//             if ($Xseance) {
+//                 if ($Xseance->getStatut() == "2") {
+//                     return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
+//                 }
+//                 if ($Xseance->getStatut() != "1") {
+//                     return new JsonResponse(['error' => 'La séance est pas encore traitée!'], 500);
+//                 }
+//             }
+//         }    
+//         // $abcd = ['A'=>201,'B'=>0,'C'=>0,'D'=>1];
+//         // return new JsonResponse(['data'=>$abcd,'message'=>'test',200]);
+//         $emptime = $this->em->getRepository(PlEmptime::class)->find($emptime);
+
+//         // dd("hi");
+//         $element = $emptime->getProgrammation()->getElement();
+//         $promotion = $element->getModule()->getSemestre()->getPromotion();
+//         $salle = $emptime->getXsalle();
+//         // dd($salle->getCode());
+//         // $pointeuses = $this->em->getRepository(ISeanceSalle::class)->findBy(['code_salle'=>$salle->getCode()]);
+
+//         $code_salle = $salle->getCode();
+//         $requete = "SELECT * FROM `iseance_salle` where code_salle like '$code_salle'";
+
+//         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//         $newstmt = $stmt->executeQuery();   
+//         $pointeuses = $newstmt->fetchAll();
+
+//         $sns = [];
+//         $dateSeance = $emptime->getStart()->format('Y-m-d');
+//         // dd($pointeuses);
+//         foreach ($pointeuses as $pointeuse) {
+//             $id_pointeuse = $pointeuse["id_pointeuse"];
+//             $requete = "SELECT * FROM `machines` where sn = '$id_pointeuse' LIMIT 1";
+
+//             $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//             $newstmt = $stmt->executeQuery();   
+//             $machine = $newstmt->fetchAll();
+
+//             // $machine = $this->em->getRepository(Machines::class)->findOneBy(['sn'=>$pointeuse->getIdPointeuse()]);
+//             if (!$machine) {
+//                 continue;
+//             }
+//             $zk = new \ZKLibrary($machine[0]["ip"], 4370);
+//             $zk->connect();
+//             $attendaces = $zk->getAttendance($dateSeance);
+//             // dd($attendaces);
+//             // dd($pointeuse->getIdPointeuse(),$attendaces[0]['timestamp']);
+//             $zk->disconnect();
+//             if ($attendaces) {
+//                 foreach ($attendaces as $attendace) {
+//                     // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['Badgenumber'=>$attendace['id']]);
+
+//                     $badgenumber = $attendace['id'];
+
+//                     $requete = "SELECT * FROM `userinfo` where badgenumber = '$badgenumber' LIMIT 1";
+
+//                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//                     $newstmt = $stmt->executeQuery();   
+//                     $userInfo = $newstmt->fetchAll();
+
+//                     if ($userInfo) {
+//                         // $checkIIN = $this->em->getRepository(Checkinout::class)->findOneBy([
+//                         //     'sn' => $pointeuse->getIdPointeuse(),
+//                         //     'USERID' => $userInfo->getUSERID(),
+//                         //     'CHECKTIME' => new DateTime($attendace['timestamp']),
+//                         // ]);
+
+//                         $sn = $pointeuse["id_pointeuse"];
+//                         $userid = $userInfo[0]["userid"];
+//                         $CHECKTIME = $attendace['timestamp'];
+//                         $memoinfo = $promotion->getFormation()->getEtablissement()->getAbreviation();
+//                         // dd($CHECKTIME);
+
+//                         $requete = "SELECT * FROM `checkinout` WHERE sn = '$sn' AND userid = '$userid' AND checktime = '$CHECKTIME' LIMIT 1";
+
+//                         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//                         $newstmt = $stmt->executeQuery();   
+//                         $checkIIN = $newstmt->fetchAll();
+
+//                         // dd($checkIIN);
+
+//                         // if ($attendace['id'] == 9299) {
+//                         //     dd($checkIIN,$pointeuse->getIdPointeuse(),$userInfo->getUSERID());
+//                         // }
+//                         if (!$checkIIN) {
+//                             $requete = "INSERT INTO `checkinout`(`userid`, `checktime`, `memoinfo`, `sn`) VALUES ('$userid','$CHECKTIME','$memoinfo','$sn')";
+
+//                             $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//                             $newstmt = $stmt->executeQuery();   
+//                             $result = $newstmt->fetchAll();
+
+//                             // $checkin = new Checkinout();
+//                             // $checkin->setUSERID($userInfo->getUSERID());
+//                             // $checkin->setCHECKTIME(new DateTime($attendace['timestamp']));
+//                             // $checkin->setMemoinfo($promotion->getFormation()->getEtablissement()->getAbreviation());
+//                             // $checkin->setSN($pointeuse->getIdPointeuse());
+//                             // $this->em->persist($checkin);
+//                         }
+//                     }
+//                 }
+//             }
+//             array_push($sns,$pointeuse["id_pointeuse"]);
+//         }
+//         // $this->em->flush();
+
+//         $groupes = [];
+//         $annee = $this->em->getRepository(AcAnnee::class)->getActiveAnneeByFormation($promotion->getFormation());
+//         if($emptime->getGroupe()){
+//             $groupe = $emptime->getGroupe();
+//             array_push($groupes,$groupe);
+//                 foreach ($groupe->getGroupes() as $groupe) {
+//                     if (!in_array($groupe, $groupes)){
+//                         array_push($groupes,$groupe);
+//                     }
+//                     foreach ($groupe->getGroupes() as $groupe) {
+//                         if (!in_array($groupe, $groupes)){
+//                             array_push($groupes,$groupe);
+//                         }
+//                     }
+//                 }
+//             $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoAndGroupe($promotion,$annee,$groupes);
+//         }else{
+//             $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoNoGroup($promotion,$annee);
+//         }
+//         if (count($inscriptions) == 0) {
+//             die('Aucun Etudiant Trouver!!!');
+//         }
+//         $counter = 0;
+//         $ID_etablissement = $annee->getFormation()->getEtablissement()->getId();
+//         // $A = $ID_etablissement == 28 ? 20 : 15;
+//         if ($ID_etablissement == 28) {
+//             $A = 20;
+//             if ($emptime->getStart()->format('H:i') == '08:00') {
+//                 $AA = -30;
+//             }else {
+//                 $AA = -20;
+//             }
+//             $B = $A;
+//         }else{
+//             $A = 15;
+//             $AA = -15;
+//             $B = $A + 15;
+//         }
+//         $C = $B + 15;
+//         $abcd = ['A'=>0,'B'=>0,'C'=>0,'D'=>0];
+//         $date = clone $emptime->getStart();
+//         $date->modify($AA.' min');
+//         $check_ = $date->format("Y-m-d H:i:s"); //!!!!!!!!!!!!!!!!!!!!!!!!!!
+//         foreach ($inscriptions as $inscription) {
+//             // $capitaliseExist = $this->em->getRepository(XseanceCapitaliser::class)->findOneBy([
+//             //     'ID_Admission'=>$inscription->getAdmission()->getCode(),
+//             //     'ID_Module'=>$element->getModule()->getCode(),
+//             //     'ID_Année'=>$annee->getCode()]);
+
+//             $id_admission = $inscription->getAdmission()->getCode();
+//             $id_module = $element->getModule()->getCode();
+//             $id_annee = $annee->getCode();
+
+//             $requete = "SELECT * FROM `xseance_capitaliser` where id_admission = '$id_admission' and id_module = '$id_module' and id_année = '$id_annee' LIMIT 1";
+//             $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//             $newstmt = $stmt->executeQuery();   
+//             $capitaliseExist = $newstmt->fetchAll();
+            
+//             $street = $inscription->getAdmission()->getCode();
+//             if (!$capitaliseExist) {
+//                 $requete = "SELECT * FROM `userinfo` where street = '$street' LIMIT 1";
+
+//                 $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//                 $newstmt = $stmt->executeQuery();   
+//                 $userInfo = $newstmt->fetchAll();
+
+//                 // dd($userInfo);
+
+//                 // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['street'=>$inscription->getAdmission()->getCode()]);
+//                 $checkinout = null;
+//                 $cat = "D";
+//                 $CHECKTIME = $attendace['timestamp'];
+                
+//                 $sn = array_map(function($item) {
+//                     return "'$item'";
+//                 }, $sns);
+//                 $sn = implode(',', $sn);
+//                 if ($userInfo) {
+//                     $userid = $userInfo[0]["userid"];
+//                     $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime = '$checktime' AND sn in ($sn) ORDER BY checktime DESC LIMIT 1";
+// //                     $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
+
+//                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//                     $newstmt = $stmt->executeQuery();   
+//                     $checkinout = $newstmt->fetchAll();
+//                     // $checkinout = $this->em->getRepository(Checkinout::class)->findOneBySNAndDateAndUserId($sns,$userInfo->getUSERID(),$date);
+//                     // dd($checkinout);
+//                 }
+                
+                
+//                 if ($checkinout) {
+//                     $checktime_ = new \DateTime($checkinout[0]["checktime"]);
+//                     $interval = ($checktime_->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
+                    
+//                     if ($interval == 0) {
+//                         $cat = "A";
+//                     }elseif ($emptime->getStart() > $checktime_) {
+//                         if ($interval >= $AA) {
+//                             $cat = "A";
+//                         }else {
+//                             $cat = "D";
+//                         }
+//                     }elseif ($emptime->getStart() < $checktime_) {
+//                         if ($interval <= $A) {
+//                             $cat = "A";
+//                         }elseif ($interval <= $B) {
+//                             $cat = "B";
+//                         }elseif($interval <= $C) {
+//                             $cat = "C";
+//                         }else {
+//                             $cat = "D";
+//                         }
+//                     }
+                    
+//                     // if ($userInfo->getUSERID() == 54012) {
+//                     //     dd($interval,$cat);
+//                     // }
+//                 }
+//             }else {
+//                 $cat = 'P';
+//             }
+//             $xAbseanceExist = $this->em->getRepository(XseanceAbsences::class)->findOneBy([
+//                 'ID_Admission'=>$inscription->getAdmission()->getCode(),
+//                 'ID_Séance'=>$emptime->getId(),
+//             ]);
+            
+            
+//             if($type == 2){ //!!retraitement
+                    
+//                 $xAbseanceExist->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
+//                 $xAbseanceExist->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
+//                 $xAbseanceExist->setCategorieSi($cat);
+
+//                 // update in local
+
+//                 $id_admission = $inscription->getAdmission()->getCode();
+//                 $id_seance = $emptime->getId();
+//                 $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
+//                 $categorie = $cat;
+
+//                 $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie' WHERE `id_séance` = '$id_seance' AND `id_admission` = '$id_admission'";
+
+//                 // dd($requete);
+//                 $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//                 $newstmt = $stmt->executeQuery(); 
+
+//             }else{ //!!traitements
+//                 if (!$xAbseanceExist) {
+//                     $xAbseance = new XseanceAbsences();
+//                     $xAbseance->setIDAdmission($inscription->getAdmission()->getCode());
+//                     $xAbseance->setIDSéance($emptime->getId());
+//                     $xAbseance->setNom($inscription->getAdmission()->getPreinscription()->getEtudiant()->getNom());
+//                     $xAbseance->setPrénom($inscription->getAdmission()->getPreinscription()->getEtudiant()->getPrenom());
+//                     $xAbseance->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
+//                     $xAbseance->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
+//                     $xAbseance->setCategorie($cat);
+//                     $this->em->persist($xAbseance);
+    
+//                     // insert xseance in local database
+    
+//                     $id_admission = $inscription->getAdmission()->getCode();
+//                     $id_seance = $emptime->getId();
+//                     $nom = addslashes($inscription->getAdmission()->getPreinscription()->getEtudiant()->getNom());
+//                     $prenom = addslashes($inscription->getAdmission()->getPreinscription()->getEtudiant()->getPrenom());
+//                     $date = $checkinout != null ? $checkinout[0]["checktime"] : $emptime->getStart()->format('Y-m-d');
+//                     $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
+//                     $categorie = $cat;
+    
+//                     $requete = "INSERT INTO `xseance_absences`(`id_admission`, `id_séance`, `nom`, `prénom`, `date_pointage`, `heure_pointage`, `categorie`) VALUES ('$id_admission','$id_seance','$nom','$prenom','$date','$pointage','$categorie')";
+    
+//                     // dd($requete);
+//                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//                     $newstmt = $stmt->executeQuery();
+    
+//                 }else {
+//                     $xAbseanceExist->setDatePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : $emptime->getStart());
+//                     $xAbseanceExist->setHeurePointage($checkinout != null ? (new \DateTime($checkinout[0]['checktime'])) : null);
+//                     $xAbseanceExist->setCategorie($cat);
+    
+//                     // update in local
+    
+//                     $id_admission = $inscription->getAdmission()->getCode();
+//                     $id_seance = $emptime->getId();
+//                     $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
+//                     $categorie = $cat;
+    
+//                     $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie' WHERE `id_séance` = '$id_seance' AND `id_admission` = '$id_admission'";
+    
+//                     // dd($requete);
+//                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//                     $newstmt = $stmt->executeQuery(); 
+//                 }
+//             }
+            
+//             $counter++;
+//             switch ($cat) {
+//                 case 'A':
+//                     $abcd['A']++;
+//                     break;
+//                 case 'B':
+//                     $abcd['B']++;
+//                     break;
+//                 case 'C':
+//                     $abcd['C']++;
+//                     break;
+//                 case 'D':
+//                     $abcd['D']++;
+//                     break;
+//             }
+//         }
+//         $this->em->flush();
+
+// //conflis fixed like this 👇 
+// //         $Xseance = new Xseance();
+// //         $Xseance->setTypeséance($emptime->getProgrammation()->getNatureEpreuve()->getCode());
+// //         $Xseance->setIDEtablissement($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode());
+// //         $Xseance->setIDFormation($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode());
+// //         $Xseance->setIDPromotion($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode());
+// //         $Xseance->setIDAnnée($emptime->getProgrammation()->getAnnee()->getCode());
+// //         $Xseance->setAnnéeLib($emptime->getProgrammation()->getAnnee()->getDesignation());
+// //         $Xseance->setIDSemestre($emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode());
+// //         $Xseance->setGroupe($emptime->getGroupe()->getNiveau());
+// //         $Xseance->setIDModule($emptime->getProgrammation()->getElement()->getModule()->getCode());
+// //         $Xseance->setIDElement($emptime->getProgrammation()->getElement()->getId());
+// //         $Xseance->setIDEnseignant($emptime->getemptimetimens()[0]->getEnseignant()->getCode());
+// //         $Xseance->setIDSalle(strtoupper($emptime->getSalle()->getCode()));
+// //         $Xseance->setDateSéance($emptime->getStart()->format("Y-m-d"));
+// //         $Xseance->setSemaine($emptime->getSemaine()->getId());
+// //         $Xseance->setHeureDebut($emptime->getHeurDb()->format("H:i"));
+// //         $Xseance->setHeureFin($emptime->getHeurFin()->format("H:i"));
+// //         $Xseance->setDateSys(new \DateTime());
+// //         $Xseance->setIDSéance($emptime->getId());
+// //         $Xseance->setStatut(1);
+
+// //         $this->em->persist($Xseance);
+// //         $this->em->flush();
+
+//         // insert into xseance
+//         $IDSéance = $emptime->getId();
+//         $Typeséance=$emptime->getProgrammation()->getNatureEpreuve()->getCode();
+//         $IDEtablissement=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode();
+//         $IDFormation=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode();
+//         $IDPromotion=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode();
+//         $IDAnnée=$emptime->getProgrammation()->getAnnee()->getCode();     
+//         $AnnéeLib=$emptime->getProgrammation()->getAnnee()->getDesignation();
+//         $IDSemestre=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode();
+//         $EmpGroupe=$emptime->getGroupe()->getNiveau();
+//         $IDModule=$emptime->getProgrammation()->getElement()->getModule()->getCode();
+//         $IDElement=$emptime->getProgrammation()->getElement()->getId();
+//         $IDEnseignant=$emptime->getemptimens()[0]->getEnseignant()->getCode();
+//         $IDSalle=strtoupper($emptime->getSalle()->getCode());
+//         // $Xseance->setStatut(1);
+//         $DateSéance=$emptime->getStart()->format("Y-m-d");
+//         $EmpSemaine=$emptime->getSemaine()->getId();
+//         $HeureDebut=$emptime->getHeurDb()->format("H:i");
+//         $HeureFin=$emptime->getHeurFin()->format("H:i");
+//         $DateSys=(new \DateTime())->format("Y-m-d");
+
+//         $requete = "INSERT INTO `xseance`(`id_séance`, `typeséance`, `id_etablissement`, `id_formation`, `id_promotion`, `id_année`, `année_lib`, `id_semestre`, `groupe`, `id_module`, `id_element`, `id_enseignant`, `id_salle`, `date_séance`, `semaine`, `heure_debut`, `heure_fin`, `date_sys`, `statut`) VALUES ('$IDSéance','$Typeséance','$IDEtablissement','$IDFormation','$IDPromotion','$IDAnnée','$AnnéeLib','$IDSemestre','$EmpGroupe','$IDModule','$IDElement','$IDEnseignant','$IDSalle','$DateSéance','$EmpSemaine','$HeureDebut','$HeureFin','$DateSys','1')";
+
+
+//         // // insert into xseance
+   
+
+//         // $requete = "INSERT INTO `xseance`(`id_séance`, `typeséance`, `id_etablissement`, `id_formation`, `id_promotion`, `id_année`, `année_lib`, `id_semestre`, `groupe`, `id_module`, `id_element`, `id_enseignant`, `id_salle`, `date_séance`, `semaine`, `heure_debut`, `heure_fin`, `date_sys`, `statut`) VALUES ('$IDSéance','$Typeséance','$IDEtablissement','$IDFormation','$IDPromotion','$IDAnnée','$AnnéeLib','$IDSemestre','$EmpGroupe','$IDModule','$IDElement','$IDEnseignant','$IDSalle','$DateSéance','$EmpSemaine','$HeureDebut','$HeureFin','$DateSys','1')";
+
+//         // // dd($requete);
+//         // $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+//         // $newstmt = $stmt->executeQuery();
+
+//         return new JsonResponse(['data'=>$abcd,'message'=>$counter .' Done from '. count($inscriptions),200]);
+//         // return new JsonResponse($counter .' Done from '. count($inscriptions),200);,200);
+//     }
 
     #[Route('/reinitialiser/{seance}', name: 'reinitialiser_seance')]
     public function reinitialiser(Request $request, $seance)

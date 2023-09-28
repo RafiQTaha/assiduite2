@@ -53,6 +53,9 @@ doctrine:
       assiduite:
         # configure these for your database server
         url: "%env(resolve:DATABASE_URL_ASSIDUITE)%"
+      pointage:
+        # configure these for your database server
+        url: "%env(resolve:DATABASE_URL_POINTAGE)%"
 
   orm:
     default_entity_manager: default
@@ -69,3 +72,5 @@ doctrine:
             alias: App
       assiduite:
         connection: assiduite
+      pointage:
+        connection: pointage
