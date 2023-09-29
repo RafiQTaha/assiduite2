@@ -779,6 +779,7 @@ $('#edit_etudiant').on('submit', async function(e){
 
 $('body #parlot_traiter').on('click', async function(e){
   e.preventDefault();
+  var date = $("body #day").val();
   
   if(seances.length === 0) {
     Toast.fire({
@@ -788,18 +789,29 @@ $('body #parlot_traiter').on('click', async function(e){
     return;
   }
   const icon = $("#parlot_traiter i");
-  icon.removeClass('fab fa-clock').addClass("fa fa-spinner fa-spin");
+  icon.removeClass('fa-clock').addClass("fa-spinner fa-spin");
   let formData = new FormData();
   formData.append('seances', JSON.stringify(seances))
   try {
-      const request = await axios.post('/assiduite/traitement/parlot_traitement',formData);
+      const request = await axios.post('/assiduite/traitement/parlot_traitement/'+date,formData);
       const response = request.data;
+      errors = response.errors
+
+      // !!! dont work
+      $.each(errors, function (index, errorMessage) {
+        // console.log(errorMessage);
+        Toast.fire({
+          icon: 'error',
+          title: "test",
+        }) 
+      });
+      
       icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
       $("#etudiant_details").modal("hide")
       $("body #etudiant_datatable").ajax.reload(null, false)
   } catch (error) {
       console.log(error)
-      const message = error.response.data;
+      const message = error.response;
       Toast.fire({
           icon: 'error',
           title: message,
