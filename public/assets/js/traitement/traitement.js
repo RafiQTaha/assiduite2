@@ -238,7 +238,7 @@ $(document).ready(function () {
     const icon = $("#modifiersalle i");
 
     try {
-        icon.remove('fa-edit').addClass("fa-spinner fa-spin ");
+        icon.removeClass('fa-edit').addClass("fa-spinner fa-spin ");
         const request = await axios.get('/assiduite/traitement/modifiersalle/'+id_seance+'/'+salle);
         const response = request.data;
         console.log(response);
@@ -274,7 +274,7 @@ $(document).ready(function () {
     // if(res == 1){
     try {
       $("body .small-box").removeClass("active");
-      icon.remove("fa-edit").addClass("fa-spinner fa-spin ");
+      icon.removeClass("fa-edit").addClass("fa-spinner fa-spin ");
       const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
       const response = request.data;
       table.ajax.reload();
@@ -291,12 +291,12 @@ $(document).ready(function () {
       $("body .d").find(".number").text(response.data["D"]);
       $("body .small-box").addClass("active");
     } catch (error) {
-      console.log(error, error.response);
-      const message = error.response.data;
+      console.log(error, error.response.data);
+      const message = error.response.data.error;
       Toast.fire({
-        icon: "error",
-        title: message,
-      });
+          icon: 'error',
+          title: message,
+      }) 
       icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
     }
     // }
@@ -316,7 +316,7 @@ $(document).ready(function () {
     if(res == 1){
       try {
         $("body .small-box").removeClass("active");
-        icon.remove("fa-edit").addClass("fa-spinner fa-spin ");
+        icon.removeClass("fa-edit").addClass("fa-spinner fa-spin ");
         const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
         const response = request.data;
         table.ajax.reload();
@@ -371,7 +371,7 @@ $(document).ready(function () {
     const icon = $("#parlot_search i");
 
     try {
-        icon.remove('fa-search').addClass("fa-spinner fa-spin ");
+        icon.removeClass('fa-search').addClass("fa-spinner fa-spin ");
         const request = await axios.get('/assiduite/traitement/parlot/'+hd+"/"+hf+"/"+date);
         const response = request.data;
 
@@ -473,7 +473,7 @@ $(document).ready(function () {
       const icon = $("#reinitialiser i");
 
       try {
-          icon.remove('fa-minus').addClass("fa-spinner fa-spin ");
+          icon.removeClass('fa-minus').addClass("fa-spinner fa-spin ");
           const request = await axios.get('/assiduite/traitement/reinitialiser/'+id_seance);
           const response = request.data;
           console.log(response);
@@ -507,7 +507,7 @@ $(document).ready(function () {
     const icon = $("#signer i");
   
     try {
-        icon.remove('fa-signature').addClass("fa-spinner fa-spin ");
+        icon.removeClass('fa-signature').addClass("fa-spinner fa-spin ");
         const request = await axios.get('/assiduite/traitement/signer/'+id_seance);
         const response = request.data;
         console.log(response);
@@ -540,7 +540,7 @@ $(document).ready(function () {
     const icon = $("#existe i");
   
     try {
-        icon.remove('fa-thumbtack').addClass("fa-spinner fa-spin ");
+        icon.removeClass('fa-thumbtack').addClass("fa-spinner fa-spin ");
         const request = await axios.get('/assiduite/traitement/existe/'+id_seance);
         const response = request.data;
         console.log(response);
@@ -575,7 +575,7 @@ $(document).ready(function () {
       const icon = $("#verouiller i");
   
       try {
-          icon.remove('fa-lock').addClass("fa-spinner fa-spin ");
+          icon.removeClass('fa-lock').addClass("fa-spinner fa-spin ");
           const request = await axios.get('/assiduite/traitement/verouiller/'+id_seance);
           const response = request.data;
           console.log(response);
@@ -607,10 +607,10 @@ $(document).ready(function () {
     }
     var confirmation = confirm("Voulez-vous vraiment annuler cette seance!");
     if (confirmation) {
-      const icon = $("#existe i");
+      const icon = $("#annuler i");
   
       try {
-          icon.remove('fa-window-close').addClass("fa-spinner fa-spin ");
+          icon.removeClass('fa-window-close').addClass("fa-spinner fa-spin ");
           const request = await axios.get('/assiduite/traitement/annuler/'+id_seance);
           const response = request.data;
           console.log(response);
@@ -673,7 +673,7 @@ $(document).ready(function () {
     const icon = $("#z i");
 
     try {
-        icon.remove('fa-edit').addClass("fa-spinner fa-spin ");
+        icon.removeClass('fa-edit').addClass("fa-spinner fa-spin ");
         const request = await axios.get('/assiduite/traitement/z/'+id_seance);
         const response = request.data;
         console.log(response);
@@ -705,7 +705,7 @@ $(document).ready(function () {
     const icon = $("#s i");
 
     try {
-        icon.remove('fa-edit').addClass("fa-spinner fa-spin ");
+        icon.removeClass('fa-edit').addClass("fa-spinner fa-spin ");
         const request = await axios.get('/assiduite/traitement/s/'+id_seance);
         const response = request.data;
         console.log(response);
