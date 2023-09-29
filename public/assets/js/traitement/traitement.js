@@ -347,10 +347,12 @@ $(document).ready(function () {
   
   $("body #parlot_search").on("click", async function (e) {
     e.preventDefault()
+    seances = [];
     var hd = $("body #hd").val();
     var hf = $("body #hf").val();
     var date = $("body #day").val();
-    // var date = $("body #datetime").val();
+    var etablissement = $("body #etablissement").val();
+    var formation = $("body #formation").val();
     // console.log(hd, hf);
 
     if (!hd) {
@@ -367,12 +369,26 @@ $(document).ready(function () {
         });
       return;
     }
+    if (!etablissement) {
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez remplir la etablissement !',
+        });
+      return;
+    }
+    if (!formation) {
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez remplir la formation !',
+        });
+      return;
+    }
 
     const icon = $("#parlot_search i");
 
     try {
         icon.removeClass('fa-search').addClass("fa-spinner fa-spin ");
-        const request = await axios.get('/assiduite/traitement/parlot/'+hd+"/"+hf+"/"+date);
+        const request = await axios.get('/assiduite/traitement/parlot/'+hd+"/"+hf+"/"+etablissement+"/"+formation+"/"+date);
         const response = request.data;
 
         $('body #parlot_datatable').html(response.html);
@@ -473,6 +489,7 @@ $(document).ready(function () {
       const icon = $("#reinitialiser i");
 
       try {
+          $("body .small-box").removeClass("active");
           icon.removeClass('fa-minus').addClass("fa-spinner fa-spin ");
           const request = await axios.get('/assiduite/traitement/reinitialiser/'+id_seance);
           const response = request.data;

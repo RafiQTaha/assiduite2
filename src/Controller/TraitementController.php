@@ -423,7 +423,7 @@ class TraitementController extends AbstractController
                 $cat = 'P';
             }
             // dd('hi');
-            $requete = "SELECT * FROM `xseance_absences` where id_admission = '$id_admission' and id_séance = '$id_seance' and active = 1 LIMIT 1";
+            $requete = "SELECT * FROM `xseance_absences` where id_admission = '$id_admission' and id_séance = '$id_seance' LIMIT 1";
             // dd($requete);
             
             $stmt = $this->emAssiduite->getConnection()->prepare($requete);
@@ -1094,10 +1094,10 @@ class TraitementController extends AbstractController
         return new JsonResponse("Bien Modifier",200);
     }
 
-    #[Route('/parlot/{hd}/{hf}/{day}', name: 'affichage_parlot')]
-    public function affichage_parlot(Request $request,$hd,$hf,$day)
+    #[Route('/parlot/{hd}/{hf}/{etablissement}/{formation}/{day}', name: 'affichage_parlot')]
+    public function affichage_parlot(Request $request,$hd,$hf,$day, $etablissement, $formation)
     {
-        // dd($day);
+        // dd($etbalissement,$formation);
         $todayDate = new \DateTime($day);
         $todayDate = $todayDate->format('Y-m-d');
         $todayDate = $todayDate . '%';
@@ -1119,7 +1119,7 @@ class TraitementController extends AbstractController
 
         left join xseance xs on xs.id_séance = emp.id 
 
-        WHERE emp.heur_db >= '$hd' and emp.heur_fin <= '$hf' and emp.start like '$todayDate' and (xs.statut not in (1,2) or xs.statut is null) group by emp.id";
+        WHERE etab.id = '$etablissement' and form.id = '$formation' and emp.heur_db >= '$hd' and emp.heur_fin <= '$hf' and emp.start like '$todayDate' and (xs.statut not in (1,2) or xs.statut is null) group by emp.id";
         $stmt = $this->em->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $emptimes = $newstmt->fetchAll();
@@ -1144,7 +1144,7 @@ class TraitementController extends AbstractController
         $html1 = $this->renderView('traitement/pages/infos_seance.html.twig', ['emptime' => $emptime]);
         
         $etudiants = [];
-        if(!$Xseance){
+        if(!$Xseance or $Xseance->getStatut() == 0 ){
             $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoNoGroup($promotion,$annee);
             array_push($etudiants, $inscriptions);
             // dd($inscriptions);
@@ -1187,6 +1187,16 @@ class TraitementController extends AbstractController
         @readfile($file);
         return new JsonResponse('pdf not found ');
     }
+
+    // #[Route('/pointage/{seance}', name: 'pointage_seance')]
+    // public function pointage(Request $request, $seance)
+    // {
+    //     $requete = "SELECT  FROM `checkinout` inner join userinfo u on u.use where date(checktime) = '$day'";
+
+    //     $stmt = $this->emPointage->getConnection()->prepare($requete);
+    //     $newstmt = $stmt->executeQuery();   
+    //     $pointages = $newstmt->fetchAll();
+    // }
 
     #[Route('/count/{seance}', name: 'count_seance')]
     public function count(Request $request, $seance)
