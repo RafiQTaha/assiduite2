@@ -1074,9 +1074,30 @@ class TraitementController extends AbstractController
         $todayDate = new \DateTime($day);
         $todayDate = $todayDate->format('Y-m-d');
         $todayDate = $todayDate . '%';
-        // dd($todayDate);
+        // dd($todayDate, $hd, $hf);
 
-        $emptimes = $this->em->getRepository(PlEmptime::class)->getEmptimeByHdHf($hd, $hf, $todayDate);
+        $requete = "SELECT emp.id as id_seance, emp.heur_db, emp.heur_fin, etab.abreviation as etbalissement, form.abreviation as formation, prm.designation as promotion, grp.niveau as groupe, sall.designation as salle, elm.designation as element, CONCAT(ens.nom,' ', ens.prenom) as enseignant from pl_emptime emp
+        left join psalles sall on sall.id = emp.xsalle_id
+        left join pgroupe grp on grp.id = emp.groupe_id
+        inner join pl_emptimens empens on empens.seance_id = emp.id
+        inner join penseignant ens on ens.id = empens.enseignant_id
+        inner join pr_programmation prg on prg.id = emp.programmation_id
+        inner join pnature_epreuve nat on nat.id = prg.nature_epreuve_id
+        inner join ac_element elm on elm.id = prg.element_id
+        inner join ac_module mdl on mdl.id = elm.module_id
+        inner join ac_semestre sem on sem.id = mdl.semestre_id
+        inner join ac_promotion prm on prm.id = sem.promotion_id
+        inner join ac_formation form on form.id = prm.formation_id
+        inner join ac_etablissement etab on etab.id = form.etablissement_id
+
+        left join xseance xs on xs.id_séance = emp.id 
+
+        WHERE emp.heur_db = '$hd' and emp.heur_fin <= '$hf' and emp.start like '$todayDate'  group by emp.id";
+        $stmt = $this->em->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery();   
+        $emptimes = $newstmt->fetchAll();
+        // dd($emptimes);
+        // $emptimes = $this->em->getRepository(PlEmptime::class)->getEmptimeByHdHfnonTraiter($hd, $hf, $todayDate);
 
         $html = $this->renderView('traitement/tables/parlot-table.html.twig', ['emptimes' => $emptimes]);
 
@@ -1479,6 +1500,91 @@ class TraitementController extends AbstractController
         return new JsonResponse('Bien enregistre',200);
 
         
+    }
+
+    #[Route('/synthese/{datetoday}', name: 'synthese')]
+    public function synthese($datetoday)
+    {
+        dd($datetoday);
+
+    $TodayDate= new \DateTime();
+    $date= date_format($TodayDate, 'Y-m-d');
+    setlocale(LC_TIME, "fr_FR", "French");
+    $date2 = strftime("%A %d %B %G", strtotime($date)); 
+    //seance+date+prof
+    $requete_promo_count = "SELECT COUNT(x_inscription_grp.code_admission) AS etud,x_inscription_grp.promotion_code 
+                            FROM x_inscription_grp GROUP BY promotion_code";
+    $count_global =  ApiController::execute($requete_promo_count,$this->em);
+
+    $requete_promo_daily = "SELECT COUNT(xseance_absences.ID_Admission) as etud,xseance.ID_Promotion as promotion_code FROM xseance_absences 
+                            INNER JOIN xseance ON xseance.ID_Séance=xseance_absences.ID_Séance 
+                            WHERE  xseance.Date_Séance='$datetoday' GROUP by xseance.ID_Promotion
+    ";
+    $count_global_jr =  ApiController::execute($requete_promo_daily,$this->em);
+
+    $requete_promo_abs = "SELECT COUNT(xseance.ID_Séance) as etud,xseance.ID_Promotion as promotion_code FROM xseance 
+                            INNER JOIN xseance_absences ON xseance.ID_Séance=xseance_absences.ID_Séance
+                            WHERE xseance.Date_Séance='$datetoday' AND (xseance_absences.Categorie='D' OR xseance_absences.Categorie='C'
+                            OR xseance_absences.Categorie_Enseig='AD' OR xseance_absences.Categorie_Enseig='BD') GROUP BY xseance.ID_Promotion";
+    $count_global_abs =  ApiController::execute($requete_promo_abs,$this->em);
+
+    $date1 = date('Y-m-d'); // Date du jour
+    setlocale(LC_TIME, "fr_FR", "French");
+    $date2 = strftime("%A %d %B %G", strtotime($date1)); 
+    $date3 = strftime("%A %d %B %G", strtotime($date)); 
+
+    
+        $html = $this->render('assiduite/pdf/synthese.html.twig' , [
+        
+            "count_global" => $count_global,
+            "count_global_jr" => $count_global_jr,
+            "count_global_abs" => $count_global_abs,
+            "date" =>$date2,
+            "dat" =>$date3,
+            "date_today" =>$TodayDate,
+
+        ])->getContent();
+
+        
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'margin_top' => 45,
+        ]);            
+        $mpdf->SetTitle('Feuil');
+        $mpdf->SetHTMLHeader(
+            $this->render("assiduite/pdf/header_synthese.html.twig"
+            , [
+            
+            "date_today" =>$TodayDate,
+            
+                
+            ])->getContent()
+        );
+        $mpdf->SetHTMLFooter(
+            $this->render("assiduite/pdf/footer_synthese.html.twig"
+            , [
+                "date" =>$date2,
+                "dat" =>$date3,
+                "date_today" =>$TodayDate,
+                
+            ])->getContent()
+        );
+        $mpdf->SetJS('this.print();');
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('fueil' , 'I');
+
+
+
+
+
+    }
+
+    #[Route('/parlot_traitement', name: 'parlot_traitement')]
+    public function parlot_traitement(Request $request) {
+        // dd($request);
+        $seances = array_unique(json_decode($request->get("seances")));
+        // dd($seances);
+        return new JsonResponse("");
     }
 
 

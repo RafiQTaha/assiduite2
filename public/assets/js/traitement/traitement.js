@@ -10,6 +10,8 @@ const Toast = Swal.mixin({
   },
 });
 
+let seances = [];
+
 $(document).ready(function () {
   let id_seance;
   var table = $("#datatables_gestion_seances").DataTable({
@@ -382,7 +384,7 @@ $(document).ready(function () {
         $("body #parlot_datatable").DataTable({
           language: {
             url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
-          },
+          }
         });
 
 
@@ -398,37 +400,63 @@ $(document).ready(function () {
         icon.addClass('fa-edit').removeClass("fa-spinner fa-spin ");
     }
   });
-  // var seances = [];
-  // $("#check").on("click", async function (e) {
+
+  // $("body .check_seance").on("change", async function (e) {
   //   e.preventDefault();
-    
-  //   $("#parlot_datatable input[type='checkbox']").each(function () {
-  //     if ($(this).is(":checked")) {
-  //       seances.push($(this).attr("id"));
-  //     }else {
-  //       $(this).prop("checked", true);
-  //       seances.push($(this).attr("id"));
-  //     }
-  //   });
+  //   alert("hi");
+  //   if ($(this).prop("checked") == true) {
+  //       seances.push(this.value);
+  //   } else {
+  //       const index = seances.indexOf(input.attr("id"));
+  //       if (index !== -1) {
+  //         seances.splice(index, 1);
+  //       }
+  //   }
   //   console.log(seances);
   // });
 
   // !!!!!!! heree
-  seances = [];
-  $("body").on("click", "#check", function () {
-    // alert('test')
-    const se = $("body .check_seance");
-    if ($("#check").prop("checked") == true) {
-        se.prop("checked", true);
-        se.map(function () {
-          seances.push(this.value);
-        });
-        $("#check").prop("checked", false);
-        // console.log(admissions);
-    } else {
-        se.prop("checked", false);
-        seances = [];
+
+  $("body").on("click", "#parlot_datatable tbody tr", async function () {
+    const se = $(this).find('.check_seance');
+    if ($(this).hasClass("active_databales")) {
+      $(this).removeClass("active_databales");
+      se.prop("checked", false);
+      const index = seances.indexOf(se.attr("id"));
+      if (index !== -1) {
+        seances.splice(index, 1);
+      }
+    }else {
+      $(this).addClass("active_databales");
+      se.prop("checked", true);
+      seances.push(se.val());
     }
+    console.log(seances);
+  });
+  
+  $("body").on("click", "#check", function () {
+    const se = $(".check_seance");
+    
+    if (seances.length === 0) {
+        $("#parlot_datatable tbody tr").addClass("active_databales");
+        se.prop("checked", true);
+        se.each(function () {
+            seances.push($(this).val());
+        });
+    }
+    
+    console.log(seances);
+  });
+
+  $("body").on("click", "#uncheck", function () {
+    const se = $(".check_seance");
+    
+    if (seances.length !== 0) {
+      $("#parlot_datatable tbody tr").removeClass("active_databales");
+      se.prop("checked", false);
+      seances = [];
+    }
+    
     console.log(seances);
   });
 
@@ -709,7 +737,20 @@ $(document).ready(function () {
         return;
     }
     window.open('/assiduite/traitement/planing/'+today, '_blank');
-})
+  })
+
+  $('body').on('click', '#synthese', function(e){
+    e.preventDefault();
+    var today = $("body #day").val();
+    if(!today) {
+        Toast.fire({
+            icon: 'error',
+            title: 'Veuillez selection une date!',
+        })
+        return;
+    }
+    window.open('/assiduite/traitement/synthese/'+today, '_blank');
+  })
 
 $('#edit_etudiant').on('submit', async function(e){
   e.preventDefault();
@@ -731,6 +772,39 @@ $('#edit_etudiant').on('submit', async function(e){
           title: message,
       }) 
       icon.addClass('fa-check').removeClass("fa-spinner fa-spin ");
+
+  }
+})
+
+
+$('body #parlot_traiter').on('click', async function(e){
+  e.preventDefault();
+  
+  if(seances.length === 0) {
+    Toast.fire({
+        icon: 'error',
+        title: 'Veuillez cochez une ou plusieurs ligne!',
+    })
+    return;
+  }
+  const icon = $("#parlot_traiter i");
+  icon.removeClass('fab fa-clock').addClass("fa fa-spinner fa-spin");
+  let formData = new FormData();
+  formData.append('seances', JSON.stringify(seances))
+  try {
+      const request = await axios.post('/assiduite/traitement/parlot_traitement',formData);
+      const response = request.data;
+      icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
+      $("#etudiant_details").modal("hide")
+      $("body #etudiant_datatable").ajax.reload(null, false)
+  } catch (error) {
+      console.log(error)
+      const message = error.response.data;
+      Toast.fire({
+          icon: 'error',
+          title: message,
+      }) 
+      icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
 
   }
 })
