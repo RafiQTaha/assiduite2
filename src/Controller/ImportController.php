@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 // require '../zklibrary.php';
+#[Route('/Import')]
 class ImportController extends AbstractController
 {
     private $em;
