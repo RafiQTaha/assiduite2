@@ -34,14 +34,14 @@
         
     {% else %}
         {% for etu in etudiants %}
-            <tr admission={{etu.IDAdmission}}>
-                <td>{{etu.IDAdmission}}</td>
-                <td>{{etu.Nom}} {{etu.Prénom}}</td>
-                <td>{{etu.DatePointage | date('H:i:s')}}</td>
-                <td>{{etu.Categorie}}</td>                         
-                <td>{{etu.CategorieEnseig}}</td>                         
-                <td>{{etu.Categoriesi}}</td>                         
-                <td>{{etu.Categorief}}</td>                         
+            <tr admission={{etu["id_admission"]}}>
+                <td>{{etu["id_admission"]}}</td>
+                <td>{{etu["nom"]}} {{etu["prénom"]}}</td>
+                <td>{{etu["heure_pointage"] | date('H:i:s')}}</td>
+                <td>{{etu["categorie"]}}</td>                         
+                <td>{{etu["categorie_enseig"]}}</td>                         
+                <td>{{etu["categorie_si"]}}</td>                         
+                <td>{{etu["categorie_f"]}}</td>                         
             </tr>
         {% endfor %}
     {% endif %}

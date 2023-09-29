@@ -4,19 +4,19 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label>Séance  :</label>
-                    <input type="text" class="form-control" name="seance" id="seance" readonly value="{{xabs.IDSéance}}" />
+                    <input type="text" class="form-control" name="seance" id="seance" readonly value="{{xabs["id_séance"]}}" />
                 </div>
             </div> 
             <div class="col-md-4">
                 <div class="form-group">
                     <label>Admission  :</label>
-                    <input type="text" class="form-control" name="admission" id="admission" readonly value="{{xabs.IDAdmission}}" />
+                    <input type="text" class="form-control" name="admission" id="admission" readonly value="{{xabs["id_admission"]}}" />
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-group">
                     <label>Nom et prénom  :</label>
-                    <input type="text" class="form-control" name="name" id="name" readonly value="{{xabs.nom}} {{xabs.prénom}}" />
+                    <input type="text" class="form-control" name="name" id="name" readonly value="{{xabs["nom"]}} {{xabs["prénom"]}} " />
                 </div>
             </div>
         </div>
@@ -24,7 +24,7 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label>Catégorie :</label>
-                    <input type="text" class="form-control" name="categorie" id="categorie" readonly value="{% if xabs.getCategorieSi %} {{ xabs0getCategorieSi }} {% else %} {{xabs.getCategorie}} {% endif %}" />
+                    <input type="text" class="form-control" name="categorie" id="categorie" readonly value="{{ xabs["categorie_f"] }}" />
                 </div>
             </div> 
             <div class="col-md-4">
@@ -32,18 +32,18 @@
                     <label>Catégorie enseignant  :</label>
                     <select class="form-control " style="width: 100%" name="cat_Ens" id='cat_Ens'>
                         <option value="" selected>Choix de categorie</option>
-                        <option value="PEE">PEE</option>
-                        <option value="AD">AD</option>
-                        <option value="BD">BD</option>
-                        <option value="S">S</option>
-                        <option value="Z">Z</option>
+                        <option value="PEE" {% if xabs["categorie_enseig"] == 'PEE' %}selected{% endif %}>PEE</option>
+                        <option value="AD" {% if xabs["categorie_enseig"] == 'AD' %}selected{% endif %}>AD</option>
+                        <option value="BD" {% if xabs["categorie_enseig"] == 'BD' %}selected{% endif %}>BD</option>
+                        <option value="S" {% if xabs["categorie_enseig"] == 'v' %}selected{% endif %}>S</option>
+                        <option value="Z" {% if xabs["categorie_enseig"] == 'Z' %}selected{% endif %}>Z</option>
                     </select>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-group">
                     <label>Heur pointage  :</label>
-                    <input type="text" class="form-control" name="categorie" id="categorie" readonly value="{{ xabs.HeurePointage | date('H:i') }}" />
+                    <input type="text" class="form-control" name="categorie" id="categorie" readonly value="{{ xabs["heure_pointage"] | date('H:i') }}" />
                 </div>
             </div>
         </div>
