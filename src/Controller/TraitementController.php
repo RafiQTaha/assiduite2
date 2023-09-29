@@ -297,7 +297,7 @@ class TraitementController extends AbstractController
         $ID_etablissement = $annee->getFormation()->getEtablissement()->getId();
         // $A = $ID_etablissement == 28 ? 20 : 15;
         if ($ID_etablissement == 28) {
-            $A = 20;
+            $A = 21;
             if ($emptime->getStart()->format('H:i') == '08:00') {
                 $AA = -30;
             }else {
@@ -305,7 +305,7 @@ class TraitementController extends AbstractController
             }
             $B = $A;
         }else{
-            $A = 15;
+            $A = 16;
             $AA = -15;
             $B = $A + 15;
         }
@@ -397,11 +397,11 @@ class TraitementController extends AbstractController
                             $cat = "D";
                         }
                     }elseif ($emptime->getStart() < $checktime_) {
-                        if ($interval <= $A) {
+                        if ($interval < $A) {
                             $cat = "A";
-                        }elseif ($interval <= $B) {
+                        }elseif ($interval < $B) {
                             $cat = "B";
-                        }elseif($interval <= $C) {
+                        }elseif($interval < $C) {
                             $cat = "C";
                         }else {
                             $cat = "D";
@@ -421,18 +421,20 @@ class TraitementController extends AbstractController
             // dd($xAbseanceExist[0]['id']);
             //!!!! + 1400
             
-            
+            // if ($id_admission == "ADM-FMA_MG00003760") {
+            //     dd($xAbseanceExist,$cat,$type);
+            // } 
             if($type == 2){ //!!retraitement
 
                 
                 $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
                 $categorie = $cat;
 
-                $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie' WHERE `id` = ".$xAbseanceExist[0]['id'].";";
+                $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie',`categorie_f`='$categorie' WHERE `id` = ".$xAbseanceExist[0]['id'].";";
                 // $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie' WHERE `id_séance` = '$id_seance' AND `id_admission` = '$id_admission';";
 
-                // $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-                // $newstmt = $stmt->executeQuery(); 
+                $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+                $newstmt = $stmt->executeQuery(); 
 
                 // $update .= $requete;
 
@@ -444,7 +446,7 @@ class TraitementController extends AbstractController
                     $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
                     $categorie = $cat;
     
-                    $requete = "INSERT INTO `xseance_absences`(`id_admission`, `id_séance`, `nom`, `prénom`, `date_pointage`, `heure_pointage`, `categorie`, `active`) VALUES ('$id_admission','$id_seance','$nom','$prenom','$date','$pointage','$categorie',1)";
+                    $requete = "INSERT INTO `xseance_absences`(`id_admission`, `id_séance`, `nom`, `prénom`, `date_pointage`, `heure_pointage`, `categorie`, `active`,`categorie_f`) VALUES ('$id_admission','$id_seance','$nom','$prenom','$date','$pointage','$categorie',1,'$categorie')";
                     // $requete = "('$id_admission','$id_seance','$nom','$prenom','$date','$pointage','$categorie'),";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
@@ -457,12 +459,15 @@ class TraitementController extends AbstractController
                     $pointage = $checkinout != null ? (new \DateTime($checkinout[0]['checktime']))->format("H:i:s") : null;
                     $categorie = $cat;
     
-                    $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie',`active`=1 WHERE `id` = ".$xAbseanceExist[0]['id'].";";
+                    $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie`='$categorie',`categorie_f`='$categorie',`active`=1 WHERE `id` = ".$xAbseanceExist[0]['id'].";";
                     // dd($requete);
                     // $requete = "UPDATE `xseance_absences` SET `heure_pointage`='$pointage',`categorie_si`='$categorie' WHERE `id_séance` = '$id_seance' AND `id_admission` = '$id_admission';";
 
+                    // if ($id_admission == "ADM-FMA_MG00003760") {
+                    //     dd($xAbseanceExist,$cat,$requete);
+                    // } 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-                    $newstmt = $stmt->executeQuery(); 
+                    $newstmt = $stmt->executeQuery();
                     // dd("hi"); + 1200
                     // $update .= $requete;
                 }
@@ -564,7 +569,11 @@ class TraitementController extends AbstractController
         
         $abcd = ['A'=>0,'B'=>0,'C'=>0,'D'=>0];
         
-        $requete= "SELECT categories.categorie, IFNULL(t.count, 0) AS count FROM ( SELECT 'A' AS categorie UNION SELECT 'B' UNION SELECT 'C' UNION SELECT 'D' ) AS categories LEFT JOIN ( SELECT categorie, COUNT(*) AS count FROM xseance_absences WHERE id_séance = ".$emptime->getId()." and active =1 GROUP BY categorie ) AS t ON categories.categorie = t.categorie  order by categorie;";
+        // $requete= "SELECT categories.categorie, IFNULL(t.count, 0) AS count FROM ( SELECT 'A' AS categorie UNION SELECT 'B' UNION SELECT 'C' UNION SELECT 'D' ) AS categories LEFT JOIN ( SELECT categorie, COUNT(*) AS count FROM xseance_absences WHERE id_séance = ".$emptime->getId()." and active =1 GROUP BY categorie ) AS t ON categories.categorie = t.categorie  order by categorie;";
+        $requete= "SELECT categories.categorie, IFNULL(t.count, 0) AS count 
+        FROM ( SELECT 'A' AS categorie UNION SELECT 'B' UNION SELECT 'C' UNION SELECT 'D' ) AS categories 
+        LEFT JOIN ( SELECT categorie_f, COUNT(*) AS count FROM xseance_absences WHERE id_séance = ".$emptime->getId()."  and active =1 GROUP BY categorie_f ) AS t ON categories.categorie = t.categorie_f
+        order by categorie;";
         // dd($requete);
 
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
@@ -1160,7 +1169,11 @@ class TraitementController extends AbstractController
         // dd($seance);
         $abcd = ['A'=>0,'B'=>0,'C'=>0,'D'=>0];
         
-        $requete= "SELECT categories.categorie, IFNULL(t.count, 0) AS count FROM ( SELECT 'A' AS categorie UNION SELECT 'B' UNION SELECT 'C' UNION SELECT 'D' ) AS categories LEFT JOIN ( SELECT categorie, COUNT(*) AS count FROM xseance_absences WHERE id_séance = $seance  and active =1 GROUP BY categorie ) AS t ON categories.categorie = t.categorie  order by categorie;";
+        // $requete= "SELECT categories.categorie, IFNULL(t.count, 0) AS count FROM ( SELECT 'A' AS categorie UNION SELECT 'B' UNION SELECT 'C' UNION SELECT 'D' ) AS categories LEFT JOIN ( SELECT categorie, COUNT(*) AS count FROM xseance_absences WHERE id_séance = $seance  and active =1 GROUP BY categorie ) AS t ON categories.categorie = t.categorie  order by categorie;";
+        $requete= "SELECT categories.categorie, IFNULL(t.count, 0) AS count 
+        FROM ( SELECT 'A' AS categorie UNION SELECT 'B' UNION SELECT 'C' UNION SELECT 'D' ) AS categories 
+        LEFT JOIN ( SELECT categorie_f, COUNT(*) AS count FROM xseance_absences WHERE id_séance = $seance  and active =1 GROUP BY categorie_f ) AS t ON categories.categorie = t.categorie_f
+        order by categorie;";
         // dd($requete);
 
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
