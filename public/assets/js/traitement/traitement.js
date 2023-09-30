@@ -287,6 +287,7 @@ $(document).ready(function () {
     }
   
     const icon = $("#traiter i");
+    icon.removeClass("fa-clock").addClass("fa-spinner fa-spin");
   
     const import_statut = await checkImport();
   
@@ -296,11 +297,11 @@ $(document).ready(function () {
       if (res) {
         try {
           $("body .small-box").removeClass("active");
-          icon.removeClass("fa-edit").addClass("fa-spinner fa-spin");
+          
           const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
           const response = request.data;
           table.ajax.reload();
-          icon.addClass("fa-edit").removeClass("fa-spinner fa-spin");
+          icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
           Toast.fire({
             icon: "success",
             title: response.message,
@@ -318,8 +319,10 @@ $(document).ready(function () {
             icon: 'error',
             title: message,
           });
-          icon.addClass("fa-edit").removeClass("fa-spinner fa-spin");
+          icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
         }
+      }else{
+        icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
       }
     } else {
       try {
@@ -363,7 +366,7 @@ $(document).ready(function () {
     // alert(id_seance)
     var res = confirm('Vous voulez vraiment retraiter cette seance ?');
     if(res == 1){
-
+      icon.removeClass("fa-clock").addClass("fa-spinner fa-spin ");
       const import_statut = await checkImport();
   
       if (import_statut) {
@@ -372,12 +375,12 @@ $(document).ready(function () {
         if (res) {
           try {
             $("body .small-box").removeClass("active");
-            icon.removeClass("fa-edit").addClass("fa-spinner fa-spin ");
+            
             const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
             const response = request.data;
             table.ajax.reload();
           //   id_seance = false
-            icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+            icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
             Toast.fire({
               icon: "success",
               title: response.message,
@@ -395,8 +398,10 @@ $(document).ready(function () {
                 icon: 'error',
                 title: message,
             })
-            icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+            icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
           }
+        }else{
+          icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
         }
       } else {
         try {
@@ -896,33 +901,73 @@ $('body #parlot_traiter').on('click', async function(e){
   icon.removeClass('fa-clock').addClass("fa-spinner fa-spin");
   let formData = new FormData();
   formData.append('seances', JSON.stringify(seances))
-  try {
-      const request = await axios.post('/assiduite/traitement/parlot_traitement/'+date,formData);
-      const response = request.data;
-      errors = response.errors
 
-      // !!! dont work
-      $.each(errors, function (index, errorMessage) {
-        // console.log(errorMessage);
-        Toast.fire({
-          icon: 'error',
-          title: "test",
-        }) 
-      });
+  const import_statut = await checkImport();
+  
+    if (import_statut) {
+      const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
+  
+      if (res) {
+        try {
+          const request = await axios.post('/assiduite/traitement/parlot_traitement/'+date,formData);
+          const response = request.data;
+          errors = response.errors
+    
+          // !!! dont work
+          $.each(errors, function (index, errorMessage) {
+            // console.log(errorMessage);
+            Toast.fire({
+              icon: 'error',
+              title: "test",
+            }) 
+          });
+          
+          icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
+          $("#etudiant_details").modal("hide")
+          $("body #etudiant_datatable").ajax.reload(null, false)
+        } catch (error) {
+            console.log(error)
+            const message = error.response;
+            Toast.fire({
+                icon: 'error',
+                title: message,
+            }) 
+            icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
       
-      icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
-      $("#etudiant_details").modal("hide")
-      $("body #etudiant_datatable").ajax.reload(null, false)
-  } catch (error) {
-      console.log(error)
-      const message = error.response;
-      Toast.fire({
-          icon: 'error',
-          title: message,
-      }) 
-      icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
+        }
+      }else{
+        icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
+      }
+    } else {
+      try {
+        const request = await axios.post('/assiduite/traitement/parlot_traitement/'+date,formData);
+        const response = request.data;
+        errors = response.errors
+  
+        // !!! dont work
+        $.each(errors, function (index, errorMessage) {
+          // console.log(errorMessage);
+          Toast.fire({
+            icon: 'error',
+            title: "test",
+          }) 
+        });
+        
+        icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
+        $("#etudiant_details").modal("hide")
+        $("body #etudiant_datatable").ajax.reload(null, false)
+      } catch (error) {
+          console.log(error)
+          const message = error.response;
+          Toast.fire({
+              icon: 'error',
+              title: message,
+          }) 
+          icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
+    
+      }
+    }
 
-  }
 })
 
 });
