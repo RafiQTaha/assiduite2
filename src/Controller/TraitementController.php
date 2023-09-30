@@ -1484,6 +1484,7 @@ class TraitementController extends AbstractController
     #[Route('/check_import', name: 'check_import')]
     public function check_import(Request $request) {
 
+        // $requete = "SELECT sync FROM `psituation` WHERE `id` = 1 LIMIT 1;";
         $requete = "SELECT sync FROM `situation_sync` WHERE `id` = 1 LIMIT 1;";
 
         $stmt = $this->emPointage->getConnection()->prepare($requete);

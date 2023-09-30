@@ -336,73 +336,45 @@ $(document).ready(function () {
     }
     const icon = $("#retraiter i");
     // alert(id_seance)
+    
     var res = confirm('Vous voulez vraiment retraiter cette seance ?');
     if(res == 1){
       icon.removeClass("fa-clock").addClass("fa-spinner fa-spin ");
       const import_statut = await checkImport();
-  
+      console.log(import_statut)
       if (import_statut) {
-        const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
-    
-        if (res) {
-          try {
-            $("body .small-box").removeClass("active");
-            
-            const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
-            const response = request.data;
-            table.ajax.reload();
-          //   id_seance = false
-            icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
-            Toast.fire({
-              icon: "success",
-              title: response.message,
-            });
-            // console.log(response.data['A'])
-            $("body .a").find(".number").text(response.data["A"]);
-            $("body .b").find(".number").text(response.data["B"]);
-            $("body .c").find(".number").text(response.data["C"]);
-            $("body .d").find(".number").text(response.data["D"]);
-            $("body .small-box").addClass("active");
-          } catch (error) {
-            console.log(error, error.response);
-            const message = error.response.data.error;
-            Toast.fire({
-                icon: 'error',
-                title: message,
-            })
-            icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
+          const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
+          if (!res) {
+            return
           }
-        }else{
-          icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
-        }
-      } else {
-        try {
-          $("body .small-box").removeClass("active");
-          icon.removeClass("fa-edit").addClass("fa-spinner fa-spin ");
-          const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
-          const response = request.data;
-          table.ajax.reload();
-        //   id_seance = false
-          icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
-          Toast.fire({
-            icon: "success",
-            title: response.message,
-          });
-          // console.log(response.data['A'])
-          $("body .a").find(".number").text(response.data["A"]);
-          $("body .b").find(".number").text(response.data["B"]);
-          $("body .c").find(".number").text(response.data["C"]);
-          $("body .d").find(".number").text(response.data["D"]);
-          $("body .small-box").addClass("active");
-        } catch (error) {
-          console.log(error, error.response);
-          const message = error.response.data.error;
-          Toast.fire({
-              icon: 'error',
-              title: message,
-          })
-          icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
-        }
+      }
+
+      try {
+        $("body .small-box").removeClass("active");
+        
+        const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
+        const response = request.data;
+        table.ajax.reload();
+      //   id_seance = false
+        icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
+        Toast.fire({
+          icon: "success",
+          title: response.message,
+        });
+        // console.log(response.data['A'])
+        $("body .a").find(".number").text(response.data["A"]);
+        $("body .b").find(".number").text(response.data["B"]);
+        $("body .c").find(".number").text(response.data["C"]);
+        $("body .d").find(".number").text(response.data["D"]);
+        $("body .small-box").addClass("active");
+      } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+        })
+        icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
       }
 
     }
@@ -875,11 +847,14 @@ $('body #parlot_traiter').on('click', async function(e){
   formData.append('seances', JSON.stringify(seances))
 
   const import_statut = await checkImport();
-  
-    if (import_statut) {
+  console.log(import_statut)
+  if (import_statut) {
       const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
-  
-      if (res) {
+      if (!res) {
+        return
+      }
+  }
+
         try {
           const request = await axios.post('/assiduite/traitement/parlot_traitement/'+date,formData);
           const response = request.data;
@@ -907,38 +882,6 @@ $('body #parlot_traiter').on('click', async function(e){
             icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
       
         }
-      }else{
-        icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
-      }
-    } else {
-      try {
-        const request = await axios.post('/assiduite/traitement/parlot_traitement/'+date,formData);
-        const response = request.data;
-        errors = response.errors
-  
-        // !!! dont work
-        $.each(errors, function (index, errorMessage) {
-          // console.log(errorMessage);
-          Toast.fire({
-            icon: 'error',
-            title: "test",
-          }) 
-        });
-        
-        icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
-        $("#etudiant_details").modal("hide")
-        $("body #etudiant_datatable").ajax.reload(null, false)
-      } catch (error) {
-          console.log(error)
-          const message = error.response;
-          Toast.fire({
-              icon: 'error',
-              title: message,
-          }) 
-          icon.addClass('fa-clock').removeClass("fa-spinner fa-spin ");
-    
-      }
-    }
 
 })
 
