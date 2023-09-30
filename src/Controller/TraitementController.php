@@ -198,27 +198,41 @@ class TraitementController extends AbstractController
     public function traiter($emptime, $type)
     {
         $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance" => $emptime]);
-        if($type == 2){ //!!retraitement
-            if ($Xseance) {
-                if ($Xseance->getStatut() == "2") {
-                    return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
-                }
-                if ($Xseance->getStatut() != "1") {
-                    return new JsonResponse(['error' => 'La séance est pas encore traitée!'], 500);
-                }
+        if ($Xseance) {
+            if ($Xseance->getStatut() == "2") {
+                return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
             }
-        }else{
-            if ($Xseance) {
-                if ($Xseance->getStatut() == "1") {
-                    return new JsonResponse(['error' => 'La séance est déja traitée!'], 500);
-                }
-                if ($Xseance->getStatut() == "2") {
-                    return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
-                }
-            }else{
-                return new JsonResponse(['error' => 'no Xséance'], 500);
+            if ($Xseance->getStatut() == "1" and $type == 1) {
+                return new JsonResponse(['error' => 'La séance n\'est déja traitée!'], 500);
+            }
+            if ($Xseance->getStatut() == "0" and $type == 2) {
+                return new JsonResponse(['error' => 'La séance n\'est pas encore traitée!'], 500);
             }
         }
+        if (!$Xseance and $type == 2) {
+            return new JsonResponse(['error' => 'La séance n\'est pas encore traitée!'], 500);
+        }
+        // if($type == 2){ //!!retraitement
+        //     if ($Xseance) {
+        //         if ($Xseance->getStatut() == "2") {
+        //             return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
+        //         }
+        //         if ($Xseance->getStatut() != "1") {
+        //             return new JsonResponse(['error' => 'La séance est pas encore traitée!'], 500);
+        //         }
+        //     }
+        // }else{
+        //     if ($Xseance) {
+        //         if ($Xseance->getStatut() == "1") {
+        //             return new JsonResponse(['error' => 'La séance est déja traitée!'], 500);
+        //         }
+        //         if ($Xseance->getStatut() == "2") {
+        //             return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
+        //         }
+        //     }else{
+        //         return new JsonResponse(['error' => 'no Xséance'], 500);
+        //     }
+        // }
 
         $emptime = $this->em->getRepository(PlEmptime::class)->find($emptime);
         $id_seance = $emptime->getId();
@@ -236,6 +250,7 @@ class TraitementController extends AbstractController
         $sns ="";
         $dateSeance = $emptime->getStart()->format('Y-m-d');
         if (!$pointeuses) {
+            return new JsonResponse('Aucune Pointeuse n\'est trouvée!',500);
             dd($pointeuses);
         }
         // dd($pointeuses);
@@ -250,25 +265,37 @@ class TraitementController extends AbstractController
             // dd($pointages);
             if ($pointages) {
                 foreach ($pointages as $pointage) {
-                    // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['Badgenumber'=>$attendace['id']]);
+                    // dd($pointage);
+                    $requete = "SELECT * FROM `Userinfo` where Badgenumber = ".$pointage['userid']." LIMIT 1";
+
+                    $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+                    $newstmt = $stmt->executeQuery();   
+                    $uuserinfo = $newstmt->fetchAll();
 
                     $id_checkinout = $pointage["id"];
-                    $userid = $pointage["userid"];
+                    $userid = $uuserinfo[0]["userid"];
                     $checktime = $pointage["checktime"];
                     $memoinfo = $pointage["memoinfo"];
                     $sn = $pointage["sn"];
 
                     //** checks if there is that checkinout in local database 'assiduite' **//
-                    $requete = "SELECT * FROM `checkinout` where id = $id_checkinout LIMIT 1";
+                    // $requete = "SELECT * FROM `checkinout` where id = $id_checkinout LIMIT 1";
+                    $requete = "SELECT * FROM `checkinout` where sn = '$sn' and date(checktime) = '$checktime' and userid = $userid  LIMIT 1";
 
+                    // dd($requete);
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
                     $checkinout = $newstmt->fetchAll();
+                    // dd($checkinout);
+
+                    // if ($checkinout) {
+                    //     dd($checkinout);
+                    // }
 
                     // dd($requete);
 
                     if(!$checkinout){
-                        $requete = "INSERT INTO `checkinout`(`id`,`userid`, `checktime`, `memoinfo`, `sn`) VALUES ('$id_checkinout','$userid','$checktime','$memoinfo','$sn')";
+                        $requete = "INSERT INTO `checkinout`(`userid`, `checktime`, `memoinfo`, `sn`) VALUES ('$userid','$checktime','$memoinfo','$sn')";
 
                         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                         $newstmt = $stmt->executeQuery();
@@ -325,34 +352,7 @@ class TraitementController extends AbstractController
         $date = clone $emptime->getStart();
         $date->modify($AA.' min');
         $check_ = $date->format("Y-m-d H:i:s"); //!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // dd($inscriptions);
-        // $update = "";
-        // $insert = "";
-        // foreach ($inscriptions as $inscription) {
-
-        //     $id_admission = $inscription->getAdmission()->getCode();
-        //     $id_module = $element->getModule()->getCode();
-        //     $id_annee = $annee->getCode();
-            
-        //     $requete = "SELECT * FROM `userinfo` where street = '$id_admission' group by street LIMIT 1";
-        //     // dd($requete);
-
-        //     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-        //     $newstmt = $stmt->executeQuery();   
-        //     $userInfo = $newstmt->fetchAll();
-        //     if ($userInfo) {
-        //         dd($inscriptions , $inscription);
-        //     }
-        // }
-        // dd('hi');
         foreach ($inscriptions as $inscription) {
-            // if ($inscription->getId() != 19117) {
-            //     continue;
-            // }
-            // $capitaliseExist = $this->em->getRepository(XseanceCapitaliser::class)->findOneBy([
-            //     'ID_Admission'=>$inscription->getAdmission()->getCode(),
-            //     'ID_Module'=>$element->getModule()->getCode(),
-            //     'ID_Année'=>$annee->getCode()]);
 
             $id_admission = $inscription->getAdmission()->getCode();
             $id_module = $element->getModule()->getCode();
@@ -429,12 +429,7 @@ class TraitementController extends AbstractController
             $stmt = $this->emAssiduite->getConnection()->prepare($requete);
             $newstmt = $stmt->executeQuery();   
             $xAbseanceExist = $newstmt->fetchAll();
-            // dd($xAbseanceExist[0]['id']);
-            //!!!! + 1400
             
-            // if ($id_admission == "ADM-FMA_MG00003760") {
-            //     dd($xAbseanceExist,$cat,$type);
-            // } 
             if($type == 2){ //!!retraitement
 
                 
@@ -486,35 +481,7 @@ class TraitementController extends AbstractController
             // dd('hi');
             
             $counter++;
-            // switch ($cat) {
-            //     case 'A':
-            //         $abcd['A']++;
-            //         break;
-            //     case 'B':
-            //         $abcd['B']++;
-            //         break;
-            //     case 'C':
-            //         $abcd['C']++;
-            //         break;
-            //     case 'D':
-            //         $abcd['D']++;
-            //         break;
-            // }
         }
-        // dd('testtt');
-        // if($insert != ""){
-        //     $insert_req = "INSERT INTO `xseance_absences`(`id_admission`, `id_séance`, `nom`, `prénom`, `date_pointage`, `heure_pointage`, `categorie`) VALUES ".$insert;
-        //     $insert_req = rtrim($insert_req, ', ');
-        //     // dd($update, $insert_req);
-        //     $stmt = $this->emAssiduite->getConnection()->prepare($insert_req);
-        //     $newstmt = $stmt->executeQuery(); 
-        // }
-        // if($update != ""){
-        //     $stmt = $this->emAssiduite->getConnection()->prepare($update);
-        //     $newstmt = $stmt->executeQuery(); 
-        // }
-        // dd("hi");
-        // $this->em->flush();
         $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $id_seance]);
         if($Xseance){
             $Xseance->setStatut(1);
@@ -526,30 +493,6 @@ class TraitementController extends AbstractController
             $Xseance->setStatut(1);
             $Xseance->setDateSys(new \DateTime());
             $this->em->persist($Xseance);
-            // $Xseance->setTypeséance($programmation->getNatureEpreuve()->getCode());
-            // $Xseance->setIDEtablissement($programmation->getAnnee()->getFormation()->getEtablissement()->getCode())
-
-            // $IDEtablissement=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode();
-            // $IDFormation=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getCode();
-            // $IDPromotion=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getCode();
-            // $IDAnnée=$emptime->getProgrammation()->getAnnee()->getCode();     
-            // $AnnéeLib=$emptime->getProgrammation()->getAnnee()->getDesignation();
-            // $IDSemestre=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getCode();
-            // $EmpGroupe= $emptime->getGroupe() ? $emptime->getGroupe()->getNiveau() : "";
-            // $IDModule=$emptime->getProgrammation()->getElement()->getModule()->getCode();
-            // $IDElement=$emptime->getProgrammation()->getElement()->getId();
-            // $IDEnseignant=$emptime->getemptimens()[0]->getEnseignant()->getCode();
-            // $IDSalle=strtoupper($emptime->getSalle()->getCode());
-            // // $Xseance->setStatut(1);
-            // $DateSéance=$emptime->getStart()->format("Y-m-d");
-            // $EmpSemaine=$emptime->getSemaine()->getId();
-            // $HeureDebut=$emptime->getHeurDb()->format("H:i");
-            // $HeureFin=$emptime->getHeurFin()->format("H:i");
-            // $DateSys=(new \DateTime())->format("Y-m-d");
-
-
-
-            
             // $IDSéance = $emptime->getId();
             // $Typeséance=$emptime->getProgrammation()->getNatureEpreuve()->getCode();
             // $IDEtablissement=$emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getEtablissement()->getCode();
@@ -1645,21 +1588,29 @@ class TraitementController extends AbstractController
 
         if ($pointages) {
             foreach ($pointages as $pointage) {
+                $requete = "SELECT * FROM `Userinfo` where Badgenumber = ".$pointage['userid']." LIMIT 1";
+
+                $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+                $newstmt = $stmt->executeQuery();   
+                $uuserinfo = $newstmt->fetchAll();
+
                 $id_checkinout = $pointage["id"];
-                $userid = $pointage["userid"];
+                $userid = $uuserinfo[0]["userid"];
                 $checktime = $pointage["checktime"];
                 $memoinfo = $pointage["memoinfo"];
                 $sn = $pointage["sn"];
 
                 //** checks if there is that checkinout in local database 'assiduite' **//
-                $requete = "SELECT * FROM `checkinout` where id = $id_checkinout LIMIT 1";
+                // $requete = "SELECT * FROM `checkinout` where id = $id_checkinout LIMIT 1";
+                $requete = "SELECT * FROM `checkinout` where sn = '$sn' and date(checktime) = '$checktime' and userid = $userid  LIMIT 1";
 
                 $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                 $newstmt = $stmt->executeQuery();   
                 $checkinout = $newstmt->fetchAll();
 
                 if(!$checkinout){
-                    $requete = "INSERT INTO `checkinout`(`id`,`userid`, `checktime`, `memoinfo`, `sn`) VALUES ('$id_checkinout','$userid','$checktime','$memoinfo','$sn')";
+                    // $requete = "INSERT INTO `checkinout`(`id`,`userid`, `checktime`, `memoinfo`, `sn`) VALUES ('$id_checkinout','$userid','$checktime','$memoinfo','$sn')";
+                    $requete = "INSERT INTO `checkinout`(`userid`, `checktime`, `memoinfo`, `sn`) VALUES ('$userid','$checktime','$memoinfo','$sn')";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();
