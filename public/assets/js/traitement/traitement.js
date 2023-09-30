@@ -65,7 +65,7 @@ $(document).ready(function () {
         $("body .small-box").removeClass("active");
         const request = await axios.post("/assiduite/traitement/count/" + id_seance);
         const response = request.data;
-        console.log(response.data['A'])
+        // console.log(response.data['A'])
         $("body .a").find(".number").text(response.data["A"]);
         $("body .b").find(".number").text(response.data["B"]);
         $("body .c").find(".number").text(response.data["C"]);
@@ -260,48 +260,97 @@ $(document).ready(function () {
 
   })
 
+  async function checkImport() {
+    try {
+      const request = await axios.post("/assiduite/traitement/check_import");
+      const response = request.data;
+      console.log(response);
+      if (response == 1) {
+        return true;
+      }else{
+        return false;
+      }
+      
+    } catch (error) {
+      return false;
+    }
+    
+  }
+
   $("#traiter").on("click", async function () {
     if (!id_seance) {
       Toast.fire({
         icon: "error",
-        title: "Veuillez selectioner une ligne!",
+        title: "Veuillez sélectionner une ligne!",
       });
       return;
     }
+  
     const icon = $("#traiter i");
-    // alert(id_seance)
-    // var res = confirm('Vous voulez vraiment traiter cette seance ?');
-    // if(res == 1){
-    try {
-      $("body .small-box").removeClass("active");
-      icon.removeClass("fa-edit").addClass("fa-spinner fa-spin ");
-      const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
-      const response = request.data;
-      table.ajax.reload();
-    //   id_seance = false
-      icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
-      Toast.fire({
-        icon: "success",
-        title: response.message,
-      });
-      // console.log(response.data['A'])
-      $("body .a").find(".number").text(response.data["A"]);
-      $("body .b").find(".number").text(response.data["B"]);
-      $("body .c").find(".number").text(response.data["C"]);
-      $("body .d").find(".number").text(response.data["D"]);
-      $("body .small-box").addClass("active");
-    } catch (error) {
-      console.log(error, error.response.data);
-      const message = error.response.data.error;
-      Toast.fire({
+  
+    const import_statut = await checkImport();
+  
+    if (import_statut) {
+      const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
+  
+      if (res) {
+        try {
+          $("body .small-box").removeClass("active");
+          icon.removeClass("fa-edit").addClass("fa-spinner fa-spin");
+          const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
+          const response = request.data;
+          table.ajax.reload();
+          icon.addClass("fa-edit").removeClass("fa-spinner fa-spin");
+          Toast.fire({
+            icon: "success",
+            title: response.message,
+          });
+  
+          $("body .a").find(".number").text(response.data["A"]);
+          $("body .b").find(".number").text(response.data["B"]);
+          $("body .c").find(".number").text(response.data["C"]);
+          $("body .d").find(".number").text(response.data["D"]);
+          $("body .small-box").addClass("active");
+        } catch (error) {
+          console.log(error, error.response.data);
+          const message = error.response.data.error;
+          Toast.fire({
+            icon: 'error',
+            title: message,
+          });
+          icon.addClass("fa-edit").removeClass("fa-spinner fa-spin");
+        }
+      }
+    } else {
+      try {
+        $("body .small-box").removeClass("active");
+        icon.removeClass("fa-edit").addClass("fa-spinner fa-spin");
+        const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
+        const response = request.data;
+        table.ajax.reload();
+        icon.addClass("fa-edit").removeClass("fa-spinner fa-spin");
+        Toast.fire({
+          icon: "success",
+          title: response.message,
+        });
+
+        $("body .a").find(".number").text(response.data["A"]);
+        $("body .b").find(".number").text(response.data["B"]);
+        $("body .c").find(".number").text(response.data["C"]);
+        $("body .d").find(".number").text(response.data["D"]);
+        $("body .small-box").addClass("active");
+      } catch (error) {
+        console.log(error, error.response.data);
+        const message = error.response.data.error;
+        Toast.fire({
           icon: 'error',
           title: message,
-      }) 
-      icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+        });
+        icon.addClass("fa-edit").removeClass("fa-spinner fa-spin");
+      }
     }
-    // }
   });
-
+  
   $("#retraiter").on("click", async function () {
     if (!id_seance) {
       Toast.fire({
@@ -314,33 +363,71 @@ $(document).ready(function () {
     // alert(id_seance)
     var res = confirm('Vous voulez vraiment retraiter cette seance ?');
     if(res == 1){
-      try {
-        $("body .small-box").removeClass("active");
-        icon.removeClass("fa-edit").addClass("fa-spinner fa-spin ");
-        const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
-        const response = request.data;
-        table.ajax.reload();
-      //   id_seance = false
-        icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
-        Toast.fire({
-          icon: "success",
-          title: response.message,
-        });
-        // console.log(response.data['A'])
-        $("body .a").find(".number").text(response.data["A"]);
-        $("body .b").find(".number").text(response.data["B"]);
-        $("body .c").find(".number").text(response.data["C"]);
-        $("body .d").find(".number").text(response.data["D"]);
-        $("body .small-box").addClass("active");
-      } catch (error) {
-        console.log(error, error.response);
-        const message = error.response.data.error;
-        Toast.fire({
-            icon: 'error',
-            title: message,
-        })
-        icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+
+      const import_statut = await checkImport();
+  
+      if (import_statut) {
+        const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
+    
+        if (res) {
+          try {
+            $("body .small-box").removeClass("active");
+            icon.removeClass("fa-edit").addClass("fa-spinner fa-spin ");
+            const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
+            const response = request.data;
+            table.ajax.reload();
+          //   id_seance = false
+            icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+            Toast.fire({
+              icon: "success",
+              title: response.message,
+            });
+            // console.log(response.data['A'])
+            $("body .a").find(".number").text(response.data["A"]);
+            $("body .b").find(".number").text(response.data["B"]);
+            $("body .c").find(".number").text(response.data["C"]);
+            $("body .d").find(".number").text(response.data["D"]);
+            $("body .small-box").addClass("active");
+          } catch (error) {
+            console.log(error, error.response);
+            const message = error.response.data.error;
+            Toast.fire({
+                icon: 'error',
+                title: message,
+            })
+            icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+          }
+        }
+      } else {
+        try {
+          $("body .small-box").removeClass("active");
+          icon.removeClass("fa-edit").addClass("fa-spinner fa-spin ");
+          const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
+          const response = request.data;
+          table.ajax.reload();
+        //   id_seance = false
+          icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+          Toast.fire({
+            icon: "success",
+            title: response.message,
+          });
+          // console.log(response.data['A'])
+          $("body .a").find(".number").text(response.data["A"]);
+          $("body .b").find(".number").text(response.data["B"]);
+          $("body .c").find(".number").text(response.data["C"]);
+          $("body .d").find(".number").text(response.data["D"]);
+          $("body .small-box").addClass("active");
+        } catch (error) {
+          console.log(error, error.response);
+          const message = error.response.data.error;
+          Toast.fire({
+              icon: 'error',
+              title: message,
+          })
+          icon.addClass("fa-edit").removeClass("fa-spinner fa-spin ");
+        }
       }
+
     }
   });
 

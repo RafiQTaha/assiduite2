@@ -272,8 +272,13 @@ class TraitementController extends AbstractController
                     $newstmt = $stmt->executeQuery();   
                     $uuserinfo = $newstmt->fetchAll();
 
-                    $id_checkinout = $pointage["id"];
+                    if(!$uuserinfo){
+                        return new JsonResponse('Aucune userinfo n\'est trouvée!',500);
+                        dd($uuserinfo);
+                    }
+
                     $userid = $uuserinfo[0]["userid"];
+                    $id_checkinout = $pointage["id"];
                     $checktime = $pointage["checktime"];
                     $memoinfo = $pointage["memoinfo"];
                     $sn = $pointage["sn"];
@@ -1496,6 +1501,19 @@ class TraitementController extends AbstractController
         return new JsonResponse('Bien enregistre',200);
 
         
+    }
+    #[Route('/check_import', name: 'check_import')]
+    public function check_import(Request $request) {
+
+        $requete = "SELECT sync FROM  `psituation` WHERE `id` = 1 LIMIT 1;";
+
+        $stmt = $this->emPointage->getConnection()->prepare($requete);
+        $newstmt = $stmt->executeQuery(); 
+        $check = $newstmt->fetchAll();
+
+        if($check[0]["sync"] == 1){
+            return new JsonResponse($check[0]["sync"],200);
+        }
     }
 
     #[Route('/synthese/{datetoday}', name: 'synthese')]
