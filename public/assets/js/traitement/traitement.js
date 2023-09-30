@@ -264,7 +264,7 @@ $(document).ready(function () {
     try {
       const request = await axios.post("/assiduite/traitement/check_import");
       const response = request.data;
-      console.log(response);
+      // console.log(response);
       if (response == 1) {
         return true;
       }else{
@@ -287,70 +287,42 @@ $(document).ready(function () {
     }
   
     const icon = $("#traiter i");
-    icon.removeClass("fa-clock").addClass("fa-spinner fa-spin");
   
     const import_statut = await checkImport();
-  
+    console.log(import_statut)
     if (import_statut) {
-      const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
-  
-      if (res) {
-        try {
-          $("body .small-box").removeClass("active");
-          
-          const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
-          const response = request.data;
-          table.ajax.reload();
-          icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
-          Toast.fire({
-            icon: "success",
-            title: response.message,
-          });
-  
-          $("body .a").find(".number").text(response.data["A"]);
-          $("body .b").find(".number").text(response.data["B"]);
-          $("body .c").find(".number").text(response.data["C"]);
-          $("body .d").find(".number").text(response.data["D"]);
-          $("body .small-box").addClass("active");
-        } catch (error) {
-          console.log(error, error.response.data);
-          const message = error.response.data.error;
-          Toast.fire({
-            icon: 'error',
-            title: message,
-          });
-          icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
+        const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
+        if (!res) {
+          return
         }
-      }else{
-        icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
-      }
-    } else {
-      try {
-        $("body .small-box").removeClass("active");
-        icon.removeClass("fa-edit").addClass("fa-spinner fa-spin");
-        const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
-        const response = request.data;
-        table.ajax.reload();
-        icon.addClass("fa-edit").removeClass("fa-spinner fa-spin");
-        Toast.fire({
-          icon: "success",
-          title: response.message,
-        });
+    }
+    
+    icon.removeClass("fa-clock").addClass("fa-spinner fa-spin");
+    try {
+      $("body .small-box").removeClass("active");
+      
+      const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
+      const response = request.data;
+      table.ajax.reload();
+      icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
+      Toast.fire({
+        icon: "success",
+        title: response.message,
+      });
 
-        $("body .a").find(".number").text(response.data["A"]);
-        $("body .b").find(".number").text(response.data["B"]);
-        $("body .c").find(".number").text(response.data["C"]);
-        $("body .d").find(".number").text(response.data["D"]);
-        $("body .small-box").addClass("active");
-      } catch (error) {
-        console.log(error, error.response.data);
-        const message = error.response.data.error;
-        Toast.fire({
-          icon: 'error',
-          title: message,
-        });
-        icon.addClass("fa-edit").removeClass("fa-spinner fa-spin");
-      }
+      $("body .a").find(".number").text(response.data["A"]);
+      $("body .b").find(".number").text(response.data["B"]);
+      $("body .c").find(".number").text(response.data["C"]);
+      $("body .d").find(".number").text(response.data["D"]);
+      $("body .small-box").addClass("active");
+    } catch (error) {
+      console.log(error, error.response.data);
+      const message = error.response.data.error;
+      Toast.fire({
+        icon: 'error',
+        title: message,
+      });
+      icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
     }
   });
   

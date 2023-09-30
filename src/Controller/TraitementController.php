@@ -203,7 +203,7 @@ class TraitementController extends AbstractController
                 return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
             }
             if ($Xseance->getStatut() == "1" and $type == 1) {
-                return new JsonResponse(['error' => 'La séance n\'est déja traitée!'], 500);
+                return new JsonResponse(['error' => 'La séance est déja traitée!'], 500);
             }
             if ($Xseance->getStatut() == "0" and $type == 2) {
                 return new JsonResponse(['error' => 'La séance n\'est pas encore traitée!'], 500);
@@ -212,27 +212,6 @@ class TraitementController extends AbstractController
         if (!$Xseance and $type == 2) {
             return new JsonResponse(['error' => 'La séance n\'est pas encore traitée!'], 500);
         }
-        // if($type == 2){ //!!retraitement
-        //     if ($Xseance) {
-        //         if ($Xseance->getStatut() == "2") {
-        //             return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
-        //         }
-        //         if ($Xseance->getStatut() != "1") {
-        //             return new JsonResponse(['error' => 'La séance est pas encore traitée!'], 500);
-        //         }
-        //     }
-        // }else{
-        //     if ($Xseance) {
-        //         if ($Xseance->getStatut() == "1") {
-        //             return new JsonResponse(['error' => 'La séance est déja traitée!'], 500);
-        //         }
-        //         if ($Xseance->getStatut() == "2") {
-        //             return new JsonResponse(['error' => 'La séance est verouiller!'], 500);
-        //         }
-        //     }else{
-        //         return new JsonResponse(['error' => 'no Xséance'], 500);
-        //     }
-        // }
 
         $emptime = $this->em->getRepository(PlEmptime::class)->find($emptime);
         $id_seance = $emptime->getId();
@@ -1505,15 +1484,15 @@ class TraitementController extends AbstractController
     #[Route('/check_import', name: 'check_import')]
     public function check_import(Request $request) {
 
-        $requete = "SELECT sync FROM  `psituation` WHERE `id` = 1 LIMIT 1;";
+        $requete = "SELECT sync FROM `situation_sync` WHERE `id` = 1 LIMIT 1;";
 
         $stmt = $this->emPointage->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery(); 
         $check = $newstmt->fetchAll();
 
-        if($check[0]["sync"] == 1){
-            return new JsonResponse($check[0]["sync"],200);
-        }
+        // if($check[0]["sync"] == 1){
+        return new JsonResponse($check[0]["sync"],200);
+        // }
     }
 
     #[Route('/synthese/{datetoday}', name: 'synthese')]
