@@ -1,6 +1,8 @@
 {# {%set getCurrentUrl = app.request.pathinfo|split('/')[1]%}
 {%set secondCurrentUrl = app.request.pathinfo|split('/')[2]%} #}
 
+{% set assiduite_users = [96, 97, 98, 39, 1] %}
+
 <div class="main-sidebar">
   <aside id="sidebar-wrapper">
     <div class="sidebar-brand">
@@ -13,29 +15,42 @@
     <ul class="sidebar-menu">
       <li class="menu-header">Dashboard</li>
       {# {{ dump(app.request.attributes.get('_route')) }} #}
-      {%set assiduite = ['traitement','app_situation_pointage','app_situation_presentiel']%}
-      <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') in assiduite %}active{% endif %}">
-        <a href="#" class="nav-link has-dropdown"
-          ><i class=""></i><span>Assiduite</span></a
-        >
-        <ul class="dropdown-menu">
-            <li><a class="nav-link {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'traitement' %}activeSecondUrl{% endif %}" href="{{path('traitement')}}">Assiduite</a></li>
-        </ul>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link " href="{{path('app_situation_pointage')}}">Situation Pointage</a></li>
-        </ul>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link " href="{{path('app_situation_presentiel')}}">Situation Presentiel</a></li>
-        </ul>
-      </li>
-      <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}active{% endif %}">
-        <a href="#" class="nav-link has-dropdown"
-          ><i class=""></i><span>Stage</span></a
-        >
-        <ul class="dropdown-menu">
-            <li><a class="nav-link {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}activeSecondUrl{% endif %}" href="{{path('app_stage')}}">Stage</a></li>
-        </ul>
-      </li>
+      {% if app.user.id in assiduite_users %}
+        {%set assiduite = ['traitement','app_situation_pointage','app_situation_presentiel']%}
+        <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') in assiduite %}active{% endif %}">
+          <a href="#" class="nav-link has-dropdown"
+            ><i class=""></i><span>Assiduite</span></a
+          >
+          <ul class="dropdown-menu">
+              <li><a class="nav-link {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'traitement' %}activeSecondUrl{% endif %}" href="{{path('traitement')}}">Assiduite</a></li>
+          </ul>
+          <ul class="dropdown-menu">
+              <li><a class="nav-link " href="{{path('app_situation_pointage')}}">Situation Pointage</a></li>
+          </ul>
+          <ul class="dropdown-menu">
+              <li><a class="nav-link " href="{{path('app_situation_presentiel')}}">Situation Presentiel</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}active{% endif %}">
+          <a href="#" class="nav-link has-dropdown"
+            ><i class=""></i><span>Stage</span></a
+          >
+          <ul class="dropdown-menu">
+              <li><a class="nav-link {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}activeSecondUrl{% endif %}" href="{{path('app_stage')}}">Stage</a></li>
+          </ul>
+        </li>
+      {% else %}
+        <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}active{% endif %}">
+          <a href="#" class="nav-link has-dropdown"
+            ><i class=""></i><span>Stage</span></a
+          >
+          <ul class="dropdown-menu">
+              <li><a class="nav-link {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}activeSecondUrl{% endif %}" href="{{path('app_stage')}}">Stage</a></li>
+          </ul>
+        </li>
+      {% endif %}
+
+      
       
       {# {% for module in app.session.get('modules') %}
       
