@@ -83,7 +83,7 @@ class SituationPresentielController extends AbstractController
         where prm.id = ".$inscription->getPromotion()->getId()." $filter;";
 
         // dd($requete);
-        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        $stmt = $this->em->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $seances = $newstmt->fetchAll();
         // dd($seances);
