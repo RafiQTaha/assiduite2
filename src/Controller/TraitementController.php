@@ -1134,7 +1134,7 @@ class TraitementController extends AbstractController
         // $requete= "SELECT categories.categorie, IFNULL(t.count, 0) AS count FROM ( SELECT 'A' AS categorie UNION SELECT 'B' UNION SELECT 'C' UNION SELECT 'D' ) AS categories LEFT JOIN ( SELECT categorie, COUNT(*) AS count FROM xseance_absences WHERE id_séance = $seance  and active =1 GROUP BY categorie ) AS t ON categories.categorie = t.categorie  order by categorie;";
         $requete= "SELECT categories.categorie, IFNULL(t.count, 0) AS count 
         FROM ( SELECT 'A' AS categorie UNION SELECT 'B' UNION SELECT 'C' UNION SELECT 'D' ) AS categories 
-        LEFT JOIN ( SELECT categorie_f, COUNT(*) AS count FROM xseance_absences WHERE id_séance = $seance  and active =1 GROUP BY categorie_f ) AS t ON categories.categorie = t.categorie_f
+        LEFT JOIN ( SELECT categorie_f, COUNT(*) AS count FROM xseance_absences WHERE id_séance = $seance  and active = 1 GROUP BY categorie_f ) AS t ON categories.categorie = t.categorie_f
         order by categorie;";
         // dd($requete);
 
@@ -1484,7 +1484,6 @@ class TraitementController extends AbstractController
     #[Route('/check_import', name: 'check_import')]
     public function check_import(Request $request) {
 
-        // $requete = "SELECT sync FROM `psituation` WHERE `id` = 1 LIMIT 1;";
         $requete = "SELECT sync FROM `situation_sync` WHERE `id` = 1 LIMIT 1;";
 
         $stmt = $this->emPointage->getConnection()->prepare($requete);
