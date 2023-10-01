@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %} {% block title %}Univ - Situation Pointage{% endblock %} {%
+block body %}
+
+<style>
+  .small-box {
+    position: relative;
+    text-align: center;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    font-size: 24px;
+    margin: 0;
+    padding: 0;
+    float: left;
+    border: 1px solid #ccc;
+    overflow: hidden;
+  }
+  .cat{
+    position: absolute;
+    width: 100%;
+    transition: all 0.8s ease-out;
+  }
+  .lettre{
+    top:0%;
+  }
+  .number{
+    top:100%;
+  }
+  .small-box.active .lettre {
+    top: -100%;
+  }
+
+  .small-box.active .number {
+    top: 0;
+  }
+</style>
+<div class="main-content">
+  <section class="section">
+    <div class="section-header">
+      <h1>Seances</h1>
+      <div class="section-header-breadcrumb">
+        <a href="#" id="imprimer" class="btn btn-primary ml-1"><i class="fas fa-print"></i> Imprimer</a>
+      </div>
+    </div>
+
+    <div class="section-body">
+      <div class="card">
+        <div class="card-header">
+          <h4>Tableau des etudiants</h4>
+        </div>
+        <div class="card-body">
+          <div class="card-search" style="margin-bottom: 1.5rem">
+            <div class="row">
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+                <label for="etablissement">Etablissement:</label>
+                <select class="form-control" name="etablissement" id="etablissement">
+                  <option value="">Choix etablissement</option>
+                  {% for etablissement in etablissements %}
+                  <option value="{{ etablissement.id }}">
+                    {{ etablissement.designation }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+                <label for="formation">Formation:</label>
+                <select class="form-control" name="formation" id="formation"></select>
+              </div>
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+                <label for="promotion">Promotion:</label>
+                <select class="form-control" name="promotion" id="promotion"></select>
+              </div>
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+                <label for="promotion">Semestre:</label>
+                <select class="form-control" name="semestre" id="semestre"></select>
+              </div>
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+                <label for="etudiant">Etudiants:</label>
+                <select class="form-control" name="etudiant" id="etudiant">
+                    <option value="">Choix Etudiants</option>
+                    {% for inscription in inscriptions %}
+                    <option value="{{ inscription.id }}">
+                        {{ inscription.admission.preinscription.etudiant.nom }} {{ inscription.admission.preinscription.etudiant.prenom }}
+                    </option>
+                    {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="pointage">
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!--Modal Import Group-->
+{# {% include 'traitement/modals/parlot.html.twig' %}
+{% include 'traitement/modals/etudiant.html.twig' %}
+{% include 'traitement/modals/etudiant_detail.html.twig' %} #}
+{% endblock %} {% block javascripts
+%}
+{{ parent() }}
+{# {{ encore_entry_script_tags("traitement") }} #}
+<script src="/assets/js/situation_presentiel/situationPresentiel.js"></script>
+
+{% endblock %}

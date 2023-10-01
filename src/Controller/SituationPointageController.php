@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-#[Route('/assiduite/pointage')]
+#[Route('/situation_pointage')]
 class SituationPointageController extends AbstractController
 {
     private $em;
@@ -70,7 +70,7 @@ class SituationPointageController extends AbstractController
         INNER JOIN iseance_salle on iseance_salle.id_pointeuse = machines.sn
         INNER JOIN psalles on psalles.code = iseance_salle.code_salle
         WHERE checkinout.checktime BETWEEN '$date_debut' AND '$date_fin' AND userinfo.street ='".$inscription->getAdmission()->getCode()."'";
-        $stmt = $this->emPointage->getConnection()->prepare($requete);
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $pointages = $newstmt->fetchAll();
         // dd($pointages);
