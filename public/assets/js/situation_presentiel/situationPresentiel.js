@@ -35,17 +35,42 @@ const Toast = Swal.mixin({
       $("#promotion").html(response).select2();
     });
     $("#promotion").on("change", async function () {
-      $("#etudiant").empty();
       const id_promotion = $(this).val();
+      $("#etudiant").empty();
+      $("#semestre").empty();
   
       if (id_promotion != "") {
           const request = await axios.get("/api/etudiants/" + id_promotion);
+          const request2 = await axios.get("/api/semestre/" + id_promotion);
           response = request.data;
+          response2 = request2.data;
           console.log('response');
           
       }
       $("#etudiant").html(response).select2();
+      $("#semestre").html(response2).select2();
     });
+
+    $("#imprimer").on("click", async () => {
+        const id_etudiant = $("body #etudiant").val();
+        let id_semestre = $("body #semestre").val();
+        if(!id_etudiant){
+          Toast.fire({
+            icon: 'error',
+            title: 'Veuillez choissir un etudiant!',
+          })
+          return;
+        }
+        if (!id_semestre || id_semestre == "") {
+            id_semestre = "global";
+        }
+        
+        window.open(
+          "/situation_presentiel/imprimer/"+id_etudiant+"/"+id_semestre,
+          "_blank"
+        );
+      
+    })
 
     $("body #search").on("click", async function(e) {
         e.preventDefault()
@@ -74,7 +99,7 @@ const Toast = Swal.mixin({
   
       try {
           icon.removeClass('fa-search').addClass("fa-spinner fa-spin ");
-          const request = await axios.post('/situation_pointage/search', formData, {
+          const request = await axios.post('/situation_presentiel/search', formData, {
             headers: {
               'Content-Type': 'multipart/form-data', // Set content type to multipart/form-data
             },

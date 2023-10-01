@@ -86,7 +86,7 @@ class ApiController extends AbstractController
         $annee = $this->em->getRepository(AcAnnee::class)->getActiveAnneeByFormation($promotion->getFormation());
         $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoNoGroup($promotion,$annee);
         // dd($promotions);
-        $data = self::dropdownEtudiant($inscriptions,'inscription');
+        $data = self::dropdownEtudiant($inscriptions,'etudiant');
         return new JsonResponse($data);
     }
     #[Route('/annee/{id}', name: 'getAnnee')]
