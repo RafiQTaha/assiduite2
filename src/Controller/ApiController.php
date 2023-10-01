@@ -79,6 +79,16 @@ class ApiController extends AbstractController
         $data = self::dropdown($promotions,'promotion');
         return new JsonResponse($data);
     }
+    #[Route('/etudiants/{promotion}', name: 'getEtudiants')]
+    public function getEtudiants($promotion): Response
+    {   
+        $promotion = $this->em->getRepository(AcPromotion::class)->find($promotion);
+        $annee = $this->em->getRepository(AcAnnee::class)->getActiveAnneeByFormation($promotion->getFormation());
+        $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoNoGroup($promotion,$annee);
+        // dd($promotions);
+        $data = self::dropdownEtudiant($inscriptions,'inscription');
+        return new JsonResponse($data);
+    }
     #[Route('/annee/{id}', name: 'getAnnee')]
     public function getAnnee($id): Response
     {   
@@ -391,6 +401,14 @@ class ApiController extends AbstractController
         $data = "<option selected enabled value=''>Choix ".$choix."</option>";
         foreach ($objects as $object) {
             $data .="<option value=".$object->getId().">".$object->getDesignation()."</option>";
+         }
+         return $data;
+    }
+    static function dropdownEtudiant($objects,$choix)
+    {
+        $data = "<option selected enabled value=''>Choix ".$choix."</option>";
+        foreach ($objects as $object) {
+            $data .="<option value=".$object->getId().">".$object->getAdmission()->getPreinscription()->getEtudiant()->getNom()." ".$object->getAdmission()->getPreinscription()->getEtudiant()->getPrenom()."</option>";
          }
          return $data;
     }

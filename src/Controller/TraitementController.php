@@ -68,11 +68,11 @@ class TraitementController extends AbstractController
             // 'operations' => $operations
         ]);
     }
-    #[Route('/list', name: 'assiduite_list')]
-    public function list(Request $request)
+    #[Route('/list/{type}', name: 'assiduite_list')]
+    public function list(Request $request, $type)
     {
         $params = $request->query;
-        // dd($params);
+        // dd($type);
         $where = $totalRows = $sqlRequest = "";
         // $filtre = "where 1 = 1 and elm.active = 1";   
         $filtre = " where 1 = 1 ";   
@@ -91,6 +91,11 @@ class TraitementController extends AbstractController
         }
         if (!empty($params->all('columns')[3]['search']['value'])) {
             $filtre .= " and prm.id = '" . $params->all('columns')[3]['search']['value'] . "' ";
+        }
+        if ($type == "stage") {
+            $filtre .= " and nat.abreviation = 'ST' ";
+        }else{
+            $filtre .= " and nat.abreviation != 'ST' ";
         }
         
 
@@ -1021,14 +1026,20 @@ class TraitementController extends AbstractController
         return new JsonResponse("Bien Modifier",200);
     }
 
-    #[Route('/parlot/{hd}/{hf}/{etablissement}/{formation}/{day}', name: 'affichage_parlot')]
-    public function affichage_parlot(Request $request,$hd,$hf,$day, $etablissement, $formation)
+    #[Route('/parlot/{hd}/{hf}/{etablissement}/{formation}/{day}/{type}', name: 'affichage_parlot')]
+    public function affichage_parlot(Request $request,$hd,$hf,$day, $etablissement, $formation,$type)
     {
         // dd($etbalissement,$formation);
         $todayDate = new \DateTime($day);
         $todayDate = $todayDate->format('Y-m-d');
         $todayDate = $todayDate . '%';
         // dd($todayDate, $hd, $hf);
+
+        if($type == "stage"){
+            $filtre = " and nat.abreviation = 'ST' ";
+        }else{
+            $filtre = " and nat.abreviation != 'ST' ";
+        }
 
         $requete = "SELECT emp.id as id_seance, emp.heur_db, emp.heur_fin, etab.abreviation as etbalissement, form.abreviation as formation, prm.designation as promotion, grp.niveau as groupe, sall.designation as salle, elm.designation as element, CONCAT(ens.nom,' ', ens.prenom) as enseignant from pl_emptime emp
         left join psalles sall on sall.id = emp.xsalle_id
@@ -1046,7 +1057,7 @@ class TraitementController extends AbstractController
 
         left join xseance xs on xs.id_séance = emp.id 
 
-        WHERE etab.id = '$etablissement' and form.id = '$formation' and emp.heur_db >= '$hd' and emp.heur_fin <= '$hf' and emp.start like '$todayDate' and (xs.statut not in (1,2) or xs.statut is null) group by emp.id";
+        WHERE etab.id = '$etablissement' and form.id = '$formation' and emp.heur_db >= '$hd' and emp.heur_fin <= '$hf' and emp.start like '$todayDate' and (xs.statut not in (1,2) or xs.statut is null) $filtre group by emp.id";
         $stmt = $this->em->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $emptimes = $newstmt->fetchAll();

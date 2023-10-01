@@ -11,7 +11,31 @@
       <a href="#">UV</a>
     </div>
     <ul class="sidebar-menu">
-      <li class="menu-header">Assiduite</li>
+      <li class="menu-header">Dashboard</li>
+      {# {{ dump(app.request.attributes.get('_route')) }} #}
+      <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'traitement' %}active{% endif %}">
+        <a href="#" class="nav-link has-dropdown"
+          ><i class=""></i><span>Assiduite</span></a
+        >
+        <ul class="dropdown-menu">
+            <li><a class="nav-link {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'traitement' %}activeSecondUrl{% endif %}" href="{{path('traitement')}}">Assiduite</a></li>
+        </ul>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link " href="{{path('app_situation_pointage')}}">Situation Pointage</a></li>
+        </ul>
+        {# <ul class="dropdown-menu">
+            <li><a class="nav-link " href="{{path('app_situation_presentiel')}}">Situation Presentiel</a></li>
+        </ul> #}
+      </li>
+      <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}active{% endif %}">
+        <a href="#" class="nav-link has-dropdown"
+          ><i class=""></i><span>Stage</span></a
+        >
+        <ul class="dropdown-menu">
+            <li><a class="nav-link {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}activeSecondUrl{% endif %}" href="{{path('app_stage')}}">Stage</a></li>
+        </ul>
+      </li>
+      
       {# {% for module in app.session.get('modules') %}
       
       <li class="nav-item dropdown {% if getCurrentUrl == module.module.prefix %} active {% endif %}">

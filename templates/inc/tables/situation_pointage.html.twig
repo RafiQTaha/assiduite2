@@ -1,0 +1,35 @@
+<table id="datatables_pointages" class="table table-striped" style="width: 100%">
+<thead>
+    <tr>
+    <th>Admission</th>
+    <th>Nom Complet</th>
+    <th>Date Pointage</th>
+    <th>Heur Pointage</th>
+    <th>Salle</th>
+    <th>Ip</th>
+    <th>Sn</th>
+    </tr>
+</thead>
+<tbody>
+    {% for pointage in pointages %}
+        <th> {{pointage["street"]}} </th>
+        <th>{{pointage["name"]}}</th>
+        <th>{{pointage["checktime"] | date("Y:m:d")}}</th>
+        <th>{{pointage["checktime"] | date("H;i:s")}}</th>
+        <th>{{pointage["salle"]}}</th>
+        <th>{{pointage["ip"]}}</th>
+        <th>{{pointage["sn"]}}</th>
+    {% endfor %}
+</tbody>
+<tfoot>
+    <tr>
+    <th>Admission</th>
+    <th>Nom Complet</th>
+    <th>Date Pointage</th>
+    <th>Heur Pointage</th>
+    <th>Salle</th>
+    <th>Ip</th>
+    <th>Sn</th>
+    </tr>
+</tfoot>
+</table>
