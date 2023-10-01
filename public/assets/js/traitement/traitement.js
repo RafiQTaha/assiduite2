@@ -20,7 +20,7 @@ $(document).ready(function () {
       [10, 15, 25, 50, 100, "All"],
     ],
     order: [[0, "desc"]],
-    ajax: "/assiduite/traitement/list",
+    ajax: "/assiduite/traitement/list/normal",
     processing: true,
     serverSide: true,
     deferRender: true,
@@ -424,7 +424,7 @@ $(document).ready(function () {
 
     try {
         icon.removeClass('fa-search').addClass("fa-spinner fa-spin ");
-        const request = await axios.get('/assiduite/traitement/parlot/'+hd+"/"+hf+"/"+etablissement+"/"+formation+"/"+date);
+        const request = await axios.get('/assiduite/traitement/parlot/'+hd+"/"+hf+"/"+etablissement+"/"+formation+"/"+date+"/normal");
         const response = request.data;
 
         $('body #parlot_datatable').html(response.html);
