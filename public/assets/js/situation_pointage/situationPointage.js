@@ -89,7 +89,7 @@ const Toast = Swal.mixin({
 
             $("body #datatables_pointages").DataTable({
             language: {
-                url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
+              url: "/assets/js/datatables-french/datatables-french.json",
             }
             });
           icon.addClass('fa-search').removeClass("fa-spinner fa-spin ");

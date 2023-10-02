@@ -25,7 +25,8 @@ $(document).ready(function () {
     serverSide: true,
     deferRender: true,
     language: {
-      url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
+      url: "/assets/js/datatables-french/datatables-french.json",
+      // url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
     },
     preDrawCallback: function(settings) {
         if ($.fn.DataTable.isDataTable('#datatables_gestion_seances')) {
@@ -101,7 +102,7 @@ $(document).ready(function () {
         $("#modal-etudiant").modal("show");
         $("body #etudiant_datatable").DataTable({
           language: {
-            url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
+            url: "/assets/js/datatables-french/datatables-french.json",
           },
         });
     } catch (error) {
@@ -435,7 +436,7 @@ $(document).ready(function () {
 
         $("body #parlot_datatable").DataTable({
           language: {
-            url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
+            url: "/assets/js/datatables-french/datatables-french.json",
           }
         });
 
