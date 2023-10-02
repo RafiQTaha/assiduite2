@@ -122,13 +122,11 @@ class SituationPresentielController extends AbstractController
         if($cats){
             if ($cats[0]['categorie_f']) {
                 $cat = $cats[0]['categorie_f'];
-            }
-            if ($cats[0]['categorie_si']) {
+            }elseif ($cats[0]['categorie_si']){
                 $cat = $cats[0]['categorie_si'];
-            }
-            if ($cats[0]['categorie']) {
+            }elseif($cats[0]['categorie']) {
                 $cat = $cats[0]['categorie'];
-            } 
+            }
         }
         return new Response($cat, 200, ['Content-Type' => 'text/html']);
     }
