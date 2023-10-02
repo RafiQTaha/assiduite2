@@ -257,8 +257,8 @@ class PlEmptimeRepository extends ServiceEntityRepository
 
     public function getEmptimeByCurrentDayAndSalle($sall)
     {
-        // $date =date('Y-m-d')."%";
-        $date ="2023-09-08%";
+        $date =date('Y-m-d')."%";
+        // $date ="2023-09-08%";
         return $this->createQueryBuilder('e')
             ->innerJoin("e.programmation", "programmation")
             ->innerJoin("programmation.element", "element")
