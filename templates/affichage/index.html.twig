@@ -1,0 +1,219 @@
+
+
+{% block title %}{% endblock %}
+{% block stylesheets %}
+<head>
+<meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+
+<style>
+*{
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    zoom: 98%;
+}
+body{
+    font-family: Helvetica;
+    -webkit-font-smoothing: antialiased;
+    background: rgba( 71, 147, 227, 1);
+  font-size: 5px;
+
+}
+h2{
+    text-align: center;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: white;
+    padding: 30px 0;
+}
+
+/* Table Styles */
+
+.table-wrapper{
+    margin: -29px 54px 48px;
+    box-shadow: 0px 35px 50px rgba( 0, 0, 0, 0.2 );
+}
+
+.fl-table {
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: normal;
+    border: none;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 100%;
+    white-space: nowrap;
+    background-color: white;
+}
+
+.fl-table td, .fl-table th {
+    text-align: center;
+    padding: 6px;
+}
+
+.fl-table td {
+    border-right: 1px solid #f8f8f8;
+    font-size: 12px;
+}
+
+.fl-table thead th {
+    color: #ffffff;
+    background: #4FC3A1;
+}
+
+
+.fl-table thead th:nth-child(odd) {
+    color: #ffffff;
+    background: #324960;
+}
+
+.fl-table tr:nth-child(even) {
+    background: #F8F8F8;
+}
+
+/* Responsive */
+
+@media (max-width: 767px) {
+    .fl-table {
+        display: block;
+        width: 100%;
+    }
+    .table-wrapper:before{
+        content: "Scroll horizontally >";
+        display: block;
+        text-align: right;
+        font-size: 11px;
+        color: white;
+        padding: 0 0 10px;
+    }
+    .fl-table thead, .fl-table tbody, .fl-table thead th {
+        display: block;
+    }
+    .fl-table thead th:last-child{
+        border-bottom: none;
+    }
+    .fl-table thead {
+        float: left;
+    }
+    .fl-table tbody {
+        width: auto;
+        position: relative;
+        overflow-x: auto;
+    }
+    .fl-table td, .fl-table th {
+        padding: 20px .625em .625em .625em;
+        height: 60px;
+        vertical-align: middle;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 120px;
+        font-size: 13px;
+        text-overflow: ellipsis;
+    }
+    .fl-table thead th {
+        text-align: left;
+        border-bottom: 1px solid #f7f7f9;
+    }
+    .fl-table tbody tr {
+        display: table-cell;
+    }
+    .fl-table tbody tr:nth-child(odd) {
+        background: none;
+    }
+    .fl-table tr:nth-child(even) {
+        background: transparent;
+    }
+    .fl-table tr td:nth-child(odd) {
+        background: #F8F8F8;
+        border-right: 1px solid #E6E4E4;
+    }
+    .fl-table tr td:nth-child(even) {
+        border-right: 1px solid #E6E4E4;
+    }
+    .fl-table tbody td {
+        display: block;
+        text-align: center;
+    }
+}
+* {
+  box-sizing: border-box;
+}
+
+/* Create four equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 15%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
+{% endblock %}
+{% block body %}
+  <body onload="JavaScript:AutoRefresh(50000);">
+    <h2>Présence</h2>
+    <div class="table-wrapper" style="font-size: 10px;">
+      <div class="row">
+        {% set count = 0 %}
+        {% for sall in salle %}
+          {% if count % 28 == 0 %}
+            </table>
+          </div>
+          <div class="column">
+            <table class="fl-table" style="width: 250px !important;" id="salle">
+              <thead>
+                <tr style="font-size: 10px;">
+                  <th>Etudiants</th>
+                  <th>categorie</th>
+                </tr>
+              </thead>
+              <tbody style="font-size: 10px;">
+          {% endif %}
+          <tr>
+            <td style="white-space: nowrap;max-width:40px;overflow: hidden;text-overflow: ellipsis;">{{ sall.nom }} {{ sall.prénom }}</td>
+            {% set categoryBgColor = {
+              'A': 'lightgreen',
+              'B': 'lightyellow',
+              'C': 'red',
+              'D': 'red',
+              'P': 'green'
+            } %}
+            <td style="background-color: {{ categoryBgColor[sall.categorie] }};max-width:20px;">{{ sall.categorie }}</td>
+          </tr>
+          {% set count = count + 1 %}
+        {% endfor %}
+              </tbody>
+            </table>
+          </div>
+      </div>
+    </div>
+  </body>
+{% endblock %}
+{% block javascripts %}
+
+    <script type="text/JavaScript">
+        function AutoRefresh() {
+            setTimeout(function() {
+                location.reload(true);
+            }, 90000); // 6000 milliseconds = 6 seconds
+        }
+
+        // Call the AutoRefresh function initially to start the reload process
+        AutoRefresh();
+    </script>
+
+
+{% endblock %}
