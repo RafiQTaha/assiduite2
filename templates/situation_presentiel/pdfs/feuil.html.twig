@@ -182,12 +182,12 @@
 						<td>{{se["date_seance"]}}</td>
 						<td style="text-align:center;">{{se["heur_db"]}}</td>
 						<td style="text-align:center;">{{se["heur_fin"]}}</td>
-						<td style="text-align:center;">{{se["volume"]}}</td>
+						<td style="text-align:center;">{{se["volume"] | number_format(0, '.', ',') }}</td>
 						<td style="text-align:center;">
-                            {# {{ render(controller(
+                            {{ render(controller(
                             'App\\Controller\\SituationPresentielController::getCategorie', { adm : inscription.admission.code, seance :se["seance_id"] }
-                            )) }} #}
-                            -
+                            )) }}
+                            {# - #}
                         </td>
 						{# {% if (et.Categorie == "D" or et.Categorie == "C") and et.Categorie_Enseig == "Z" %}
 

@@ -59,15 +59,18 @@ class SituationPresentielController extends AbstractController
     {
 
         // dd($ins,$sem);
-
+        ini_set('pcre.backtrack_limit', 10000000);
         $inscription = $this->em->getRepository(TInscription::class)->find($ins);
-
-        if($sem == "global"){
-            $filter = " and 1=1";
-        }else{
+        $filter="";
+        if($sem != "global"){
             $filter = " and sem.id = $sem";
         }
-
+        
+        if ($inscription->getGroupe()) {
+            $grp = " and pl.groupe_id =" .$inscription->getGroupe()->getId();
+        }else {
+            $grp = " and pl.groupe_id is null ";
+        }
         // dd($inscription);
  
         $requete = "SELECT pl.id as seance_id, nat.abreviation as type, mdl.designation as module, ele.designation as element, pl.start as date_seance, pl.heur_db, pl.heur_fin , semaine.id as semaine_id, semaine.date_debut as sem_debut, semaine.date_fin as sem_fin, time_to_sec(timediff(pl.heur_fin,  
@@ -79,8 +82,10 @@ class SituationPresentielController extends AbstractController
         INNER JOIN ac_semestre sem on sem.id = mdl.semestre_id
         INNER JOIN ac_promotion prm on prm.id = sem.promotion_id
         INNER JOIN semaine semaine on semaine.id = pl.semaine_id
-        
-        where prm.id = ".$inscription->getPromotion()->getId()." $filter;";
+        inner join ac_annee ann on ann.id = prog.annee_id
+
+        where prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
+        $grp  $filter;";
 
         // dd($requete);
         $stmt = $this->em->getConnection()->prepare($requete);
@@ -97,15 +102,15 @@ class SituationPresentielController extends AbstractController
             'margin_bottom' => 1,
         ]);            
         // $mpdf->showImageErrors = true;
-        $mpdf->SetTitle('Feuil');
+        $mpdf->SetTitle('Situation Presentiel');
         $mpdf->showImageErrors = true;
         $mpdf->WriteHTML($html);
-        $mpdf->Output('fueil' , 'I');
+        $mpdf->Output('Situation Presentiel' , 'I');
         // return new JsonResponse(['html' => $html]);
     }
     public function getCategorie($adm, $seance)
     {
-        $requete="SELECT xabs.categorie_f
+        $requete="SELECT xabs.categorie,xabs.categorie_si,xabs.categorie_f
         FROM xseance_absences xabs
         WHERE xabs.id_admission='$adm' AND xabs.id_séance='$seance'";
         // dd($requete);
@@ -113,10 +118,18 @@ class SituationPresentielController extends AbstractController
         $newstmt = $stmt->executeQuery();   
         $cats = $newstmt->fetchAll();
         // dd($cats);
+        $cat = "-";
         if($cats){
-            return new Response($cats[0], 200, ['Content-Type' => 'text/html']);
-        }else{
-            return new Response("-", 200, ['Content-Type' => 'text/html']);
+            if ($cats[0]['categorie_f']) {
+                $cat = $cats[0]['categorie_f'];
+            }
+            if ($cats[0]['categorie_si']) {
+                $cat = $cats[0]['categorie_si'];
+            }
+            if ($cats[0]['categorie']) {
+                $cat = $cats[0]['categorie'];
+            } 
         }
+        return new Response($cat, 200, ['Content-Type' => 'text/html']);
     }
 }
