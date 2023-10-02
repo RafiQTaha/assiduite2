@@ -320,12 +320,12 @@ $(function() {
   });
 
   // tooltip
-  $("[data-toggle='tooltip']").tooltip();
+  // $("[data-toggle='tooltip']").tooltip();
 
   // popover
-  $('[data-toggle="popover"]').popover({
-    container: 'body'
-  });
+  // $('[data-toggle="popover"]').popover({
+  //   container: 'body'
+  // });
 
   // Select2
   if(jQuery().select2) {
@@ -340,7 +340,7 @@ $(function() {
     });
   }
 
-  $(".notification-toggle").dropdown();
+  // $(".notification-toggle").dropdown();
   $(".notification-toggle").parent().on('shown.bs.dropdown', function() {
     $(".dropdown-list-icons").niceScroll({
       cursoropacitymin: .3,
@@ -349,7 +349,7 @@ $(function() {
     });
   });
 
-  $(".message-toggle").dropdown();
+  // $(".message-toggle").dropdown();
   $(".message-toggle").parent().on('shown.bs.dropdown', function() {
     $(".dropdown-list-message").niceScroll({
       cursoropacitymin: .3,
