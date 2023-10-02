@@ -90,7 +90,7 @@ class AffichageController extends AbstractController
     //     }
 
 
-    return $this->render('affichage/salle.html.twig', [
+    return $this->render('affichage/index.html.twig', [
         "salle" =>$sean,
      
     ]); 
