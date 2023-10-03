@@ -71,9 +71,9 @@ class SituationPresentielController extends AbstractController
         }else {
             $grp = " and pl.groupe_id is null ";
         }
-        // dd($inscription);
+        $today = (new DateTime())->format("Y-m-d");
  
-        $requete = "SELECT pl.id as seance_id, nat.abreviation as type, mdl.designation as module, ele.designation as element, pl.start as date_seance, pl.heur_db, pl.heur_fin , semaine.id as semaine_id, semaine.date_debut as sem_debut, semaine.date_fin as sem_fin, time_to_sec(timediff(pl.heur_fin,  
+        $requete = "SELECT pl.id as seance_id, pl.start as date_seance, nat.abreviation as type, mdl.designation as module, ele.designation as element, pl.start as date_seance, pl.heur_db, pl.heur_fin , semaine.id as semaine_id, semaine.date_debut as sem_debut, semaine.date_fin as sem_fin, time_to_sec(timediff(pl.heur_fin,  
         pl.heur_db )) / 3600 as volume FROM `pl_emptime` pl
         INNER JOIN pr_programmation prog on prog.id = pl.programmation_id
         INNER JOIN pnature_epreuve nat on nat.id = prog.nature_epreuve_id
@@ -84,14 +84,16 @@ class SituationPresentielController extends AbstractController
         INNER JOIN semaine semaine on semaine.id = pl.semaine_id
         inner join ac_annee ann on ann.id = prog.annee_id
 
-        where prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
+        where date(pl.start) < '$today' and prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
         $grp  $filter;";
 
         // dd($requete);
         $stmt = $this->em->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $seances = $newstmt->fetchAll();
-        // dd($seances);
+        if($ins == 18838){
+            dd($seances);
+        }
         $html = $this->renderView('situation_presentiel/pdfs/feuil.html.twig', ['seances' => $seances, 'inscription' => $inscription]);
 
         $mpdf = new Mpdf([
