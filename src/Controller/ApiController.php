@@ -89,6 +89,26 @@ class ApiController extends AbstractController
         $data = self::dropdownEtudiant($inscriptions,'etudiant');
         return new JsonResponse($data);
     }
+    // #[Route('/residanat-etud/{Residanat}', name: 'resid-aff')]
+    // public function residanat_aff($Residanat): Response
+    // {   
+    //     if($Residanat == "1")
+    //     {   $requete="SELECT DISTINCT (code_admission), nom , prenom  
+    //         FROM `x_inscription_grp` WHERE promotion_code IN ('PRM0000007','PRM0000006','PRM00000317','PRM00000311','PRM00000313','PRM00000013') 
+    //         and ( niv_1 in ('A','C') or  niv_2 in ('A','C') or  niv_3 in ('A','C'))";
+    //     }
+    //     else{$requete="SELECT DISTINCT (code_admission) , `nom`,`prenom` FROM `x_inscription_grp`
+    //         INNER JOIN ac_promotion ON x_inscription_grp.promotion_code=ac_promotion.code
+    //         INNER JOIN ac_formation ON ac_formation.id=ac_promotion.formation_id 
+    //         WHERE ac_formation.abreviation in ('MEI','ANP','REA','BM','HEC','RAD','NP','PD','GS','PN','CCV','CV','GO','GN','CAR','END','NRO','RTH','ONC','ORL', 'OPH','DRM','URL','TOR','RUM','NC','BC','OCH','PEP','PRD','PRT','ODF')
+    //             ";}
+        
+   
+    //     $residanatEtudiant =  self::execute($requete,$this->em);
+    //     $data = self::dropdownsituation($residanatEtudiant,'residanatEtudiant');
+    //     // dd($data);
+    //     return new JsonResponse($data);
+    // }
     #[Route('/annee/{id}', name: 'getAnnee')]
     public function getAnnee($id): Response
     {   

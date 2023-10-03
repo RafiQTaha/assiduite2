@@ -373,11 +373,14 @@ class TraitementController extends AbstractController
                 // }, $sns);
                 // $sn = implode(',', $sn);
                 // dd($sn);
+                // if($id_seance == 53548){
+                //     dd($check_);
+                // }
                 if ($userInfo) {
                     // dd($userInfo);
                     $userid = $userInfo[0]["userid"];
                     // $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime like '$dateSeance%' AND sn in ($sn) ORDER BY checktime DESC";
-                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
+                    $requete = "SELECT * FROM `checkinout` WHERE userid = '$userid' AND checktime >= '$check_' AND date(checktime) = '$dateSeance' AND sn in ($sn) ORDER BY checktime ASC LIMIT 1";
                     
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
@@ -388,6 +391,7 @@ class TraitementController extends AbstractController
                 }
                 
                 if ($checkinout) {
+                    
                     $checktime_ = new \DateTime($checkinout[0]["checktime"]);
                     $interval = ($checktime_->getTimestamp() - $emptime->getStart()->getTimestamp()) / 60;
                     
@@ -415,6 +419,7 @@ class TraitementController extends AbstractController
             }else {
                 $cat = 'P';
             }
+            
             // dd('hi');
             $requete = "SELECT * FROM `xseance_absences` where id_admission = '$id_admission' and id_séance = '$id_seance' LIMIT 1";
             // dd($requete);
