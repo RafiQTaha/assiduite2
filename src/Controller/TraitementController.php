@@ -131,7 +131,7 @@ class TraitementController extends AbstractController
 
         left join xseance xs on xs.id_séance = emp.id 
 
-        $filtre group by emp.id ";
+        $filtre and emp.active = 1 group by emp.id ";
         // dd($sql);
         $totalRows .= $sql;
         $sqlRequest .= $sql;
@@ -246,6 +246,9 @@ class TraitementController extends AbstractController
             $stmt = $this->emPointage->getConnection()->prepare($requete);
             $newstmt = $stmt->executeQuery();   
             $pointages = $newstmt->fetchAll();
+            // if(!$sn == "AIOR200360236"){
+            //     dd($pointages);
+            // }
             // dd($pointages);
             if ($pointages) {
                 foreach ($pointages as $pointage) {
@@ -257,6 +260,7 @@ class TraitementController extends AbstractController
                     $uuserinfo = $newstmt->fetchAll();
 
                     if(!$uuserinfo){
+                        continue;
                         return new JsonResponse('Aucune userinfo n\'est trouvée!',500);
                         dd($uuserinfo);
                     }
@@ -1057,7 +1061,7 @@ class TraitementController extends AbstractController
 
         left join xseance xs on xs.id_séance = emp.id 
 
-        WHERE etab.id = '$etablissement' and form.id = '$formation' and emp.heur_db >= '$hd' and emp.heur_fin <= '$hf' and emp.start like '$todayDate' and (xs.statut not in (1,2) or xs.statut is null) $filtre group by emp.id";
+        WHERE etab.id = '$etablissement' and form.id = '$formation' and emp.heur_db >= '$hd' and emp.heur_fin <= '$hf' and emp.start like '$todayDate' and (xs.statut not in (1,2) or xs.statut is null) $filtre and emp.active = 1 group by emp.id";
         $stmt = $this->em->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $emptimes = $newstmt->fetchAll();
