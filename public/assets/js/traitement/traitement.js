@@ -86,7 +86,8 @@ $(document).ready(function () {
   });
 
   $("body").on("dblclick", "#datatables_gestion_seances tbody tr", async function () {
-
+      $("#datatables_gestion_seances tbody tr").removeClass("active_databales");
+      $(this).addClass("active_databales");
       id_seance = $(this).attr("id");
       try {
         const request = await axios.get('/assiduite/traitement/etudiants/'+id_seance);
@@ -99,7 +100,7 @@ $(document).ready(function () {
           $("body #etudiant_datatable").DataTable().clear().destroy();
         }
         
-        $("#modal-etudiant").modal("show");
+        // $("#modal-etudiant").modal("show");
         $("body #etudiant_datatable").DataTable({
           language: {
             url: "/assets/js/datatables-french/datatables-french.json",

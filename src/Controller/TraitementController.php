@@ -233,10 +233,10 @@ class TraitementController extends AbstractController
         // $sns = [];
         $sns ="";
         $dateSeance = $emptime->getStart()->format('Y-m-d');
-        if (!$pointeuses) {
-            return new JsonResponse('Aucune Pointeuse n\'est trouvée!',500);
-            dd($pointeuses);
-        }
+        // if (!$pointeuses) {
+        //     return new JsonResponse('Aucune Pointeuse n\'est trouvée!',500);
+        //     dd($pointeuses);
+        // }
         // dd($pointeuses);
         foreach ($pointeuses as $machine) {
             $sn = $machine["sn"];
@@ -324,6 +324,7 @@ class TraitementController extends AbstractController
         if (count($inscriptions) == 0) {
             die('Aucun Etudiant Trouver!!!');
         }
+
         $counter = 0;
         $ID_etablissement = $annee->getFormation()->getEtablissement()->getId();
         // $A = $ID_etablissement == 28 ? 20 : 15;
@@ -346,7 +347,9 @@ class TraitementController extends AbstractController
         $date->modify($AA.' min');
         $check_ = $date->format("Y-m-d H:i:s"); //!!!!!!!!!!!!!!!!!!!!!!!!!!
         foreach ($inscriptions as $inscription) {
-
+            // if($inscription->getId() == 19723){
+            //     dd($inscription);
+            // }
             $id_admission = $inscription->getAdmission()->getCode();
             $id_module = $element->getModule()->getCode();
             $id_annee = $annee->getCode();
@@ -1309,9 +1312,14 @@ class TraitementController extends AbstractController
             "date" =>$date2,
         ])->getContent();
         
+            
+
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
-            'margin_top' => 100,
+            'margin_top' => 100, 
+            'margin_right' => 10,  
+            'margin_bottom' => 10, 
+            'margin_left' => 10, 
         ]);            
         $mpdf->SetTitle('Feuil');
         $mpdf->SetJS('this.print()');
@@ -1340,7 +1348,8 @@ class TraitementController extends AbstractController
             ])->getContent()
         );
         $mpdf->WriteHTML($html);
-        $mpdf->Output('fueil' , 'I');
+        // $mpdf->Output('fueil' , 'I');
+        $mpdf->Output($emptime->getId().".pdf", "I");
         
     
         
@@ -1445,7 +1454,7 @@ class TraitementController extends AbstractController
             $sheet->setCellValue('E'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getFormation()->getAbreviation());
             $sheet->setCellValue('F'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getDesignation());
             $sheet->setCellValue('G'.$i, $emptime->getGroupe() ? $emptime->getGroupe()->getNiveau() : "");
-            $sheet->setCellValue('H'.$i, $emptime->getXSalle()->getDesignation());
+            $sheet->setCellValue('H'.$i, $emptime->getXSalle()?$emptime->getXSalle()->getDesignation():"");
             $sheet->setCellValue('I'.$i, $emptime->getEmptimens()[0]->getEnseignant()->getNom()." ".$emptime->getEmptimens()[0]->getEnseignant()->getPrenom());
             
             

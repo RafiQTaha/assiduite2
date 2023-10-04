@@ -105,7 +105,7 @@
 							<td style="padding-top:5px" class="td tdsmall">Etudiant</td>
 
 							<td style="padding-top:5px" class="td">:&nbsp;&nbsp;&nbsp;{{inscription.admission.preinscription.etudiant.nom}}
-								{{inscription.admission.preinscription.etudiant.nom}}
+								{{inscription.admission.preinscription.etudiant.prenom}}
 							</td>
 
 						</tr>
@@ -179,7 +179,7 @@
 						</td>
 
 
-						<td>{{se["date_seance"]}}</td>
+						<td>{{se["date_seance"] | date("Y-m-d")}}</td>
 						<td style="text-align:center;">{{se["heur_db"]}}</td>
 						<td style="text-align:center;">{{se["heur_fin"]}}</td>
 						<td style="text-align:center;">{{se["volume"] | number_format(0, '.', ',') }}</td>

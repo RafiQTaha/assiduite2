@@ -67,10 +67,11 @@ class SituationPresentielController extends AbstractController
         }
         
         if ($inscription->getGroupe()) {
-            $grp = " and pl.groupe_id =" .$inscription->getGroupe()->getId();
+            $grp = " and (pl.groupe_id =" .$inscription->getGroupe()->getId() ." or pl.groupe_id is null) ";
         }else {
             $grp = " and pl.groupe_id is null ";
         }
+        $etudiant = $inscription->getAdmission()->getPreinscription()->getEtudiant();
         $today = (new DateTime())->format("Y-m-d");
  
         $requete = "SELECT pl.id as seance_id, pl.start as date_seance, nat.abreviation as type, mdl.designation as module, ele.designation as element, pl.start as date_seance, pl.heur_db, pl.heur_fin , semaine.id as semaine_id, semaine.date_debut as sem_debut, semaine.date_fin as sem_fin, time_to_sec(timediff(pl.heur_fin,  
@@ -84,16 +85,18 @@ class SituationPresentielController extends AbstractController
         INNER JOIN semaine semaine on semaine.id = pl.semaine_id
         inner join ac_annee ann on ann.id = prog.annee_id
 
+        inner join xseance xs on xs.id_séance = pl.id
+
         where date(pl.start) < '$today' and prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
-        $grp  $filter;";
+        $grp $filter and xs.statut != 0 ORDER BY date_seance;";
 
         // dd($requete);
         $stmt = $this->em->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $seances = $newstmt->fetchAll();
-        if($ins == 18838){
-            dd($seances);
-        }
+        // if($ins == 18838){
+            // dd($seances);
+        // }
         $html = $this->renderView('situation_presentiel/pdfs/feuil.html.twig', ['seances' => $seances, 'inscription' => $inscription]);
 
         $mpdf = new Mpdf([
@@ -107,7 +110,8 @@ class SituationPresentielController extends AbstractController
         $mpdf->SetTitle('Situation Presentiel');
         $mpdf->showImageErrors = true;
         $mpdf->WriteHTML($html);
-        $mpdf->Output('Situation Presentiel' , 'I');
+        // $mpdf->Output('Situation Presentiel' , 'I');
+        $mpdf->Output($etudiant->getNom()."_".$etudiant->getPrenom().".pdf", "I");
         // return new JsonResponse(['html' => $html]);
     }
     public function getCategorie($adm, $seance)
