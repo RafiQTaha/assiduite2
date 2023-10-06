@@ -1,0 +1,31 @@
+<thead>
+    <tr>
+        <th>Admission
+        </th>
+        <th>Etudiant
+        </th>
+        <th>User Id
+        </th>
+        <th>Salle
+        </th>
+        <th>Pointage
+        </th>
+        <th>Pointeuse Sn
+        </th>
+
+    </tr>
+</thead>
+<tbody>
+
+    {% for check in checkinout %}
+        <tr>
+            <td>{{check["street"]}}</td>
+            <td>{{check["name"]}}</td>
+            <td>{{check["userid"]}}</td>
+            <td>{{salle.designation}}</td>                         
+            <td>{{check["checktime"] | date("h:i:s")}}</td>                         
+            <td>{{check["sn"]}}</td>                        
+        </tr>
+    {% endfor %}
+        
+</tbody>

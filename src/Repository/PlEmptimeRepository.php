@@ -293,7 +293,7 @@ class PlEmptimeRepository extends ServiceEntityRepository
             ->innerJoin("programmation.element", "element")
             ->innerJoin("element.module", "module")
             ->innerJoin("module.semestre", "semestre")
-            ->where('semestre.id = :semestre')
+            ->where('semestre in (:semestre)')
             ->andWhere("groupe = :groupe")
             ->andWhere("semaine = :semaine")
             ->andWhere("e.active = 1")

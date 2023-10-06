@@ -71,6 +71,10 @@ $(document).ready(function () {
         $("body .b").find(".number").text(response.data["B"]);
         $("body .c").find(".number").text(response.data["C"]);
         $("body .d").find(".number").text(response.data["D"]);
+        $("body .p").find(".number").text(response.data["P"]);
+        $("body .s").find(".number").text(response.data["S"]);
+        $("body .z").find(".number").text(response.data["Z"]);
+        $("body .total").find(".number").text(response.data["total"]);
         $("body .small-box").addClass("active");
       } catch (error) {
         console.log(error, error.response);
@@ -89,6 +93,8 @@ $(document).ready(function () {
       $("#datatables_gestion_seances tbody tr").removeClass("active_databales");
       $(this).addClass("active_databales");
       id_seance = $(this).attr("id");
+      const icon = $("#btnEtudiants i");
+      icon.removeClass('fa-user-friends').addClass("fa-spinner fa-spin ");
       try {
         const request = await axios.get('/assiduite/traitement/etudiants/'+id_seance);
         const response = request.data;
@@ -106,6 +112,7 @@ $(document).ready(function () {
             url: "/assets/js/datatables-french/datatables-french.json",
           },
         });
+        icon.addClass('fa-user-friends').removeClass("fa-spinner fa-spin ");
     } catch (error) {
         console.log(error, error.response);
         const message = error.response.data.error;
@@ -113,6 +120,7 @@ $(document).ready(function () {
             icon: 'error',
             title: message,
         })
+        icon.addClass('fa-user-friends').removeClass("fa-spinner fa-spin ");
     }
   });
 
@@ -316,6 +324,10 @@ $(document).ready(function () {
       $("body .b").find(".number").text(response.data["B"]);
       $("body .c").find(".number").text(response.data["C"]);
       $("body .d").find(".number").text(response.data["D"]);
+      $("body .p").find(".number").text(response.data["P"]);
+      $("body .s").find(".number").text(response.data["S"]);
+      $("body .z").find(".number").text(response.data["Z"]);
+      $("body .total").find(".number").text(response.data["total"]);
       $("body .small-box").addClass("active");
     } catch (error) {
       console.log(error, error.response.data);
@@ -368,6 +380,10 @@ $(document).ready(function () {
         $("body .b").find(".number").text(response.data["B"]);
         $("body .c").find(".number").text(response.data["C"]);
         $("body .d").find(".number").text(response.data["D"]);
+        $("body .p").find(".number").text(response.data["P"]);
+        $("body .s").find(".number").text(response.data["S"]);
+        $("body .z").find(".number").text(response.data["Z"]);
+        $("body .total").find(".number").text(response.data["total"]);
         $("body .small-box").addClass("active");
       } catch (error) {
         console.log(error, error.response);
@@ -818,7 +834,7 @@ $('#edit_etudiant').on('submit', async function(e){
       const response = request.data;
       icon.addClass('fa-check').removeClass("fa-spinner fa-spin ");
       $("#etudiant_details").modal("hide")
-      $("body #etudiant_datatable").ajax.reload(null, false)
+      $("body #etudiant_datatable").ajax.reload()
   } catch (error) {
       console.log(error)
       const message = error.response.data;
@@ -885,6 +901,38 @@ $('body #parlot_traiter').on('click', async function(e){
       
         }
 
-})
+    })
+
+    $('body').on('click','#pointage_seance', async function(e){
+      // id_seance = $(this).attr("id");
+      const icon = $("#pointage_seance i");
+      icon.removeClass('fa-search').addClass("fa-spinner fa-spin");
+      try {
+        const request = await axios.get('/assiduite/traitement/pointages/'+id_seance);
+        const response = request.data;
+        
+        $('#pointage_datatable').html(response.html);
+        
+        if ($.fn.DataTable.isDataTable("body #pointage_datatable")) {
+          $("body #pointage_datatable").DataTable().clear().destroy();
+        }
+        
+        $("#modal-pointage").modal("show");
+        $("body #pointage_datatable").DataTable({
+          language: {
+            url: "/assets/js/datatables-french/datatables-french.json",
+          },
+        });
+        icon.addClass('fa-search').removeClass("fa-spinner fa-spin ");
+    } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+        })
+        icon.addClass('fa-search').removeClass("fa-spinner fa-spin ");
+    }
+  });
 
 });

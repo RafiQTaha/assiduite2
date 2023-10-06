@@ -52,6 +52,18 @@ class AcAnneeRepository extends ServiceEntityRepository
         ->getOneOrNullResult();
     }
 
+    // pour assiduite
+    public function getAnneeByFor($formation)
+    {
+        //a.designation = '2021/2022' pour les derogation ca compte apartir de l'annee 2021/2022
+        return $this->createQueryBuilder('a')
+        ->innerJoin("a.formation", 'formation')
+        ->where("formation = :formation")
+        ->orderBy('a.id','DESC')
+        ->setParameter('formation', $formation)
+        ->getQuery()
+        ->getResult();
+    }
     
     public function getActiveAnneeByFormation($formation): ?AcAnnee
     {

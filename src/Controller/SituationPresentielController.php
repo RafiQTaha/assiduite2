@@ -15,6 +15,7 @@ use App\Entity\TAdmission;
 use App\Entity\ISeanceSalle;
 use App\Entity\TInscription;
 use App\Entity\AcEtablissement;
+use App\Entity\PGroupe;
 use App\Entity\XseanceAbsences;
 use App\Entity\XseanceCapitaliser;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -61,16 +62,27 @@ class SituationPresentielController extends AbstractController
         // dd($ins,$sem);
         ini_set('pcre.backtrack_limit', 10000000);
         $inscription = $this->em->getRepository(TInscription::class)->find($ins);
+        // dd($inscription->getPromotion());
         $filter="";
         if($sem != "global"){
             $filter = " and sem.id = $sem";
         }
         
-        if ($inscription->getGroupe()) {
-            $grp = " and (pl.groupe_id =" .$inscription->getGroupe()->getId() ." or pl.groupe_id is null) ";
-        }else {
+        $groupe = $inscription->getGroupe();
+        if ($groupe) {
+            $groupes =  $groupe->getId();
+            if ($groupe->getGroupe()) {
+                $groupes .=  ','.$groupe->getGroupe()->getId();
+                if ($groupe->getGroupe()->getGroupe()) {
+                    $groupes .=  ','.$groupe->getGroupe()->getGroupe()->getId();
+                }
+            }
+            $grp = " and (pl.groupe_id in($groupes) or pl.groupe_id is null) ";
+        }
+        else {
             $grp = " and pl.groupe_id is null ";
         }
+        // dd($groupes);
         $etudiant = $inscription->getAdmission()->getPreinscription()->getEtudiant();
         $today = (new DateTime())->format("Y-m-d");
  
@@ -84,11 +96,10 @@ class SituationPresentielController extends AbstractController
         INNER JOIN ac_promotion prm on prm.id = sem.promotion_id
         INNER JOIN semaine semaine on semaine.id = pl.semaine_id
         inner join ac_annee ann on ann.id = prog.annee_id
-
         inner join xseance xs on xs.id_séance = pl.id
 
         where date(pl.start) < '$today' and prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
-        $grp $filter and xs.statut != 0 ORDER BY date_seance;";
+        $grp  $filter and xs.statut != 0 ORDER BY date_seance;";
 
         // dd($requete);
         $stmt = $this->em->getConnection()->prepare($requete);

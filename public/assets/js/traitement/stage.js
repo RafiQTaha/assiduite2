@@ -71,6 +71,10 @@ const Toast = Swal.mixin({
           $("body .b").find(".number").text(response.data["B"]);
           $("body .c").find(".number").text(response.data["C"]);
           $("body .d").find(".number").text(response.data["D"]);
+          $("body .p").find(".number").text(response.data["P"]);
+        $("body .s").find(".number").text(response.data["S"]);
+        $("body .z").find(".number").text(response.data["Z"]);
+        $("body .total").find(".number").text(response.data["total"]);
           $("body .small-box").addClass("active");
         } catch (error) {
           console.log(error, error.response);
@@ -316,6 +320,10 @@ const Toast = Swal.mixin({
         $("body .b").find(".number").text(response.data["B"]);
         $("body .c").find(".number").text(response.data["C"]);
         $("body .d").find(".number").text(response.data["D"]);
+        $("body .p").find(".number").text(response.data["P"]);
+        $("body .s").find(".number").text(response.data["S"]);
+        $("body .z").find(".number").text(response.data["Z"]);
+        $("body .total").find(".number").text(response.data["total"]);
         $("body .small-box").addClass("active");
       } catch (error) {
         console.log(error, error.response.data);
@@ -368,6 +376,10 @@ const Toast = Swal.mixin({
           $("body .b").find(".number").text(response.data["B"]);
           $("body .c").find(".number").text(response.data["C"]);
           $("body .d").find(".number").text(response.data["D"]);
+          $("body .p").find(".number").text(response.data["P"]);
+        $("body .s").find(".number").text(response.data["S"]);
+        $("body .z").find(".number").text(response.data["Z"]);
+        $("body .total").find(".number").text(response.data["total"]);
           $("body .small-box").addClass("active");
         } catch (error) {
           console.log(error, error.response);

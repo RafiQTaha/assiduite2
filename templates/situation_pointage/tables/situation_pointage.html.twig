@@ -12,13 +12,22 @@
 </thead>
 <tbody>
     {% for pointage in pointages %}
+    <tr>
         <th> {{pointage["street"]}} </th>
         <th>{{pointage["name"]}}</th>
-        <th>{{pointage["checktime"] | date("Y:m:d")}}</th>
-        <th>{{pointage["checktime"] | date("H;i:s")}}</th>
-        <th>{{pointage["salle"]}}</th>
+        <th>{{pointage["checktime"] | date("Y-m-d")}}</th>
+        <th>{{pointage["checktime"] | date("H:i:s")}}</th>
+        <th>
+            {{pointage["salleDesignation"]}}
+        </th>
+        {# <th>
+            {{ render(controller(
+            'App\\Controller\\SituationPointageController::getSalle', { code : pointage["code_salle"]}
+            )) }}
+        </th> #}
         <th>{{pointage["ip"]}}</th>
         <th>{{pointage["sn"]}}</th>
+    </tr>
     {% endfor %}
 </tbody>
 <tfoot>

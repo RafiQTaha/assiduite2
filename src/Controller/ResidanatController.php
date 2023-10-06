@@ -46,7 +46,155 @@ class ResidanatController extends AbstractController
         $hour = date(' H:i:s');
         $date = date('Y-m-d');
         $dates = date('Y-m-d', strtotime('-1 day', strtotime($date)));
-    
+        $badgenumber = "1858,
+        1907,
+        1838,
+        1943,
+        8447,
+        8448,
+        8716,
+        8692,
+        8907,
+        8688,
+        5225,
+        5220,
+        8425,
+        8449,
+        8675,
+        8705,
+        8724,
+        8685,
+        8651,
+        8681,
+        8648,
+        4855,
+        4499,
+        8645,
+        8741,
+        1070,
+        1100,
+        1034,
+        1077,
+        1053,
+        1161,
+        1113,
+        1124,
+        1081,
+        1105,
+        1059,
+        1078,
+        1123,
+        1154,
+        1149,
+        1093,
+        1122,
+        1095,
+        1041,
+        1045,
+        1133,
+        1138,
+        1047,
+        1048,
+        1130,
+        1433,
+        1390,
+        1259,
+        1449,
+        1452,
+        8693,
+        8796,
+        8735,
+        8649,
+        8763,
+        5139,
+        514,
+        378,
+        113,
+        1636,
+        1607,
+        1493,
+        1520,
+        1570,
+        1590,
+        1649,
+        1530,
+        1539,
+        1580,
+        1492,
+        1655,
+        1509,
+        1638,
+        1559,
+        1504,
+        1538,
+        2514,
+        1561,
+        1503,
+        1604,
+        1557,
+        1629,
+        2505,
+        5101,
+        9284,
+        8429,
+        8441,
+        8748,
+        8750,
+        8707,
+        8432,
+        8710,
+        2547,
+        8438,
+        8691,
+        8764,
+        2541,
+        8436,
+        8680,
+        8728,
+        8719,
+        2548,
+        8423,
+        8677,
+        8704,
+        8440,
+        8439,
+        8647,
+        8686,
+        8431,
+        8428,
+        8430,
+        8437,
+        8698,
+        8696,
+        8720,
+        9285,
+        8738,
+        8434,
+        8435,
+        8739,
+        8706,
+        8726,
+        4854,
+        5189,
+        8650,
+        5221,
+        8426,
+        2249,
+        8422,
+        8718,
+        8712,
+        1293,
+        1245,
+        1255,
+        1243,
+        1248,
+        1289,
+        2195,
+        2255,
+        2113,
+        2254,
+        2074,
+        2120";
         $admission = "'ADM-FMA_ORL00003355',
         'ADM-FMA_OPH00003354',
         'ADM-FMA_CAR00004432',
@@ -199,47 +347,82 @@ class ResidanatController extends AbstractController
         'ADM-FDA_FDA00002777'";
         $myArray="'x',";
             
-        $requete="SELECT DISTINCT userinfo.name,userinfo.street,
-        date_format(checkinout.checktime,'%Y-%m-%d') as Dat,min(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMINIMAL,max(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMaximal 
-        from userinfo
-        left join checkinout on checkinout.userid = userinfo.userid
-        WHERE userinfo.street in ($admission)  AND CHECKTIME>='$dates 06:00:00' AND CHECKTIME<='$dates 23:59:00' GROUP BY street order by name";
-        // dd($salle);
-        $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-        $newstmt = $stmt->executeQuery();   
-        $sean = $newstmt->fetchAll();
-        foreach($sean as $l){
-            $myArray.="'".$l['street']."',";
-        }
+        // $requete="SELECT DISTINCT userinfo.name,userinfo.street,checkinout.checktime,
+        // date_format(checkinout.checktime,'%Y-%m-%d') as Dat,min(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMINIMAL,max(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMaximal 
+        // from userinfo
+        // left join checkinout on checkinout.userid = userinfo.userid
+        // WHERE userinfo.street in ($admission)  AND checktime>='$dates 06:00:00' AND checktime<='$dates 23:59:00' GROUP BY street order by name";
+        // // dd($salle);
+        // $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        // $newstmt = $stmt->executeQuery();   
+        // $sean = $newstmt->fetchAll();
+        // foreach($sean as $l){
+        //     $myArray.="'".$l['street']."',";
+        // }
         // $requete="SELECT DISTINCT userinfo.name,userinfo.street,date_format(checkinout.checktime,'%Y-%m-%d') as Dat,min(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMINIMAL,max(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMaximal
         // from userinfo
         // left join checkinout on checkinout.userid = userinfo.userid
         // WHERE userinfo.street in ($admission) and checkinout.checktime between '2023-09-25' and '2023-10-02' 
         // order by name";
-        $requete="SELECT DISTINCT userinfo.name,userinfo.street,checkinout.checktime 
+        $requete="SELECT DISTINCT userinfo.name,userinfo.street,userinfo.badgenumber
         from userinfo
-        left join checkinout on checkinout.userid = userinfo.userid
-        WHERE userinfo.street in ($admission) and checkinout.checktime between '2023-09-25' and '2023-10-02' 
-        order by name";
+        WHERE userinfo.street in ($admission) order by name";
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
-        $sean2 = $newstmt->fetchAll();
-        // dd($sean2);
+        $userinfo = $newstmt->fetchAll();
+        // dd($requete);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'ADMISSION');
         $sheet->setCellValue('B1', 'NOM');
-        $sheet->setCellValue('C1', 'CHECKTIME');
+        $sheet->setCellValue('C1', 'date');
+        $sheet->setCellValue('D1', 'HEUREDEPOINTAGEMINIMAL');
+        $sheet->setCellValue('E1', 'HEUREDEPOINTAGEMaximal');
 
-        $i=3;
+        $i=2;
         $count = 1 ;
-        foreach ($sean2 as $sn) {
-            $sheet->setCellValue('A'.$i, $sn["street"]);
-            $sheet->setCellValue('B'.$i, $sn["name"]);
-            $sheet->setCellValue('C'.$i, $sn["checktime"]);
+        foreach ($userinfo as $sn) {
+
+            $requete="SELECT
+                c1.Dat,
+                c1.checktime AS min_pointage,
+                c2.checktime AS max_pointage
+            FROM
+                (
+                    SELECT DATE_FORMAT(checktime, '%Y-%m-%d') AS Dat, MIN(TIME_FORMAT(checktime, '%H:%i:%s')) AS checktime
+                    FROM checkinout
+                    WHERE userid = ".$sn["badgenumber"]."
+                    AND checktime BETWEEN '2023-09-01' AND '2023-09-27'
+                    GROUP BY Dat
+                ) c1
+            LEFT JOIN
+                (
+                    SELECT DATE_FORMAT(checktime, '%Y-%m-%d') AS Dat, MAX(TIME_FORMAT(checktime, '%H:%i:%s')) AS checktime
+                    FROM checkinout
+                    WHERE userid = ".$sn["badgenumber"]."
+                    AND checktime BETWEEN '2023-09-01' AND '2023-09-27'
+                    GROUP BY Dat
+                ) c2
+            ON c1.Dat = c2.Dat;";
+            // dd($requete);
+            $stmt = $this->emPointage->getConnection()->prepare($requete);
+            $newstmt = $stmt->executeQuery();   
+            $pointage = $newstmt->fetchAll();
+
+            foreach($pointage as $p){
+                
+                $sheet->setCellValue('A'.$i, $sn["street"]);
+                $sheet->setCellValue('B'.$i, $sn["name"]);
+                
+                // dd($pointage);
+                $sheet->setCellValue('C'.$i, ($p["Dat"]));
+                $sheet->setCellValue('D'.$i, $p["min_pointage"]);
+                $sheet->setCellValue('E'.$i, $p["max_pointage"]);
+
+                $i++;
+            }
             
             
-            $i++;
         }
 
             
@@ -283,7 +466,8 @@ class ResidanatController extends AbstractController
         inner join ac_formation frm on frm.id = ann.formation_id
         inner join ac_etablissement etab on etab.id = frm.etablissement_id
         INNER JOIN xseance ON xseance.ID_Séance=pl.id 
-        where date(pl.start) >= '2023-09-11' and date(pl.start) <= '2023-10-02' and frm.designation not like 'Résidanat%' and etab.id != 25 and nat.absence = 1 AND (xseance.Annulée=0 or xseance.Annulée is NULL )  order by seance_id ASC";
+        where date(pl.start) >= '2023-09-11' and date(pl.start) <= '2023-10-03' and frm.designation not like 'Résidanat%' and etab.id != 25 and nat.absence = 1 AND (xseance.Annulée=0 or xseance.Annulée is NULL ) and pl.active = 1  order by seance_id ASC";
+
 
         $stmt = $this->em->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
@@ -307,8 +491,8 @@ class ResidanatController extends AbstractController
         $sheet->setCellValue('M1', 'Formation');
         $sheet->setCellValue('N1', 'Promotion');
         $sheet->setCellValue('O1', 'Module');
-        $sheet->setCellValue('P1', 'Code Module');
-        $sheet->setCellValue('Q1', 'Code Element');
+        // $sheet->setCellValue('P1', 'Code Module');
+        // $sheet->setCellValue('Q1', 'Code Element');
         
         $i=2;
         $count = 1;
@@ -335,8 +519,8 @@ class ResidanatController extends AbstractController
                     $sheet->setCellValue('M'.$i, $seance["formation"]);
                     $sheet->setCellValue('N'.$i, $seance["promotion"]);
                     $sheet->setCellValue('O'.$i, $seance["module"]);
-                    $sheet->setCellValue('P'.$i, $seance["c_module"]);
-                    $sheet->setCellValue('Q'.$i, $seance["c_element"]);
+                    // $sheet->setCellValue('P'.$i, $seance["c_module"]);
+                    // $sheet->setCellValue('Q'.$i, $seance["c_element"]);
                     $i++;
                 }
             }

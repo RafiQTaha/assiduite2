@@ -81,7 +81,7 @@ block body %}
         <a href="#" id="z" class="btn btn-primary ml-1"><i class="fas fa-edit"></i> Z</a>
         <a href="#" id="s" class="btn btn-primary ml-1"><i class="fas fa-edit"></i> S</a>
       {% endif %}
-      <button type="button" class="btn btn-primary ml-1" data-toggle="modal" data-target="#modal-etudiant">
+      <button type="button" class="btn btn-primary ml-1" id="btnEtudiants" data-toggle="modal" data-target="#modal-etudiant">
         <i class="fas fa-user-friends"></i> Etudiants
       </button>
         {# {% for operation in operations %}
@@ -155,6 +155,22 @@ block body %}
               <div class="cat lettre">D</div>
               <div class="cat number">0</div>
             </div> 
+            <div class="small-box p">
+              <div class="cat lettre">P</div>
+              <div class="cat number">0</div>
+            </div> 
+            <div class="small-box s">
+              <div class="cat lettre">S</div>
+              <div class="cat number">0</div>
+            </div> 
+            <div class="small-box z">
+              <div class="cat lettre">Z</div>
+              <div class="cat number">0</div>
+            </div> 
+            <div class="small-box total">
+              <div class="cat lettre">TOT</div>
+              <div class="cat number">0</div>
+            </div> 
             {# <div class="clearfix"></div> #}
           </div>
           <table id="datatables_gestion_seances" class="table table-striped" style="width: 100%">
@@ -199,6 +215,7 @@ block body %}
 <!--Modal Import Group-->
 {% include 'traitement/modals/parlot.html.twig' %}
 {% include 'traitement/modals/etudiant.html.twig' %}
+{% include 'traitement/modals/pointage.html.twig' %}
 {% include 'traitement/modals/etudiant_detail.html.twig' %}
 {% endblock %} {% block javascripts
 %}

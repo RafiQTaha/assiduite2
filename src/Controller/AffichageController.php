@@ -51,7 +51,7 @@ class AffichageController extends AbstractController
     #[Route('/salle/{sall}', name: 'app_affichage')]
     public function salle(Request $request,$sall): Response
     {
-
+        dd("");
         
         $salle= $this->em->getRepository(PSalles::class)->findOneBy(["abreviation" => $sall]);
         $seance = $this->em->getRepository(PlEmptime::class)->getEmptimeByCurrentDayAndSalle($salle->getId());

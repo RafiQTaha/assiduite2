@@ -64,18 +64,31 @@ class SituationPointageController extends AbstractController
 
         // dd($inscription);
  
-        $requete = "SELECT userinfo.street as street, userinfo.name as name, checkinout.checktime as checktime, psalles.designation as salle, machines.ip as ip, machines.sn as sn FROM `checkinout` 
+        $requete = "SELECT userinfo.street as street, userinfo.name as name, iseance_salle.code_salle, checkinout.checktime as checktime, machines.ip as ip, machines.sn as sn FROM `checkinout` 
         INNER JOIN userinfo ON userinfo.userid=checkinout.userid
         INNER JOIN machines ON machines.sn=checkinout.sn
         INNER JOIN iseance_salle on iseance_salle.id_pointeuse = machines.sn
-        INNER JOIN psalles on psalles.code = iseance_salle.code_salle
-        WHERE checkinout.checktime BETWEEN '$date_debut' AND '$date_fin' AND userinfo.street ='".$inscription->getAdmission()->getCode()."'";
+        -- INNER JOIN psalles on psalles.code = iseance_salle.code_salle
+        WHERE date(checkinout.checktime) >= '$date_debut' and date(checkinout.checktime)  <= '$date_fin' AND userinfo.street ='".$inscription->getAdmission()->getCode()."' group by checktime";
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $pointages = $newstmt->fetchAll();
-        // dd($pointages);
-        $html = $this->renderView('situation_pointage/tables/situation_pointage.html.twig', ['pointages' => $pointages]);
+        $newPointages = [];
+        foreach ($pointages as $pointage) {
+            $pointage['salleDesignation'] = $this->em->getRepository(PSalles::class)->findOneBy(['code'=>$pointage['code_salle']])->getDesignation();
+            $newPointages[] = $pointage;
+            // dd($pointage,$pointages);
+        }
+        // $salles = $this->em->getRepository(PSalles::class)->findAll();
+        // dd($newPointages);
+        $html = $this->renderView('situation_pointage/tables/situation_pointage.html.twig', ['pointages' => $newPointages]);
 
         return new JsonResponse(['html' => $html]);
+    }
+    public function getSalle($code)
+    {
+        $salle = $this->em->getRepository(PSalles::class)->findOneBy(["code" => $code]);
+        // dd($salle);
+        return new Response($salle->getDesignation(), 200, ['Content-Type' => 'text/html']);
     }
 }

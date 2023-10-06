@@ -12,6 +12,17 @@ const Toast = Swal.mixin({
   
   $(document).ready(function () {
 
+    // var table = $("#datatables_pointages").DataTable({
+    //   lengthMenu: [
+    //     [10, 15, 25, 50, 100, 20000000000000],
+    //     [10, 15, 25, 50, 100, "All"],
+    //   ],
+    //   language: {
+    //     url: "/assets/js/datatables-french/datatables-french.json",
+    //     // url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json",
+    //   },
+    // });
+
     $("select").select2();
 
     $("#etablissement").on("change", async function () {
@@ -93,7 +104,7 @@ const Toast = Swal.mixin({
             }
             });
           icon.addClass('fa-search').removeClass("fa-spinner fa-spin ");
-          table.ajax.reload();
+          // table.ajax.reload();
       } catch (error) {
           console.log(error, error.response);
           const message = error.response;
