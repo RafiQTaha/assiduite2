@@ -66,11 +66,22 @@
    <div class="column right" >
    
   <div style="font-size:10px;">
-A: {{A}}<hr/>
-B: {{B}}<hr/>
-C: {{C}}<hr/>
-D: {{D}}<hr/> 
-Total: {{Total}} 
+  {% if S > 0 %}
+  S: {{S}}<hr/>
+  Total: {{S}} 
+  {% elseif Z > 0 %}
+    Z: {{Z}}<hr/>
+    Total: {{Z}} 
+  {% else %}
+
+  A: {{A}}<hr/>
+  B: {{B}}<hr/>
+  C: {{C}}<hr/>
+  D: {{D}}<hr/> 
+  Total: {{Total}} 
+
+  {% endif %}
+
 
   </div>
   </div>

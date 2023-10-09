@@ -912,8 +912,8 @@ class TraitementController extends AbstractController
         
         $requete= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.categorie_f
         FROM xseance_absences
-        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='A'";
-        // dd($requete);
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='A' and xseance_absences.active = 1";
+        // dd($reque 1e);
 
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();
@@ -923,7 +923,7 @@ class TraitementController extends AbstractController
         
         $requete2= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.categorie_f
         FROM xseance_absences
-        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='B'";
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='B' and xseance_absences.active = 1";
 
         $stmt = $this->emAssiduite->getConnection()->prepare($requete2);
         $newstmt = $stmt->executeQuery();
@@ -931,7 +931,7 @@ class TraitementController extends AbstractController
 
         $requete3= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.categorie_f
         FROM xseance_absences
-        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='C'";
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='C' and xseance_absences.active = 1";
 
         $stmt = $this->emAssiduite->getConnection()->prepare($requete3);
         $newstmt = $stmt->executeQuery();
@@ -939,16 +939,35 @@ class TraitementController extends AbstractController
 
         $requete4= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.categorie_f
         FROM xseance_absences
-        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='D'";
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='D' and xseance_absences.active = 1";
 
         $stmt = $this->emAssiduite->getConnection()->prepare($requete4);
         $newstmt = $stmt->executeQuery();
         $etudiantD = $newstmt->fetchAll();
+
+        $requete5= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.categorie_f
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='S' and xseance_absences.active = 1";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete5);
+        $newstmt = $stmt->executeQuery();
+        $etudiantS = $newstmt->fetchAll();
+
+        $requete6= "SELECT xseance_absences.ID_Admission as  id_admission,xseance_absences.Nom,xseance_absences.Prénom,TIME_FORMAT(xseance_absences.Heure_Pointage, '%H:%i') AS Heure_Pointage,xseance_absences.categorie_f
+        FROM xseance_absences
+        WHERE xseance_absences.ID_Séance=$seance and xseance_absences.categorie_f='Z' and xseance_absences.active = 1";
+
+        $stmt = $this->emAssiduite->getConnection()->prepare($requete6);
+        $newstmt = $stmt->executeQuery();
+        $etudiantZ = $newstmt->fetchAll();
+
         // dd($etudiantD);
         $A= count($etudiantA);
         $B= count($etudiantB);
         $C= count($etudiantC);
         $D= count($etudiantD);
+        $S= count($etudiantS);
+        $Z= count($etudiantZ);
 
         $total = $A + $B + $C + $D;
         // dd($A, $B, $C, $D, $total); 
@@ -959,10 +978,14 @@ class TraitementController extends AbstractController
             "etudiantB" =>$etudiantB,
             "etudiantC" =>$etudiantC,
             "etudiantD" =>$etudiantD,
+            "etudiantS" =>$etudiantS,
+            "etudiantZ" =>$etudiantZ,
             "A" => $A,
             "B" => $B,
             "C" => $C,
             "D" => $D,
+            "S" => $S,
+            "Z" => $Z,
             "date" =>$date2,
         ])->getContent();
         
@@ -987,6 +1010,8 @@ class TraitementController extends AbstractController
                 "B" => $B,
                 "C" => $C,
                 "D" => $D,
+                "S" => $S,
+                "Z" => $Z,
                 "Total" =>$total,
                 "date" =>$date2,
                 

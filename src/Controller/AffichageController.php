@@ -40,54 +40,44 @@ class AffichageController extends AbstractController
         $this->emAssiduite = $doctrine->getManager('assiduite');
         $this->emPointage = $doctrine->getManager('pointage');
     }
-    // #[Route('/affichage', name: 'app_affichage')]
-    // public function index(): Response
-    // {
-    //     return $this->render('affichage/index.html.twig', [
-    //         'controller_name' => 'AffichageController',
-    //     ]);
-    // }
      
     #[Route('/salle/{sall}', name: 'app_affichage')]
     public function salle(Request $request,$sall): Response
     {
-        dd("");
+        
+        $Today= new \DateTime(); 
+        // Adjust to Greenwich Mean Time (GMT) or UTC+1
+        $Today->modify('+1 hour');
+        
         
         $salle= $this->em->getRepository(PSalles::class)->findOneBy(["abreviation" => $sall]);
+        
+        
         $seance = $this->em->getRepository(PlEmptime::class)->getEmptimeByCurrentDayAndSalle($salle->getId());
-        // dd($salle, $seance[0]->getId());
+        // dd($seance);
+        // dd($Today,$Today >= $seance[0]->getStart(),$seance[0]->getStart() , $Today <= $seance[0]->getEnd() ,$seance[0]->getEnd());
+        if($Today >= $seance[0]->getStart() && $Today <= $seance[0]->getEnd()){
+            $salle->setEtatPC(1);
+            $this->em->flush();
+        }else{
+            $salle->setEtatPC(0);
+            $this->em->flush();
+        }
         if($seance){
-         $salle="SELECT xabs.* FROM xseance_absences xabs
-         where xabs.id_séance = '".$seance[0]->getId()."';";
-         $stmt = $this->emAssiduite->getConnection()->prepare($salle);
-         $stmt = $stmt->executeQuery();    
-         $sean = $stmt->fetchAll();
+            if($salle->getEtatPC() == 1){
+                $abs="SELECT xabs.* FROM xseance_absences xabs
+                where xabs.id_séance = '".$seance[0]->getId()."';";
+                $stmt = $this->emAssiduite->getConnection()->prepare($abs);
+                $stmt = $stmt->executeQuery();    
+                $sean = $stmt->fetchAll();
+
+                 
+            }else{
+                $sean = "";
+            }
         }else{
             $sean = "";
         }
-
-         
-    // $salle= $this->em->getRepository(PSalles::class)->findOneBy(["abreviation" => $sall]);
-
-        
-    //     $seance = $this->em->getRepository(PlEmptime::class)->getEmptimeByCurrentDayAndSalle($salle->getId());
-    //     // dd($salle, $seance[0]->getId());
-    //     if($seance){
-    //         if($salle->getEtatPC() == 1){
-    //             $abs="SELECT xabs.* FROM xseance_absences xabs
-    //             where xabs.id_séance = '".$seance[0]->getId()."';";
-    //             $stmt = $this->emAssiduite->getConnection()->prepare($abs);
-    //             $stmt = $stmt->executeQuery();    
-    //             $sean = $stmt->fetchAll();
-
-    //             if($sean == null){
-    //                 $salle->setEtatPC(0);
-    //                 $this->em->flush();
-    //             }  
-    //         }
-    //     }else{
-    //         $sean = "";
-    //     }
 
 
     return $this->render('affichage/index.html.twig', [

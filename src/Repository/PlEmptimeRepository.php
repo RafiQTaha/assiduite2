@@ -258,6 +258,8 @@ class PlEmptimeRepository extends ServiceEntityRepository
     public function getEmptimeByCurrentDayAndSalle($sall)
     {
         $date =date('Y-m-d')."%";
+        $heur =date('H:i:s', strtotime('1 hour'));
+        // dd($heur);
         // $date ="2023-09-08%";
         return $this->createQueryBuilder('e')
             ->innerJoin("e.programmation", "programmation")
@@ -268,15 +270,18 @@ class PlEmptimeRepository extends ServiceEntityRepository
             ->innerJoin("promotion.formation", "formation")
             ->innerJoin("formation.etablissement", "etablissement")
             ->where('e.start like :date')
+            ->andWhere('e.heur_db < :heur')
             // ->where('e.start like :date')
             ->andWhere("e.active = 1")
             ->andWhere("e.annuler = 0")
             ->andWhere("e.xsalle = :salle")
             ->andWhere("formation.designation not like 'Résidanat%' ")
             ->andWhere("etablissement.id != 25 ")
-            ->groupBy('e.xsalle')
+            // ->groupBy('e.xsalle')
             ->setParameter('date', $date)
+            ->setParameter('heur', $heur)
             ->setParameter('salle', $sall)
+            ->orderBy('e.heur_db', 'DESC')
             ->getQuery()
             ->getResult()
         ;

@@ -392,7 +392,7 @@ class ResidanatController extends AbstractController
                     SELECT DATE_FORMAT(checktime, '%Y-%m-%d') AS Dat, MIN(TIME_FORMAT(checktime, '%H:%i:%s')) AS checktime
                     FROM checkinout
                     WHERE userid = ".$sn["badgenumber"]."
-                    AND checktime BETWEEN '2023-09-01' AND '2023-09-27'
+                    AND checktime BETWEEN '2023-10-02' AND '2023-10-06'
                     GROUP BY Dat
                 ) c1
             LEFT JOIN
@@ -400,7 +400,7 @@ class ResidanatController extends AbstractController
                     SELECT DATE_FORMAT(checktime, '%Y-%m-%d') AS Dat, MAX(TIME_FORMAT(checktime, '%H:%i:%s')) AS checktime
                     FROM checkinout
                     WHERE userid = ".$sn["badgenumber"]."
-                    AND checktime BETWEEN '2023-09-01' AND '2023-09-27'
+                    AND checktime BETWEEN '2023-10-02' AND '2023-10-06'
                     GROUP BY Dat
                 ) c2
             ON c1.Dat = c2.Dat;";
