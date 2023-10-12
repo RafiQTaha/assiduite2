@@ -898,6 +898,72 @@ const Toast = Swal.mixin({
           }
   
   })
+//   $('body').on('click','#pointage_seance', async function(e){
+//     // id_seance = $(this).attr("id");
+//     const icon = $("#pointage_seance i");
+//     icon.removeClass('fa-search').addClass("fa-spinner fa-spin");
+//     try {
+//       const request = await axios.get('/assiduite/traitement/pointages/'+id_seance);
+//       const response = request.data;
+      
+//       $('#pointage_datatable').html(response.html);
+      
+//       if ($.fn.DataTable.isDataTable("body #pointage_datatable")) {
+//         $("body #pointage_datatable").DataTable().clear().destroy();
+//       }
+      
+//       $("#modal-pointage").modal("show");
+//       $("body #pointage_datatable").DataTable({
+//         language: {
+//           url: "/assets/js/datatables-french/datatables-french.json",
+//         },
+//       });
+//       icon.addClass('fa-search').removeClass("fa-spinner fa-spin ");
+//   } catch (error) {
+//       console.log(error, error.response);
+//       const message = error.response.data.error;
+//       Toast.fire({
+//           icon: 'error',
+//           title: message,
+//       })
+//       icon.addClass('fa-search').removeClass("fa-spinner fa-spin ");
+//   }
+// });
+
+$("#deverouiller").on("click", async () => {
+  if(!id_seance){
+    Toast.fire({
+      icon: 'error',
+      title: 'Veuillez choissir une séance!',
+    })
+    return;
+  }
+  var confirmation = confirm("Voulez-vous vraiment deverouiller cette seance!");
+  if (confirmation) {
+    const icon = $("#deverouiller i");
+
+    try {
+        icon.removeClass('fa-lock-open').addClass("fa-spinner fa-spin ");
+        const request = await axios.get('/assiduite/traitement/deverouiller/'+id_seance);
+        const response = request.data;
+        console.log(response);
+        Toast.fire({
+          icon: 'success',
+          title: 'La seance est bien deverouillée!',
+        })
+        icon.addClass('fa-lock-open').removeClass("fa-spinner fa-spin ");
+        table.ajax.reload();
+    } catch (error) {
+        console.log(error, error.response);
+        const message = error.response.data.error;
+      Toast.fire({
+          icon: 'error',
+          title: message,
+      })
+        icon.addClass('fa-lock-open').removeClass("fa-spinner fa-spin ");
+    }
+  }
+})
   
   });
   

@@ -70,6 +70,7 @@ block body %}
         <a href="#" id="planing" class="btn btn-success ml-1"><i class="fas fa-calendar-alt"></i> Planing</a>
         <a href="#" id="imprimer" class="btn btn-secondary ml-1"><i class="fas fa-print"></i> Imprimer</a>
         <a href="#" id="verouiller" class="btn btn-danger ml-1"><i class="fas fa-lock"></i> Verouiller</a>
+        
         <a href="#" id="retraiter" class="btn btn-success ml-1"><i class="fas fa-redo"></i> Retraiter</a>
         <a href="#" id="scan" class="btn btn-secondary ml-1"><i class="fas fa-file"></i> Scan</a>
         <a href="#" id="annuler" class="btn btn-danger ml-1"><i class="fas fa-window-close"></i> Annuler</a>
@@ -80,6 +81,9 @@ block body %}
         <a href="#" id="modifiersalle" class="btn btn-warning ml-1"><i class="fas fa-edit"></i> Modifier Salle</a>
         <a href="#" id="z" class="btn btn-primary ml-1"><i class="fas fa-edit"></i> Z</a>
         <a href="#" id="s" class="btn btn-primary ml-1"><i class="fas fa-edit"></i> S</a>
+      {% endif %}
+      {% if app.user.id == 1 %}
+        <a href="#" id="deverouiller" class="btn btn-danger ml-1"><i class="fas fa-lock-open"></i> Deverouiller</a>
       {% endif %}
       <button type="button" class="btn btn-primary ml-1" id="btnEtudiants" data-toggle="modal" data-target="#modal-etudiant">
         <i class="fas fa-user-friends"></i> Etudiants

@@ -668,6 +668,41 @@ $(document).ready(function () {
     }
   })
 
+  $("#deverouiller").on("click", async () => {
+    if(!id_seance){
+      Toast.fire({
+        icon: 'error',
+        title: 'Veuillez choissir une séance!',
+      })
+      return;
+    }
+    var confirmation = confirm("Voulez-vous vraiment deverouiller cette seance!");
+    if (confirmation) {
+      const icon = $("#deverouiller i");
+  
+      try {
+          icon.removeClass('fa-lock-open').addClass("fa-spinner fa-spin ");
+          const request = await axios.get('/assiduite/traitement/deverouiller/'+id_seance);
+          const response = request.data;
+          console.log(response);
+          Toast.fire({
+            icon: 'success',
+            title: 'La seance est bien deverouillée!',
+          })
+          icon.addClass('fa-lock-open').removeClass("fa-spinner fa-spin ");
+          table.ajax.reload();
+      } catch (error) {
+          console.log(error, error.response);
+          const message = error.response.data.error;
+        Toast.fire({
+            icon: 'error',
+            title: message,
+        })
+          icon.addClass('fa-lock-open').removeClass("fa-spinner fa-spin ");
+      }
+    }
+  })
+
   $("#annuler").on("click", async () => {
     if(!id_seance){
       Toast.fire({

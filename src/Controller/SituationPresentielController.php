@@ -98,7 +98,7 @@ class SituationPresentielController extends AbstractController
         inner join ac_annee ann on ann.id = prog.annee_id
         inner join xseance xs on xs.id_séance = pl.id
 
-        where date(pl.start) < '$today' and prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
+        where date(pl.start) < '$today' and date(pl.start) >= '2023-09-11' and (xs.annulée is null or xs.annulée = 0) and prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
         $grp  $filter and xs.statut != 0 ORDER BY date_seance;";
 
         // dd($requete);

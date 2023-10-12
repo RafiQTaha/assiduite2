@@ -1,0 +1,136 @@
+
+{% extends 'base.html.twig' %} {% block title %}Univ - Situation Pointage{% endblock %} {%
+block body %}
+
+<style>
+.drop_box {
+  margin: 10px 0;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 3px dotted #a3a3a3;
+  border-radius: 5px;
+}
+
+.drop_box h4 {
+  font-size: 16px;
+  font-weight: 400;
+  color: #2e2e2e;
+}
+
+.drop_box p {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: #a3a3a3;
+}
+.card_2 {
+  border-radius: 10px;
+  box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 260px;
+  background-color: #ffffff;
+  padding: 10px 30px 40px;
+}
+
+.card_2 h3 {
+  font-size: 22px;
+  font-weight: 600;
+  
+}
+.btn {
+  text-decoration: none;
+  background-color: #005af0;
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  outline: none;
+  transition: 0.3s;
+}
+
+.btn:hover{
+  text-decoration: none;
+  background-color: #ffffff;
+  color: #005af0;
+  /* padding: 10px 20px; */
+  border: none;
+  /* outline: 1px solid #010101; */
+}
+
+.form input {
+  margin: 10px 0;
+  width: 100%;
+  background-color: #e2e2e2;
+  border: none;
+  outline: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+}
+</style>
+<div class="main-content">
+  <section class="section">
+    <div class="section-header">
+      <h1>Régularisation</h1>
+      <div class="section-header-breadcrumb">
+        {# <a href="#" id="search" class="btn btn-primary ml-1"><i class="fas fa-search"></i> Rechercher</a> #}
+      </div>
+    </div>
+
+    <div class="section-body">
+      <div class="card">
+        <div class="card-header">
+          <h4>Régularisation</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card_2">
+                        <h3>Upload Files</h3>
+                        <div class="drop_box">
+                        <header>
+                            <h4>Inserer fichier excel</h4>
+                        </header>
+                        <p>Files Supported: xlsx</p>
+                        <input type="file" id="formFileLg" class="btn">
+                        </div>
+                    </div> 
+                </div> 
+
+                <div class="col-md-2">
+                    <div style="display: flex; flex-direction: row;">
+                        <button class="btn btn-outline-warning btn-lg" id="excel_date" value="ns" style="margin-top: 22px;">
+                            <i class="fas fa-file-excel"></i> Traiter / date seance
+                        </button>
+                        <button class="btn btn-outline-success btn-lg" id="canvas_date" value="ns" style="margin-top: 22px; margin-left: 10px;">
+                            Canvas / date seance
+                        </button>
+                    </div>
+                    <div style="display: flex; flex-direction: row;">
+                        <button class="btn btn-outline-warning btn-lg" id="excel_seance" value="ns" style="margin-top: 22px;">
+                            <i class="fas fa-file-excel"></i> Traiter / seance
+                        </button>
+                        <button class="btn btn-outline-success btn-lg" id="canvas_seance" value="ns" style="margin-top: 22px; margin-left: 10px;">
+                            Canvas / seance
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!--Modal Import Group-->
+{# {% include 'traitement/modals/parlot.html.twig' %}
+{% include 'traitement/modals/etudiant.html.twig' %}
+{% include 'traitement/modals/etudiant_detail.html.twig' %} #}
+{% endblock %} {% block javascripts
+%}
+{{ parent() }}
+{# {{ encore_entry_script_tags("traitement") }} #}
+<script src="/assets/js/regularisation/regularisation.js"></script>
+
+{% endblock %}

@@ -16,7 +16,7 @@
       <li class="menu-header">Dashboard</li>
       {# {{ dump(app.request.attributes.get('_route')) }} #}
       {% if app.user.id in assiduite_users %}
-        {%set assiduite = ['traitement','app_situation_pointage','app_situation_presentiel']%}
+        {%set assiduite = ['traitement','app_situation_pointage','app_situation_presentiel','app_extraction','app_regularisation']%}
         <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') in assiduite %}active{% endif %}">
           <a href="#" class="nav-link has-dropdown"
             ><i class=""></i><span>Assiduite</span></a
@@ -30,6 +30,12 @@
           <ul class="dropdown-menu">
               <li><a class="nav-link " href="{{path('app_situation_presentiel')}}">Situation Presentiel</a></li>
           </ul>
+          {% if app.user.id == 39 or app.user.id == 1 %}
+          <ul class="dropdown-menu">
+              <li><a class="nav-link " href="{{path('app_extraction')}}">Extraction</a></li>
+              <li><a class="nav-link " href="{{path('app_regularisation')}}">Regularisation</a></li>
+          </ul>
+          {% endif %}
         </li>
         <li class="nav-item dropdown {% if app.request.attributes.get('_route') is defined and app.request.attributes.get('_route') == 'app_stage' %}active{% endif %}">
           <a href="#" class="nav-link has-dropdown"

@@ -84,6 +84,9 @@ block body %}
         <a href="#" id="reinitialiser" class="btn btn-danger ml-1"><i class="fas fa-minus"></i> Réinitialiser</a>
         <a href="#" class="btn btn-success ml-1" id="traiter"><i class="fas fa-clock"></i> Traiter</a>
       {% endif %}
+      {% if app.user.id == 1 %}
+        <a href="#" id="deverouiller" class="btn btn-danger ml-1"><i class="fas fa-lock-open"></i> Deverouiller</a>
+      {% endif %}
 
         {# {% for operation in operations %}
         <a href="{{ operation.link }}" class="{{ operation.classTag }}" id="{{ operation.idTag }}"><i

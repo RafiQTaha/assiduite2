@@ -47,11 +47,13 @@ class TraitementController extends AbstractController
     private $em;
     private $emAssiduite;
     private $emPointage;
+    private $emUes;
     public function __construct(ManagerRegistry $doctrine)
     {
         $this->em = $doctrine->getManager();
         $this->emAssiduite = $doctrine->getManager('assiduite');
         $this->emPointage = $doctrine->getManager('pointage');
+        $this->emUes = $doctrine->getManager('ues');
     }
     #[Route('/', name: 'traitement')]
     public function index(Request $request)
@@ -396,7 +398,7 @@ class TraitementController extends AbstractController
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
                     $checkinout = $newstmt->fetchAll();
-                    // dd($checkinout);
+                    // dd($requete);
                     // !!!!!!!!! here kat3tel + 3 sec
                     // $checkinout = $this->em->getRepository(Checkinout::class)->findOneBySNAndDateAndUserId($sns,$userInfo->getUSERID(),$date);
                 }
@@ -667,9 +669,34 @@ class TraitementController extends AbstractController
     #[Route('/verouiller/{seance}', name: 'verouiller_seance')]
     public function verouiller(Request $request, $seance)
     {
+        // if($seance == 55827){
+        //     $requete = "SELECT * FROM `xseance_absences` where ID_Séance = $seance";
+        //     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+        //     $newstmt = $stmt->executeQuery();   
+        //     $xabsAssiduite = $newstmt->fetchAll();
+
+        //     // dd($xabsAssiduite);
+        //     foreach ($xabsAssiduite as $xabs) {
+                
+        //     }
+        // }
+
         $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
         if ($Xseance) {
             $Xseance->setStatut(2);
+            $this->em->flush();
+        }else{
+            return new JsonResponse(['error' => 'no Xséance'], 500);
+        }
+        return new JsonResponse("Séance existe",200);
+    }
+
+    #[Route('/deverouiller/{seance}', name: 'deverouiller_seance')]
+    public function deverouiller(Request $request, $seance)
+    {
+        $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
+        if ($Xseance) {
+            $Xseance->setStatut(1);
             $this->em->flush();
         }else{
             return new JsonResponse(['error' => 'no Xséance'], 500);

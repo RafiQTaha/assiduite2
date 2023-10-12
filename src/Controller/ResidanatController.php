@@ -326,7 +326,7 @@ class ResidanatController extends AbstractController
         'ADM-FMA_MG00003055',
         'ADM-FMA_MG00002926',
         'ADM-FMA_MG00002922',
-        'ADM-FMA_MG0002881',
+        'ADM-FMA_MG00002881',
         'ADM-FMA_MG00002853',
         'ADM-FPA_FPA00001614',
         'ADM-FPA_FPA00001684',
@@ -392,7 +392,7 @@ class ResidanatController extends AbstractController
                     SELECT DATE_FORMAT(checktime, '%Y-%m-%d') AS Dat, MIN(TIME_FORMAT(checktime, '%H:%i:%s')) AS checktime
                     FROM checkinout
                     WHERE userid = ".$sn["badgenumber"]."
-                    AND checktime BETWEEN '2023-10-02' AND '2023-10-06'
+                    AND date(checktime) >= '2023-09-26' AND  date(checktime) <= '2023-10-06'
                     GROUP BY Dat
                 ) c1
             LEFT JOIN
@@ -400,7 +400,7 @@ class ResidanatController extends AbstractController
                     SELECT DATE_FORMAT(checktime, '%Y-%m-%d') AS Dat, MAX(TIME_FORMAT(checktime, '%H:%i:%s')) AS checktime
                     FROM checkinout
                     WHERE userid = ".$sn["badgenumber"]."
-                    AND checktime BETWEEN '2023-10-02' AND '2023-10-06'
+                    AND date(checktime) >= '2023-09-26' AND  date(checktime) <= '2023-10-06'
                     GROUP BY Dat
                 ) c2
             ON c1.Dat = c2.Dat;";
@@ -441,101 +441,101 @@ class ResidanatController extends AbstractController
     }
 
     
-    #[Route('/assiduite/extractionGlobal', name: 'extractionGlobal')]
-    public function extractionGlobal(): Response
-    {
-        // dd('test');
-        // $hour = date(' H:i:s');
-        // $date = date('Y-m-d');
-        // $dates = date('Y-m-d', strtotime('-1 day', strtotime($date)));
+    // #[Route('/assiduite/extractionGlobal', name: 'extractionGlobal')]
+    // public function extractionGlobal(): Response
+    // {
+    //     // dd('test');
+    //     // $hour = date(' H:i:s');
+    //     // $date = date('Y-m-d');
+    //     // $dates = date('Y-m-d', strtotime('-1 day', strtotime($date)));
     
-        // $admission = "'ADM-FMA_ORL00003355'";
-        // $myArray="'x',";
+    //     // $admission = "'ADM-FMA_ORL00003355'";
+    //     // $myArray="'x',";
             
-        $requete="SELECT pl.id as seance_id,nat.abreviation as type,date(pl.start) as date_seance,date(pl.start) as date_seance, mdl.code as c_module, mdl.designation as module,ele.code as c_element,
-        pl.heur_db, pl.heur_fin , semaine.id as semaine_id, semaine.date_debut as sem_debut,etab.designation as etab,frm.designation as formation,prm.designation as promotion
-        FROM `pl_emptime` pl
-        INNER JOIN pr_programmation prog on prog.id = pl.programmation_id
-        INNER JOIN pnature_epreuve nat on nat.id = prog.nature_epreuve_id
-        INNER JOIN ac_element ele on ele.id = prog.element_id
-        INNER JOIN ac_module mdl on mdl.id = ele.module_id
-        INNER JOIN ac_semestre sem on sem.id = mdl.semestre_id
-        INNER JOIN ac_promotion prm on prm.id = sem.promotion_id
-        INNER JOIN semaine semaine on semaine.id = pl.semaine_id
-        inner join ac_annee ann on ann.id = prog.annee_id
-        inner join ac_formation frm on frm.id = ann.formation_id
-        inner join ac_etablissement etab on etab.id = frm.etablissement_id
-        INNER JOIN xseance ON xseance.ID_Séance=pl.id 
-        where date(pl.start) >= '2023-09-11' and date(pl.start) <= '2023-10-03' and frm.designation not like 'Résidanat%' and etab.id != 25 and nat.absence = 1 AND (xseance.Annulée=0 or xseance.Annulée is NULL ) and pl.active = 1  order by seance_id ASC";
+    //     $requete="SELECT pl.id as seance_id,nat.abreviation as type,date(pl.start) as date_seance,date(pl.start) as date_seance, mdl.code as c_module, mdl.designation as module,ele.code as c_element,
+    //     pl.heur_db, pl.heur_fin , semaine.id as semaine_id, semaine.date_debut as sem_debut,etab.designation as etab,frm.designation as formation,prm.designation as promotion
+    //     FROM `pl_emptime` pl
+    //     INNER JOIN pr_programmation prog on prog.id = pl.programmation_id
+    //     INNER JOIN pnature_epreuve nat on nat.id = prog.nature_epreuve_id
+    //     INNER JOIN ac_element ele on ele.id = prog.element_id
+    //     INNER JOIN ac_module mdl on mdl.id = ele.module_id
+    //     INNER JOIN ac_semestre sem on sem.id = mdl.semestre_id
+    //     INNER JOIN ac_promotion prm on prm.id = sem.promotion_id
+    //     INNER JOIN semaine semaine on semaine.id = pl.semaine_id
+    //     inner join ac_annee ann on ann.id = prog.annee_id
+    //     inner join ac_formation frm on frm.id = ann.formation_id
+    //     inner join ac_etablissement etab on etab.id = frm.etablissement_id
+    //     INNER JOIN xseance ON xseance.ID_Séance=pl.id 
+    //     where date(pl.start) >= '2023-09-11' and date(pl.start) <= '2023-10-09' and frm.designation not like 'Résidanat%' and etab.id != 25 and nat.absence = 1 AND (xseance.Annulée=0 or xseance.Annulée is NULL ) and pl.active = 1  order by seance_id ASC";
 
 
-        $stmt = $this->em->getConnection()->prepare($requete);
-        $newstmt = $stmt->executeQuery();   
-        $seances = $newstmt->fetchAll();
+    //     $stmt = $this->em->getConnection()->prepare($requete);
+    //     $newstmt = $stmt->executeQuery();   
+    //     $seances = $newstmt->fetchAll();
 
-        // dd($seances);
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'ADMISSION');
-        $sheet->setCellValue('B1', 'NOM');
-        $sheet->setCellValue('C1', 'Prenom');
-        $sheet->setCellValue('D1', 'Id Seance');
-        $sheet->setCellValue('E1', 'Type');
-        $sheet->setCellValue('F1', 'Date Seance');
-        $sheet->setCellValue('G1', 'H-Pointage');
-        $sheet->setCellValue('H1', 'Categorie');
-        $sheet->setCellValue('I1', 'Categorie Si');
-        $sheet->setCellValue('J1', 'HD');
-        $sheet->setCellValue('K1', 'HF');
-        $sheet->setCellValue('L1', 'Etablissement');
-        $sheet->setCellValue('M1', 'Formation');
-        $sheet->setCellValue('N1', 'Promotion');
-        $sheet->setCellValue('O1', 'Module');
-        // $sheet->setCellValue('P1', 'Code Module');
-        // $sheet->setCellValue('Q1', 'Code Element');
+    //     // dd($seances);
+    //     $spreadsheet = new Spreadsheet();
+    //     $sheet = $spreadsheet->getActiveSheet();
+    //     $sheet->setCellValue('A1', 'ADMISSION');
+    //     $sheet->setCellValue('B1', 'NOM');
+    //     $sheet->setCellValue('C1', 'Prenom');
+    //     $sheet->setCellValue('D1', 'Id Seance');
+    //     $sheet->setCellValue('E1', 'Type');
+    //     $sheet->setCellValue('F1', 'Date Seance');
+    //     $sheet->setCellValue('G1', 'H-Pointage');
+    //     $sheet->setCellValue('H1', 'Categorie');
+    //     $sheet->setCellValue('I1', 'Categorie Si');
+    //     $sheet->setCellValue('J1', 'HD');
+    //     $sheet->setCellValue('K1', 'HF');
+    //     $sheet->setCellValue('L1', 'Etablissement');
+    //     $sheet->setCellValue('M1', 'Formation');
+    //     $sheet->setCellValue('N1', 'Promotion');
+    //     $sheet->setCellValue('O1', 'Module');
+    //     // $sheet->setCellValue('P1', 'Code Module');
+    //     // $sheet->setCellValue('Q1', 'Code Element');
         
-        $i=2;
-        $count = 1;
-        foreach ($seances as $seance) {
-            $requete="SELECT * FROM `xseance_absences` where active = 1 and id_séance =".$seance['seance_id'];
-            $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-            $newstmt = $stmt->executeQuery();   
-            $xseances = $newstmt->fetchAll();
-            if ($xseances) {
-                // dd($xseances);
-                foreach ($xseances as $xseance) {
-                    $sheet->setCellValue('A'.$i, $xseance["id_admission"]);
-                    $sheet->setCellValue('B'.$i, $xseance["nom"]);
-                    $sheet->setCellValue('C'.$i, $xseance["prénom"]);
-                    $sheet->setCellValue('D'.$i, $xseance["id_séance"]);
-                    $sheet->setCellValue('E'.$i, $seance["type"]);
-                    $sheet->setCellValue('F'.$i, $seance["date_seance"]);
-                    $sheet->setCellValue('G'.$i, $xseance["heure_pointage"]);
-                    $sheet->setCellValue('H'.$i, $xseance["categorie"]);
-                    $sheet->setCellValue('I'.$i, $xseance["categorie_si"]);
-                    $sheet->setCellValue('J'.$i, $seance["heur_db"]);
-                    $sheet->setCellValue('K'.$i, $seance["heur_fin"]);
-                    $sheet->setCellValue('L'.$i, $seance["etab"]);
-                    $sheet->setCellValue('M'.$i, $seance["formation"]);
-                    $sheet->setCellValue('N'.$i, $seance["promotion"]);
-                    $sheet->setCellValue('O'.$i, $seance["module"]);
-                    // $sheet->setCellValue('P'.$i, $seance["c_module"]);
-                    // $sheet->setCellValue('Q'.$i, $seance["c_element"]);
-                    $i++;
-                }
-            }
-        }
-        // dd($xseances);
-        $fileName = null;
-        $writer = new Xlsx($spreadsheet);
-        $fileName = 'extraction_Global.xlsx';
-        $temp_file = tempnam(sys_get_temp_dir(), $fileName);
-        $writer->save($temp_file);
-        return $this->file($temp_file, $fileName, ResponseHeaderBag::DISPOSITION_INLINE);
+    //     $i=2;
+    //     $count = 1;
+    //     foreach ($seances as $seance) {
+    //         $requete="SELECT * FROM `xseance_absences` where active = 1 and id_séance =".$seance['seance_id'];
+    //         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+    //         $newstmt = $stmt->executeQuery();   
+    //         $xseances = $newstmt->fetchAll();
+    //         if ($xseances) {
+    //             // dd($xseances);
+    //             foreach ($xseances as $xseance) {
+    //                 $sheet->setCellValue('A'.$i, $xseance["id_admission"]);
+    //                 $sheet->setCellValue('B'.$i, $xseance["nom"]);
+    //                 $sheet->setCellValue('C'.$i, $xseance["prénom"]);
+    //                 $sheet->setCellValue('D'.$i, $xseance["id_séance"]);
+    //                 $sheet->setCellValue('E'.$i, $seance["type"]);
+    //                 $sheet->setCellValue('F'.$i, $seance["date_seance"]);
+    //                 $sheet->setCellValue('G'.$i, $xseance["heure_pointage"]);
+    //                 $sheet->setCellValue('H'.$i, $xseance["categorie"]);
+    //                 $sheet->setCellValue('I'.$i, $xseance["categorie_si"]);
+    //                 $sheet->setCellValue('J'.$i, $seance["heur_db"]);
+    //                 $sheet->setCellValue('K'.$i, $seance["heur_fin"]);
+    //                 $sheet->setCellValue('L'.$i, $seance["etab"]);
+    //                 $sheet->setCellValue('M'.$i, $seance["formation"]);
+    //                 $sheet->setCellValue('N'.$i, $seance["promotion"]);
+    //                 $sheet->setCellValue('O'.$i, $seance["module"]);
+    //                 // $sheet->setCellValue('P'.$i, $seance["c_module"]);
+    //                 // $sheet->setCellValue('Q'.$i, $seance["c_element"]);
+    //                 $i++;
+    //             }
+    //         }
+    //     }
+    //     // dd($xseances);
+    //     $fileName = null;
+    //     $writer = new Xlsx($spreadsheet);
+    //     $fileName = 'extraction_Global.xlsx';
+    //     $temp_file = tempnam(sys_get_temp_dir(), $fileName);
+    //     $writer->save($temp_file);
+    //     return $this->file($temp_file, $fileName, ResponseHeaderBag::DISPOSITION_INLINE);
         
-        // return $this->render('residanat/index.html.twig', [
-        //     'etablissements' => $this->em->getRepository(AcEtablissement::class)->findBy(['active' => 1]),
-        //     'controller_name' => 'ResidanatController',
-        // ]);
-    }
+    //     // return $this->render('residanat/index.html.twig', [
+    //     //     'etablissements' => $this->em->getRepository(AcEtablissement::class)->findBy(['active' => 1]),
+    //     //     'controller_name' => 'ResidanatController',
+    //     // ]);
+    // }
 }
