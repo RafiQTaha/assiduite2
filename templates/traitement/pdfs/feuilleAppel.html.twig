@@ -101,7 +101,8 @@ font-size:12px;
               
             
         {% endfor %}
-      {% elseif Z > 0 %}
+      {% endif %}
+      {% if Z > 0 %}
         <tr  style="background:lightgreen; text-align:center !important;letter-spacing:1.5px;">
           <td align="center" colspan=7>Categories: Z</td>
         </tr>
@@ -121,79 +122,80 @@ font-size:12px;
               
             
         {% endfor %}
-      {% else %}
+      {% endif %}
+      {% if A > 0 or B > 0 or C > 0 or D > 0 %}
          <tr  style="background:lightgreen; text-align:center !important;letter-spacing:1.5px;">
-    <td align="center" colspan=7>Categories: A</td>
-    </tr>
-      {% set count = 0 %}
-    {% for et in etudiantA %}
-    {% set count = count + 1 %}
-   
-      <tr>
-      <td >{{ count }}</td>
-        <td >{{et.id_admission}} </td>
-        <td>{{et.Nom}} </td>
-        <td>{{et.Prénom}}</td>
-          <td>{{et.Heure_Pointage}}</td>
-        <td style="text-align:center;">{{et.categorie_f}}</td>
-         <td></td>
-      </tr> 
-       
-          
-      {% endfor %}
+      <td align="center" colspan=7>Categories: A</td>
+      </tr>
+        {% set count = 0 %}
+      {% for et in etudiantA %}
+      {% set count = count + 1 %}
+    
+        <tr>
+        <td >{{ count }}</td>
+          <td >{{et.id_admission}} </td>
+          <td>{{et.Nom}} </td>
+          <td>{{et.Prénom}}</td>
+            <td>{{et.Heure_Pointage}}</td>
+          <td style="text-align:center;">{{et.categorie_f}}</td>
+          <td></td>
+        </tr> 
+        
+            
+        {% endfor %}
 
-      <tr style="background:#FFFACD; text-align:center;letter-spacing:1.5px;">
-          <td align="center"  colspan=7>Categories: B</td>
-          </tr>
-          {% for B in etudiantB %}
-          {% set count = count + 1 %}
-            <tr>
-            <td>{{ count }}</td>
-              <td >{{B.id_admission}} </td>
-              <td>{{B.Nom}} </td>
-              <td>{{B.Prénom}}</td>
-                <td>{{B.Heure_Pointage}}</td>
-              <td style="text-align:center;">{{B.categorie_f}}</td>
-              <td></td>
+        <tr style="background:#FFFACD; text-align:center;letter-spacing:1.5px;">
+            <td align="center"  colspan=7>Categories: B</td>
+            </tr>
+            {% for B in etudiantB %}
+            {% set count = count + 1 %}
+              <tr>
+              <td>{{ count }}</td>
+                <td >{{B.id_admission}} </td>
+                <td>{{B.Nom}} </td>
+                <td>{{B.Prénom}}</td>
+                  <td>{{B.Heure_Pointage}}</td>
+                <td style="text-align:center;">{{B.categorie_f}}</td>
+                <td></td>
+                
+              </tr> 
               
-            </tr> 
             
-          
-      {% endfor %}
-      <tr style="background:#FFA500; text-align:center;letter-spacing:1.5px;">
-          <td align="center"  colspan=7>Categories: C</td>
-          </tr>
-          {% for C in etudiantC %}
-          {% set count = count + 1 %}
-            <tr>
-            <td>{{ count }}</td>
-              <td >{{C.id_admission}} </td>
-              <td>{{C.Nom}} </td>
-              <td>{{C.Prénom}}</td>
-                <td>{{C.Heure_Pointage}}</td>
-              <td style="text-align:center;">{{C.categorie_f}}</td>
-              <td></td>
-            </tr> 
+        {% endfor %}
+        <tr style="background:#FFA500; text-align:center;letter-spacing:1.5px;">
+            <td align="center"  colspan=7>Categories: C</td>
+            </tr>
+            {% for C in etudiantC %}
+            {% set count = count + 1 %}
+              <tr>
+              <td>{{ count }}</td>
+                <td >{{C.id_admission}} </td>
+                <td>{{C.Nom}} </td>
+                <td>{{C.Prénom}}</td>
+                  <td>{{C.Heure_Pointage}}</td>
+                <td style="text-align:center;">{{C.categorie_f}}</td>
+                <td></td>
+              </tr> 
+              
             
-          
-      {% endfor %}
-      <tr style="background:#FF4500; text-align:center;letter-spacing:1.5px;">
-          <td align="center"  colspan=7>Categories: D</td>
-          </tr>
-          {% for D in etudiantD %}
-          {% set count = count + 1 %}
-            <tr>
-            <td>{{ count }}</td>
-              <td >{{D.id_admission}} </td>
-              <td>{{D.Nom}} </td>
-              <td>{{D.Prénom}}</td>
-                <td>{{D.Heure_Pointage}}</td>
-              <td style="text-align:center;">{{D.categorie_f}}</td>
-              <td></td>
-            </tr> 
+        {% endfor %}
+        <tr style="background:#FF4500; text-align:center;letter-spacing:1.5px;">
+            <td align="center"  colspan=7>Categories: D</td>
+            </tr>
+            {% for D in etudiantD %}
+            {% set count = count + 1 %}
+              <tr>
+              <td>{{ count }}</td>
+                <td >{{D.id_admission}} </td>
+                <td>{{D.Nom}} </td>
+                <td>{{D.Prénom}}</td>
+                  <td>{{D.Heure_Pointage}}</td>
+                <td style="text-align:center;">{{D.categorie_f}}</td>
+                <td></td>
+              </tr> 
+              
             
-          
-      {% endfor %}
+        {% endfor %}
     {% endif %}
       
    

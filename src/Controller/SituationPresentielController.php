@@ -49,7 +49,7 @@ class SituationPresentielController extends AbstractController
         $inscriptions = $this->em->getRepository(TInscription::class)->getActiveInscriptionByCurrentAnnee($annee);
         // dd($inscriptions);
         return $this->render('situation_presentiel/index.html.twig', [
-            'etablissements' => $this->em->getRepository(AcEtablissement::class)->findBy(['active' => 1]),
+            // 'etablissements' => $this->em->getRepository(AcEtablissement::class)->findBy(['active' => 1]),
             'inscriptions' => $inscriptions,
             'controller_name' => 'SituationPresentielController',
         ]);
@@ -86,8 +86,7 @@ class SituationPresentielController extends AbstractController
         $etudiant = $inscription->getAdmission()->getPreinscription()->getEtudiant();
         $today = (new DateTime())->format("Y-m-d");
  
-        $requete = "SELECT pl.id as seance_id, pl.start as date_seance, nat.abreviation as type, mdl.designation as module, ele.designation as element, pl.start as date_seance, pl.heur_db, pl.heur_fin , semaine.id as semaine_id, semaine.date_debut as sem_debut, semaine.date_fin as sem_fin, time_to_sec(timediff(pl.heur_fin,  
-        pl.heur_db )) / 3600 as volume FROM `pl_emptime` pl
+        $requete = "SELECT pl.id as seance_id, pl.start as date_seance, nat.abreviation as type, mdl.designation as module, ele.designation as element, pl.start as date_seance, pl.heur_db, pl.heur_fin , semaine.id as semaine_id, semaine.date_debut as sem_debut, semaine.date_fin as sem_fin, TIMEDIFF(pl.heur_fin, pl.heur_db) AS volume FROM `pl_emptime` pl
         INNER JOIN pr_programmation prog on prog.id = pl.programmation_id
         INNER JOIN pnature_epreuve nat on nat.id = prog.nature_epreuve_id
         INNER JOIN ac_element ele on ele.id = prog.element_id
@@ -98,7 +97,8 @@ class SituationPresentielController extends AbstractController
         inner join ac_annee ann on ann.id = prog.annee_id
         inner join xseance xs on xs.id_séance = pl.id
 
-        where date(pl.start) < '$today' and date(pl.start) >= '2023-09-11' and (xs.annulée is null or xs.annulée = 0) and prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
+        where nat.id in (2,6,8,9,13,14,15,20,21) 
+        and pl.active = 1 and pl.verifier = 1 and date(pl.start) < '$today' and date(pl.start) >= '2023-09-11' and (xs.annulée is null or xs.annulée = 0) and prm.id = ".$inscription->getPromotion()->getId()." and ann.id = ".$inscription->getAnnee()->getId()."
         $grp  $filter and xs.statut != 0 ORDER BY date_seance;";
 
         // dd($requete);
@@ -127,7 +127,7 @@ class SituationPresentielController extends AbstractController
     }
     public function getCategorie($adm, $seance)
     {
-        $requete="SELECT xabs.categorie,xabs.categorie_si,xabs.categorie_f
+        $requete="SELECT xabs.categorie,xabs.categorie_si,xabs.categorie_enseig,xabs.categorie_f
         FROM xseance_absences xabs
         WHERE xabs.id_admission='$adm' AND xabs.id_séance='$seance'";
         // dd($requete);
@@ -144,6 +144,8 @@ class SituationPresentielController extends AbstractController
             }elseif($cats[0]['categorie']) {
                 $cat = $cats[0]['categorie'];
             }
+            $cats[0]['categorie_enseig'] == "AD" && $cat = "AD";
+            $cats[0]['categorie_enseig'] == "BD" && $cat = "BD";
         }
         return new Response($cat, 200, ['Content-Type' => 'text/html']);
     }

@@ -48,6 +48,7 @@ class StageController extends AbstractController
         return $this->render('stage/index.html.twig', [
             'etablissements' => $this->em->getRepository(AcEtablissement::class)->findBy(['active' => 1]),
             'controller_name' => 'StageController',
+            'salles' => $this->em->getRepository(PSalles::class)->findAll(),
         ]);
     }
 }

@@ -34,7 +34,7 @@
         
     {% else %}
         {% for etu in etudiants %}
-            <tr admission={{etu["id_admission"]}}>
+            <tr admission='{{etu["id_admission"]}}'>
                 <td>{{etu["id_admission"]}}</td>
                 <td>{{etu["nom"]}} {{etu["prénom"]}}</td>
                 <td>{{etu["heure_pointage"] | date('H:i:s')}}</td>

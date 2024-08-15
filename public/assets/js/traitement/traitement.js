@@ -309,6 +309,7 @@ $(document).ready(function () {
     
     icon.removeClass("fa-clock").addClass("fa-spinner fa-spin");
     try {
+      $("#traiter").addClass('disabled');
       $("body .small-box").removeClass("active");
       
       const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
@@ -319,7 +320,7 @@ $(document).ready(function () {
         icon: "success",
         title: response.message,
       });
-
+      $("#traiter").removeClass('disabled');
       $("body .a").find(".number").text(response.data["A"]);
       $("body .b").find(".number").text(response.data["B"]);
       $("body .c").find(".number").text(response.data["C"]);
@@ -336,6 +337,7 @@ $(document).ready(function () {
         icon: 'error',
         title: message,
       });
+      $("#traiter").removeClass('disabled');
       icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
     }
   });
@@ -364,6 +366,7 @@ $(document).ready(function () {
       }
 
       try {
+        $("#retraiter").addClass('disabled');
         $("body .small-box").removeClass("active");
         
         const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
@@ -375,6 +378,7 @@ $(document).ready(function () {
           icon: "success",
           title: response.message,
         });
+        $("#retraiter").removeClass('disabled');
         // console.log(response.data['A'])
         $("body .a").find(".number").text(response.data["A"]);
         $("body .b").find(".number").text(response.data["B"]);
@@ -392,6 +396,7 @@ $(document).ready(function () {
             icon: 'error',
             title: message,
         })
+        $("#retraiter").removeClass('disabled');
         icon.addClass("fa-clock").removeClass("fa-spinner fa-spin ");
       }
 

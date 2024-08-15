@@ -51,7 +51,7 @@ block body %}
         <div class="card-body">
           <div class="card-search" style="margin-bottom: 1.5rem">
             <div class="row">
-              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+              {# <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
                 <label for="etablissement">Etablissement:</label>
                 <select class="form-control" name="etablissement" id="etablissement">
                   <option value="">Choix etablissement</option>
@@ -69,11 +69,8 @@ block body %}
               <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
                 <label for="promotion">Promotion:</label>
                 <select class="form-control" name="promotion" id="promotion"></select>
-              </div>
-              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
-                <label for="promotion">Semestre:</label>
-                <select class="form-control" name="semestre" id="semestre"></select>
-              </div>
+              </div> #}
+              
               <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
                 <label for="etudiant">Etudiants:</label>
                 <select class="form-control" name="etudiant" id="etudiant">
@@ -84,6 +81,10 @@ block body %}
                     </option>
                     {% endfor %}
                 </select>
+              </div>
+              <div class="col-md-2" style="padding-right: 5px !important;padding-left: 5px !important;">
+                <label for="promotion">Semestre:</label>
+                <select class="form-control" name="semestre" id="semestre"></select>
               </div>
             </div>
           </div>

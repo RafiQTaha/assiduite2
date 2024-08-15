@@ -14,41 +14,58 @@ const Toast = Swal.mixin({
 
     $("select").select2();
 
-    $("#etablissement").on("change", async function () {
-      const id_etab = $(this).val();
-      console.log(id_etab);
-      let response = "";
-      if (id_etab != "") {
-        const request = await axios.get("/api/formation/" + id_etab);
-        response = request.data;
-      }
-      $("#formation").html(response).select2();
-    });
-    $("#formation").on("change", async function () {
-      const id_formation = $(this).val();
-      let response = "";
-      // alert(id_formation);
-      if (id_formation != "") {
-        const request = await axios.get("/api/promotion/" + id_formation);
-        response = request.data;
-      }
-      $("#promotion").html(response).select2();
-    });
-    $("#promotion").on("change", async function () {
-      const id_promotion = $(this).val();
-      $("#etudiant").empty();
+    // $("#etablissement").on("change", async function () {
+    //   const id_etab = $(this).val();
+    //   console.log(id_etab);
+    //   let response = "";
+    //   if (id_etab != "") {
+    //     const request = await axios.get("/api/formation/" + id_etab);
+    //     response = request.data;
+    //   }
+    //   $("#formation").html(response).select2();
+    // });
+    // $("#formation").on("change", async function () {
+    //   const id_formation = $(this).val();
+    //   let response = "";
+    //   // alert(id_formation);
+    //   if (id_formation != "") {
+    //     const request = await axios.get("/api/promotion/" + id_formation);
+    //     response = request.data;
+    //   }
+    //   $("#promotion").html(response).select2();
+    // });
+    // $("#promotion").on("change", async function () {
+    //   const id_promotion = $(this).val();
+    //   $("#etudiant").empty();
+    //   $("#semestre").empty();
+  
+    //   if (id_promotion != "") {
+    //       const request = await axios.get("/api/etudiants/" + id_promotion);
+    //       const request2 = await axios.get("/api/semestre/" + id_promotion);
+    //       response = request.data;
+    //       response2 = request2.data;
+    //       console.log('response');
+          
+    //   }
+    //   $("#etudiant").html(response).select2();
+    //   $("#semestre").html(response2).select2();
+    // });
+
+    $("#etudiant").on("change", async function () {
+      const id_ins = $(this).val();
+      // $("#etudiant").empty();
       $("#semestre").empty();
   
-      if (id_promotion != "") {
-          const request = await axios.get("/api/etudiants/" + id_promotion);
-          const request2 = await axios.get("/api/semestre/" + id_promotion);
+      if (id_ins != "") {
+          const request = await axios.get("/api/semestre_etudiant/" + id_ins);
+          // const request2 = await axios.get("/api/semestre/" + id_promotion);
           response = request.data;
-          response2 = request2.data;
+          // response2 = request2.data;
           console.log('response');
           
       }
-      $("#etudiant").html(response).select2();
-      $("#semestre").html(response2).select2();
+      $("#semestre").html(response).select2();
+      // $("#semestre").html(response2).select2();
     });
 
     $("#imprimer").on("click", async () => {

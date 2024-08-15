@@ -120,7 +120,19 @@ class ApiController extends AbstractController
     #[Route('/semestre/{id}', name: 'getSemestre')]
     public function getSemestre($id): Response
     {   
+        
         $semestre = $this->em->getRepository(AcSemestre::class)->findBy(['promotion'=>$id, 'active' => 1],['designation'=>'ASC']);
+        // dd($semestre);
+        $data = self::dropdown($semestre,'Semestre');
+        return new JsonResponse($data);
+    }
+
+    #[Route('/semestre_etudiant/{id}', name: 'getSemestreEtudiant')]
+    public function getSemestreEtudaint($id): Response
+    {   
+        $ins = $this->em->getRepository(TInscription::class)->find($id);
+        $semestre = $this->em->getRepository(AcSemestre::class)->findBy(['promotion'=>$ins->getPromotion(), 'active' => 1],['designation'=>'ASC']);
+        // dd($semestre);
         $data = self::dropdown($semestre,'Semestre');
         return new JsonResponse($data);
     }

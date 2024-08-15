@@ -284,6 +284,7 @@ const Toast = Swal.mixin({
     }
   
     $("#traiter").on("click", async function () {
+      
       if (!id_seance) {
         Toast.fire({
           icon: "error",
@@ -306,6 +307,7 @@ const Toast = Swal.mixin({
       icon.removeClass("fa-clock").addClass("fa-spinner fa-spin");
       try {
         $("body .small-box").removeClass("active");
+        $("#traiter").addClass('disabled');
         
         const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/1");
         const response = request.data;
@@ -315,6 +317,7 @@ const Toast = Swal.mixin({
           icon: "success",
           title: response.message,
         });
+        $("#traiter").removeClass('disabled');
   
         $("body .a").find(".number").text(response.data["A"]);
         $("body .b").find(".number").text(response.data["B"]);
@@ -332,6 +335,7 @@ const Toast = Swal.mixin({
           icon: 'error',
           title: message,
         });
+        $("#traiter").removeClass('disabled');
         icon.addClass("fa-clock").removeClass("fa-spinner fa-spin");
       }
     });
@@ -353,13 +357,14 @@ const Toast = Swal.mixin({
         const import_statut = await checkImport();
         console.log(import_statut)
         if (import_statut) {
-            const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
-            if (!res) {
-              return
-            }
+          const res = confirm('L\'import des pointages est toujours en cours, voulez-vous vraiment traiter cette séance ?');
+          if (!res) {
+            return
+          }
         }
-  
+        
         try {
+          $('#retraiter').addClass("disabled");
           $("body .small-box").removeClass("active");
           
           const request = await axios.post("/assiduite/traitement/traiter/" + id_seance + "/2");
@@ -371,6 +376,7 @@ const Toast = Swal.mixin({
             icon: "success",
             title: response.message,
           });
+          $('#retraiter').removeClass("disabled");
           // console.log(response.data['A'])
           $("body .a").find(".number").text(response.data["A"]);
           $("body .b").find(".number").text(response.data["B"]);
@@ -382,6 +388,7 @@ const Toast = Swal.mixin({
         $("body .total").find(".number").text(response.data["total"]);
           $("body .small-box").addClass("active");
         } catch (error) {
+          $('#retraiter').removeClass("disabled");
           console.log(error, error.response);
           const message = error.response.data.error;
           Toast.fire({

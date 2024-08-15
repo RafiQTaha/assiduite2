@@ -69,14 +69,14 @@ class ExtractionController extends AbstractController
         inner join ac_formation frm on frm.id = ann.formation_id
         inner join ac_etablissement etab on etab.id = frm.etablissement_id
         INNER JOIN xseance ON xseance.ID_Séance=pl.id 
-        where date(pl.start) >= '$db' and date(pl.start) <= '$fin' and frm.designation not like 'Résidanat%' and etab.id != 25 and nat.absence = 1 AND (xseance.Annulée=0 or xseance.Annulée is NULL ) and pl.active = 1  order by seance_id ASC";
+        where date(pl.start) >= '$db' and date(pl.start) <= '$fin' and prm.id = 7  and frm.designation not like 'Résidanat%' and nat.absence = 1 AND (xseance.Annulée=0 or xseance.Annulée is NULL ) and pl.active = 1 and pl.verifier = 1  order by seance_id ASC";
 
 
 // dd($requete);
         $stmt = $this->em->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $seances = $newstmt->fetchAll();
-
+        // dd($seances);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'ADMISSION');
@@ -87,14 +87,13 @@ class ExtractionController extends AbstractController
         $sheet->setCellValue('F1', 'Date Seance');
         $sheet->setCellValue('G1', 'H-Pointage');
         $sheet->setCellValue('H1', 'Categorie');
-        $sheet->setCellValue('I1', 'Categorie Si');
+        $sheet->setCellValue('I1', 'Categorie ens');
         $sheet->setCellValue('J1', 'HD');
         $sheet->setCellValue('K1', 'HF');
         $sheet->setCellValue('L1', 'Etablissement');
         $sheet->setCellValue('M1', 'Formation');
         $sheet->setCellValue('N1', 'Promotion');
-        $sheet->setCellValue('O1', 'Module');
-        // $sheet->setCellValue('P1', 'Code Module');
+        $sheet->setCellValue('P1', 'Module');
         // $sheet->setCellValue('Q1', 'Code Element');
         
         $i=2;
@@ -114,15 +113,14 @@ class ExtractionController extends AbstractController
                     $sheet->setCellValue('E'.$i, $seance["type"]);
                     $sheet->setCellValue('F'.$i, $seance["date_seance"]);
                     $sheet->setCellValue('G'.$i, $xseance["heure_pointage"]);
-                    $sheet->setCellValue('H'.$i, $xseance["categorie"]);
-                    $sheet->setCellValue('I'.$i, $xseance["categorie_si"]);
+                    $sheet->setCellValue('H'.$i, $xseance["categorie_f"]);
+                    $sheet->setCellValue('I'.$i, $xseance["categorie_enseig"]);
                     $sheet->setCellValue('J'.$i, $seance["heur_db"]);
                     $sheet->setCellValue('K'.$i, $seance["heur_fin"]);
                     $sheet->setCellValue('L'.$i, $seance["etab"]);
                     $sheet->setCellValue('M'.$i, $seance["formation"]);
                     $sheet->setCellValue('N'.$i, $seance["promotion"]);
-                    $sheet->setCellValue('O'.$i, $seance["module"]);
-                    // $sheet->setCellValue('P'.$i, $seance["c_module"]);
+                    $sheet->setCellValue('P'.$i, $seance["module"]);
                     // $sheet->setCellValue('Q'.$i, $seance["c_element"]);
                     $i++;
                 }

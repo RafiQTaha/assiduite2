@@ -100,7 +100,7 @@ class TraitementController extends AbstractController
             $filtre .= " and nat.abreviation != 'ST' ";
         }
         
-
+        
         // dd($filtre);
         $columns = array(
             array( 'db' => 'emp.id','dt' => 0),
@@ -133,10 +133,11 @@ class TraitementController extends AbstractController
 
         left join xseance xs on xs.id_séance = emp.id 
 
-        $filtre and emp.active = 1 and nat.id in (2,6,8,9,13,14,15,20,21) group by emp.id ";
+        $filtre and emp.verifier = 1 and emp.active = 1 and nat.id in (2,6,8,9,13,14,15,20,21) group by emp.id ";
         // dd($sql);
         $totalRows .= $sql;
         $sqlRequest .= $sql;
+        // $this->em->getConnection()->exec("SET SESSION sql_mode = (SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
         $stmt = $this->em->getConnection()->prepare($sql);
         $newstmt = $stmt->executeQuery();
         $totalRecords = count($newstmt->fetchAll());
@@ -228,7 +229,7 @@ class TraitementController extends AbstractController
         $code_salle = $salle->getCode();
 
         $requete = "SELECT m.* FROM `machines` m INNER JOIN iseance_salle iss on iss.id_pointeuse = m.sn where iss.code_salle = '$code_salle'";
-
+        // dd($requete);
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $pointeuses = $newstmt->fetchAll();
@@ -243,28 +244,39 @@ class TraitementController extends AbstractController
         foreach ($pointeuses as $machine) {
             $sn = $machine["sn"];
             $requete = "SELECT * FROM `checkinout` where sn = '$sn' and date(checktime) = '$dateSeance'";
-            // dd($requete);
-
+            
             $stmt = $this->emPointage->getConnection()->prepare($requete);
             $newstmt = $stmt->executeQuery();   
             $pointages = $newstmt->fetchAll();
-            // if(!$sn == "AIOR200360236"){
+            
+            // if($emptime->getId() == 57881){
+                
             //     dd($pointages);
             // }
-            // dd($pointages);
+
+            // dd($requete);
             if ($pointages) {
                 foreach ($pointages as $pointage) {
+                    // if($pointage['userid'] == 1871){
+                
+                    //         dd($pointage);
+                    // }
                     // dd($pointage);
                     $requete = "SELECT * FROM `Userinfo` where Badgenumber = ".$pointage['userid']." LIMIT 1";
 
                     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
                     $newstmt = $stmt->executeQuery();   
                     $uuserinfo = $newstmt->fetchAll();
+                    
+                    // if($pointage['userid'] == 9855){
+                
+                            // dd($uuserinfo);
+                    // }
 
                     if(!$uuserinfo){
+                        // dd($uuserinfo);
                         continue;
                         return new JsonResponse('Aucune userinfo n\'est trouvée!',500);
-                        dd($uuserinfo);
                     }
 
                     $userid = $uuserinfo[0]["userid"];
@@ -287,7 +299,11 @@ class TraitementController extends AbstractController
                         // dd($checkinout, $pointage, $uuserinfo);
                     // }
 
-                    // dd($requete);
+                    
+                    // if($pointage['userid'] == 9855){
+                
+                    //         dd($requete);
+                    // }
 
                     if(!$checkinout){
                         // dd("hi");
@@ -302,11 +318,12 @@ class TraitementController extends AbstractController
             // array_push($sns,$sn);
         }
         $sn = rtrim($sns, ', ');
-        // dd($sns);
+        // dd($emptime->getGroupe());
         // dd("hi");
 
         $groupes = [];
         $annee = $this->em->getRepository(AcAnnee::class)->getActiveAnneeByFormation($promotion->getFormation());
+        // dd($emptime->getGroupe());
         if($emptime->getGroupe()){
             $groupe = $emptime->getGroupe();
             array_push($groupes,$groupe);
@@ -320,6 +337,7 @@ class TraitementController extends AbstractController
                         }
                     }
                 }
+                // dd($groupes);    
             $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoAndGroupe($promotion,$annee,$groupes);
         }else{
             $inscriptions = $this->em->getRepository(TInscription::class)->getInscriptionsByAnneeAndPromoNoGroup($promotion,$annee);
@@ -327,24 +345,40 @@ class TraitementController extends AbstractController
         if (count($inscriptions) == 0) {
             die('Aucun Etudiant Trouver!!!');
         }
-
         $counter = 0;
         $ID_etablissement = $annee->getFormation()->getEtablissement()->getId();
+        // dd($ID_etablissement);
         // $A = $ID_etablissement == 28 ? 20 : 15;
         if ($ID_etablissement == 28) {
-            $A = 21;
-            if ($emptime->getStart()->format('H:i') == '08:00') {
-                $AA = -30;
+            // horraire ramadan
+            
+            
+            if ($emptime->getStart()->format('H:i') == '08:00' || $emptime->getStart()->format('H:i') == '08:30') {
+                $A = 31;
+                $AA = -25;
+                $B = $A;
             }else {
-                $AA = -20;
+                $A = 16;
+                $AA = -15;
+                $B = $A + 15;
             }
-            $B = $A;
+            // end ramadan
+
+            // $A = 21;
+            // if ($emptime->getStart()->format('H:i') == '08:00') {
+            //     $AA = -30;
+            // }else {
+            //     $AA = -20;
+            // }
+
+            
         }else{
             $A = 16;
             $AA = -15;
             $B = $A + 15;
         }
         $C = $B + 15;
+        // dd($A,$AA, $B, $C);
         // $abcd = ['A'=>0,'B'=>0,'C'=>0,'D'=>0];
         $date = clone $emptime->getStart();
         $dateF = clone $emptime->getEnd();
@@ -377,7 +411,7 @@ class TraitementController extends AbstractController
                 $newstmt = $stmt->executeQuery();   
                 $userInfo = $newstmt->fetchAll();
 
-                // dd($userInfo);
+                // dd($id_admission);
                 // $userInfo = $this->em->getRepository(Userinfo::class)->findOneBy(['street'=>$inscription->getAdmission()->getCode()]);
                 $checkinout = null;
                 $cat = "D";
@@ -388,6 +422,9 @@ class TraitementController extends AbstractController
                 // dd($sn);
                 // if($id_seance == 53548){
                 //     dd($check_);
+                // }
+                // if($inscription->getId() == 19492){
+                //     dd($userInfo);
                 // }
                 if ($userInfo and $sn != "") {
                     // dd($userInfo);
@@ -428,6 +465,7 @@ class TraitementController extends AbstractController
                             $cat = "D";
                         }
                     }
+                    // dd($interval,$checktime_,$emptime->getStart(),$cat);
                 }
             }else {
                 $cat = 'P';
@@ -669,20 +707,118 @@ class TraitementController extends AbstractController
     #[Route('/verouiller/{seance}', name: 'verouiller_seance')]
     public function verouiller(Request $request, $seance)
     {
-        // if($seance == 55827){
-        //     $requete = "SELECT * FROM `xseance_absences` where ID_Séance = $seance";
-        //     $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-        //     $newstmt = $stmt->executeQuery();   
-        //     $xabsAssiduite = $newstmt->fetchAll();
-
-        //     // dd($xabsAssiduite);
-        //     foreach ($xabsAssiduite as $xabs) {
-                
-        //     }
-        // }
+        
 
         $Xseance = $this->em->getRepository(Xseance::class)->findOneBy(["ID_Séance"=> $seance]);
+        
         if ($Xseance) {
+            if($Xseance->getAnnulée() == 0){
+                // dd("hi");
+                $requete = "SELECT * FROM `xseance_absences` where ID_Séance = $seance";
+                $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+                $newstmt = $stmt->executeQuery();   
+                $xabsAssiduite = $newstmt->fetchAll();
+                // dd($xabsAssiduite);
+    
+                foreach ($xabsAssiduite as $xabs) {
+                    $requete = "SELECT * FROM `xseance_absences` where id = ".$xabs["id"].";";
+                    
+                    $stmt = $this->emUes->getConnection()->prepare($requete);
+                    $newstmt = $stmt->executeQuery();
+                    $existUes = $newstmt->fetchAll();
+    
+                    $plEmptime = $this->em->getRepository(PlEmptime::class)->find($xabs["id_séance"]);
+                    // dd($plEmptime->getSemaine());
+                    $requete = "SELECT * FROM `pl_emptime` where id = ".$xabs["id_séance"].";";
+                
+                    $stmt = $this->emUes->getConnection()->prepare($requete);
+                    $newstmt = $stmt->executeQuery();
+                    $existSeance = $newstmt->fetchAll();
+    
+                    $user_mod = $plEmptime->getUserUpdated() ? $plEmptime->getUserUpdated()->getId() : null;
+                        $date_mod = $plEmptime->getUpdated() ? $plEmptime->getUpdated()->format('Y-m-d H:i:s') : null;
+    
+                    // dd($plEmptime->getId());
+                    if (!$existSeance) {
+                        $requete = 'INSERT INTO `pl_emptime`(`id`, `code`, `description`, `pr_programmation_id`,`code_prog`, `semaine`, `datemp`, `start`, `end`, `heur_db`, `heur_fin`, `valider`, `annuler`, `generer`, `motif_anuler`, `user`, `user_mod`, `date_creation`, `date_mod`, `p_salles_id`, `code_salle`, `idmodule`, `idelement`, `idnatureepreuve`,`active`) 
+                        VALUES (
+                            "'.$plEmptime->getId().'", 
+                            "'.$plEmptime->getCode().'", 
+                            "'.$plEmptime->getDescription().'", 
+                            "'.$plEmptime->getProgrammation()->getId().'", 
+                            "'.$plEmptime->getProgrammation()->getCode().'", 
+                            "'.$plEmptime->getSemaine()->getNsemaine().'", 
+                            "'.$plEmptime->getDateemploi().'", 
+                            "'.$plEmptime->getStart()->format('Y-m-d H:i:s').'", 
+                            "'.$plEmptime->getEnd()->format('Y-m-d H:i:s').'", 
+                            "'.$plEmptime->getHeurDb()->format('H:i:s').'", 
+                            "'.$plEmptime->getHeurFin()->format('H:i:s').'", 
+                            "'.$plEmptime->getValider().'", 
+                            "'.$plEmptime->getAnnuler().'", 
+                            "'.$plEmptime->getGenerer().'", 
+                            "'.$plEmptime->getMotifAnnuler().'", 
+                            "'.$plEmptime->getUserCreated()->getId().'", 
+                            "'.$user_mod.'", 
+                            "'.$plEmptime->getCreated()->format('Y-m-d H:i:s').'", 
+                            "'.$date_mod.'", 
+                            "'.$plEmptime->getSalle()->getId().'", 
+                            "'.$plEmptime->getSalle()->getCode().'", 
+                            "'.$plEmptime->getProgrammation()->getElement()->getModule()->getCode().'", 
+                            "'.$plEmptime->getProgrammation()->getElement()->getCode().'",
+                            "'.$plEmptime->getProgrammation()->getNatureEpreuve()->getId().'",
+                            "'.$plEmptime->getActive().'"
+                        )';
+                            // dd($requete);
+                        $stmt = $this->emUes->getConnection()->prepare($requete);
+                        $newstmt = $stmt->executeQuery();
+                    }else{
+                        // $user_mod = $plEmptime->getUserUpdated() ? $plEmptime->getUserUpdated()->getId() : null;
+                        // $date_mod = $plEmptime->getUpdated() ? $plEmptime->getUpdated()->format('Y-m-d H:i:s') : null;
+                        $requete = 'UPDATE `pl_emptime` 
+                        SET `code` = "'.$plEmptime->getCode().'", 
+                            `description` = "'.$plEmptime->getDescription().'", 
+                            `pr_programmation_id` = "'.$plEmptime->getProgrammation()->getId().'", 
+                            `code_prog` = "'.$plEmptime->getProgrammation()->getCode().'", 
+                            `semaine` = "'.$plEmptime->getSemaine()->getNsemaine().'", 
+                            `datemp` = "'.$plEmptime->getDateemploi().'", 
+                            `start` = "'.$plEmptime->getStart()->format('Y-m-d H:i:s').'", 
+                            `end` = "'.$plEmptime->getEnd()->format('Y-m-d H:i:s').'", 
+                            `heur_db` = "'.$plEmptime->getHeurDb()->format('H:i:s').'", 
+                            `heur_fin` = "'.$plEmptime->getHeurFin()->format('H:i:s').'", 
+                            `valider` = "'.$plEmptime->getValider().'", 
+                            `annuler` = "'.$plEmptime->getAnnuler().'", 
+                            `generer` = "'.$plEmptime->getGenerer().'", 
+                            `motif_anuler` = "'.$plEmptime->getMotifAnnuler().'", 
+                            `user` = "'.$plEmptime->getUserCreated()->getId().'", 
+                            `user_mod` = "'.$user_mod.'", 
+                            `date_creation` = "'.$plEmptime->getCreated()->format('Y-m-d H:i:s').'", 
+                            `date_mod` = "'.$date_mod.'", 
+                            `p_salles_id` = "'.$plEmptime->getSalle()->getId().'", 
+                            `code_salle` = "'.$plEmptime->getSalle()->getCode().'", 
+                            `idmodule` = "'.$plEmptime->getProgrammation()->getElement()->getModule()->getCode().'", 
+                            `idelement` = "'.$plEmptime->getProgrammation()->getElement()->getCode().'", 
+                            `idnatureepreuve` = "'.$plEmptime->getProgrammation()->getNatureEpreuve()->getId().'", 
+                            `active` = "'.$plEmptime->getActive().'" 
+                        WHERE `id` = "'.$plEmptime->getId().'"';
+    
+                        $stmt = $this->emUes->getConnection()->prepare($requete);
+                        $newstmt = $stmt->executeQuery();
+                    }
+    
+                    // dd($plEmptime->getProgrammation()->getNatureEpreuve()->getId());
+                    if (!$existUes) {
+                        $requete = 'INSERT INTO `xseance_absences`(`id`,`id_admission`, `id_seance`, `nom`, `prenom`, `date_pointage`, `heure_pointage`, `categorie`, `active`) VALUES ("'.$xabs["id"].'","'.$xabs["id_admission"].'","'.$xabs["id_séance"].'","'.$xabs["nom"].'","'.$xabs["prénom"].'","'.$xabs["date_pointage"].'","'.$xabs["heure_pointage"].'","'.$xabs["categorie_f"].'","'.$xabs["active"].'")';
+    
+                        $stmt = $this->emUes->getConnection()->prepare($requete);
+                        $newstmt = $stmt->executeQuery();
+                    }else{
+                        $requete = "UPDATE `xseance_absences` SET `date_pointage` = '".$xabs["date_pointage"]."', `heure_pointage` = '".$xabs["heure_pointage"]."', `categorie` = '".$xabs["categorie_f"]."', `active` = '".$xabs["active"]."' where `id` = '".$xabs["id"]."';";
+    
+                        $stmt = $this->emUes->getConnection()->prepare($requete);
+                        $newstmt = $stmt->executeQuery();
+                    }
+                }
+            }
             $Xseance->setStatut(2);
             $this->em->flush();
         }else{
@@ -996,7 +1132,7 @@ class TraitementController extends AbstractController
         $S= count($etudiantS);
         $Z= count($etudiantZ);
 
-        $total = $A + $B + $C + $D;
+        $total = $A + $B + $C + $D + $S + $Z;
         // dd($A, $B, $C, $D, $total); 
 
         $html = $this->render('traitement/pdfs/feuilleAppel.html.twig' , [
@@ -1161,8 +1297,15 @@ class TraitementController extends AbstractController
             $sheet->setCellValue('F'.$i, $emptime->getProgrammation()->getElement()->getModule()->getSemestre()->getPromotion()->getDesignation());
             $sheet->setCellValue('G'.$i, $emptime->getGroupe() ? $emptime->getGroupe()->getNiveau() : "");
             $sheet->setCellValue('H'.$i, $emptime->getXSalle()?$emptime->getXSalle()->getDesignation():"");
-            $sheet->setCellValue('I'.$i, $emptime->getEmptimens()[0]->getEnseignant()->getNom()." ".$emptime->getEmptimens()[0]->getEnseignant()->getPrenom());
-            
+            if($emptime->getEmptimens()[0]){
+                if($emptime->getEmptimens()[0]->getEnseignant()){
+                    $sheet->setCellValue('I'.$i, $emptime->getEmptimens()[0]->getEnseignant()->getNom()." ".$emptime->getEmptimens()[0]->getEnseignant()->getPrenom());
+                }else{
+                    $sheet->setCellValue('I'.$i, "");
+                }
+            }else{
+                $sheet->setCellValue('I'.$i, "");
+            }
             
             $i++;
         }
@@ -1187,6 +1330,7 @@ class TraitementController extends AbstractController
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery();   
         $XseanceAbsence = $newstmt->fetchAll();
+        // dd($requete);
         // dd($admission,$XseanceAbsence);
         $html = $this->renderView('traitement/pages/etudiant_infos.html.twig', [
             'xabs' => $XseanceAbsence[0]
@@ -1197,20 +1341,38 @@ class TraitementController extends AbstractController
     #[Route('/update_etudiant', name: 'update_etudiant')]
     public function update_etudiant(Request $request) {
         // dd($request);
+        
        
-        if(empty($request->get('cat_Ens')) or empty($request->get('observation'))) {
-            return new JsonResponse("Veuillez remplir tous les champs!", 500);
-        }
+        
         if(empty($request->get('seance')) or empty($request->get('admission'))) {
             return new JsonResponse("No informations", 500);
         }
 
         $catEns = $request->get('cat_Ens');
-        $obs = $request->get('observation');
+        $obs = $request->get('observation')?$request->get('observation'):"";
         $admission = $request->get('admission');
         $seance = $request->get('seance');
 
-        $requete = "UPDATE `xseance_absences` SET `categorie_enseig`='$catEns',`obs`= '$obs' WHERE `id_admission` = '$admission' and id_séance = $seance and active = 1;";
+        if(empty($request->get('cat_Ens')) && empty($request->get('observation'))) {
+            $requete = "UPDATE `xseance_absences` SET `categorie_enseig`='',`obs`= '' WHERE `id_admission` = '$admission' and id_séance = $seance and active = 1;";
+
+            $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+            $newstmt = $stmt->executeQuery(); 
+            return new JsonResponse('Categorie enseignant a bien reinitialisé.',200);
+        }
+
+        // if(empty($request->get('cat_Ens')) or empty($request->get('observation'))) {
+        //     return new JsonResponse("Veuillez remplir tous les champs!", 500);
+        // }
+
+        // if($catEns == "AD" || $catEns == "BD"){
+        //     // dd($catEns);
+        //     $requete = "UPDATE `xseance_absences` SET `categorie_enseig`='$catEns',`categorie_f`='$catEns',`obs`= '$obs' WHERE `id_admission` = '$admission' and id_séance = $seance and active = 1;";
+        // }else{
+            // dd($catEns);
+            $requete = "UPDATE `xseance_absences` SET `categorie_enseig`='$catEns',`obs`= '$obs' WHERE `id_admission` = '$admission' and id_séance = $seance and active = 1;";
+        // }
+
 
         $stmt = $this->emAssiduite->getConnection()->prepare($requete);
         $newstmt = $stmt->executeQuery(); 

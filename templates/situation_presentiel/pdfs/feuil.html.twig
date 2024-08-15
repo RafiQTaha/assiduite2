@@ -182,7 +182,7 @@
 						<td>{{se["date_seance"] | date("Y-m-d")}}</td>
 						<td style="text-align:center;">{{se["heur_db"]}}</td>
 						<td style="text-align:center;">{{se["heur_fin"]}}</td>
-						<td style="text-align:center;">{{se["volume"] | number_format(0, '.', ',') }}</td>
+						<td style="text-align:center;">{{date(se["volume"]) | date('G:i') }}</td>
 						<td style="text-align:center;">
                             {{ render(controller(
                             'App\\Controller\\SituationPresentielController::getCategorie', { adm : inscription.admission.code, seance :se["seance_id"] }

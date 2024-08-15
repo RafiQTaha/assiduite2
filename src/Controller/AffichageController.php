@@ -53,35 +53,49 @@ class AffichageController extends AbstractController
         $salle= $this->em->getRepository(PSalles::class)->findOneBy(["abreviation" => $sall]);
         
         
-        $seance = $this->em->getRepository(PlEmptime::class)->getEmptimeByCurrentDayAndSalle($salle->getId());
-        // dd($seance);
-        // dd($Today,$Today >= $seance[0]->getStart(),$seance[0]->getStart() , $Today <= $seance[0]->getEnd() ,$seance[0]->getEnd());
-        if($Today >= $seance[0]->getStart() && $Today <= $seance[0]->getEnd()){
-            $salle->setEtatPC(1);
-            $this->em->flush();
-        }else{
-            $salle->setEtatPC(0);
-            $this->em->flush();
-        }
-        if($seance){
-            if($salle->getEtatPC() == 1){
-                $abs="SELECT xabs.* FROM xseance_absences xabs
-                where xabs.id_séance = '".$seance[0]->getId()."';";
-                $stmt = $this->emAssiduite->getConnection()->prepare($abs);
-                $stmt = $stmt->executeQuery();    
-                $sean = $stmt->fetchAll();
+        $seances = $this->em->getRepository(PlEmptime::class)->getEmptimeByCurrentDayAndSalle($salle->getId());
+        
+        // if($salle->getId() == 11) {
+            // dd($seances);
+        // }
 
-                 
-            }else{
-                $sean = "";
+
+        // dd($Today,$Today >= $seance[0]->getStart(),$seance[0]->getStart() , $Today <= $seance[0]->getEnd() ,$seance[0]->getEnd());
+        $seanArray = array();
+        if($seances){
+            foreach($seances as $seance){
+                // dd($Today >= $seances[1]->getStart() ,$Today <= $seances[1]->getEnd());
+                if($Today >= $seance->getStart() && $Today <= $seance->getEnd()){
+                    // dd("hi");
+                    $salle->setEtatPC(1);
+                    $this->em->flush();
+                }else{
+                    $salle->setEtatPC(0);
+                    $this->em->flush();
+                }
+                if($salle->getEtatPC() == 1){
+                    $abs="SELECT xabs.* FROM xseance_absences xabs
+                    where xabs.id_séance = '".$seance->getId()."';";
+                    $stmt = $this->emAssiduite->getConnection()->prepare($abs);
+                    $stmt = $stmt->executeQuery();    
+                    $sean = $stmt->fetchAll();
+                    // dd($abs);
+                    array_push($seanArray, $sean);
+    
+                     
+                }else{
+                    $sean = "";
+                }
             }
+           
         }else{
+           
             $sean = "";
         }
-
-
+        $seanArray= array_merge(...$seanArray);
+        // dd($seanArray);
     return $this->render('affichage/index.html.twig', [
-        "salle" =>$sean,
+        "salle" =>$seanArray,
      
     ]); 
     }
@@ -93,7 +107,62 @@ class AffichageController extends AbstractController
         $date = date('Y-m-d');
         $dates = date('Y-m-d', strtotime('-1 day', strtotime($date)));
     
-        $admission = "'ADM-FMA_ORL00003355',
+        $admission = "'ADM-FMA_ONC00008470',
+        'ADM-FMA_RTH00008472',
+        'ADM-FMA_RTH00008493',
+        'ADM-FMA_CAR00008718',
+        'ADM-FMA_PD00008462',
+        'ADM-FMA_HEC00008461',
+        'ADM-FMA_HEC00008464',
+        'ADM-FMA_HEC00008474',
+        'ADM-FMA_NRO00008467',
+        'ADM-FMA_CV00008473',
+        'ADM-FMA_CAR00008488',
+        'ADM-FMA_CAR00008492',
+        'ADM-FMA_BM00008401',
+        'ADM-FMA_BM00008458',
+        'ADM-FMA_BM00008479',
+        'ADM-FPA_BC00008403',
+        'ADM-FPA_BC00008451',
+        'ADM-FPA_BC00008452',
+        'ADM-FPA_BC00008486',
+
+        'ADM-FMA_RUM00008649',
+
+        'ADM-FMA_GS00008651',
+        'ADM-FMA_END00008650',
+
+        'ADM-FPA_BC00008489',
+        'ADM-FMA_NP00008468',
+        'ADM-FMA_NP00008481',
+        'ADM-FMA_NP00008483',
+        'ADM-FMA_REA00008456',
+        'ADM-FMA_REA00008465',
+        'ADM-FMA_REA00008466',
+        'ADM-FMA_REA00008471',
+        'ADM-FMA_PN00008120',
+        'ADM-FMA_NC00008460',
+        'ADM-FMA_DRM00008490',
+        'ADM-FMA_CCV00008457',
+        'ADM-FMA_ORL00008406',
+        'ADM-FMA_ORL00008445',
+        'ADM-FMA_OPH00008402',
+        'ADM-FMA_OPH00008469',
+        'ADM-FMA_OPH00008487',
+        'ADM-FMA_RAD00008429',
+        'ADM-FMA_RAD00008459',
+        'ADM-FMA_RAD00008476',
+        'ADM-FMA_GS00008393',
+        'ADM-FMA_GS00008447',
+        'ADM-FMA_ANP00008409',
+        'ADM-FMA_ANP00008463',
+        'ADM-FPA_PHI00008412',
+        'ADM-FPA_PHH00008395',
+        'ADM-FMDA_ODF00008400',
+        'ADM-FMDA_PRT00008399',
+        'ADM-FMA_DRM00008494',
+        
+        'ADM-FMA_ORL00003355',
         'ADM-FMA_OPH00003354',
         'ADM-FMA_CAR00004432',
         'ADM-FMA_DRM00005039',
@@ -224,7 +293,7 @@ class AffichageController extends AbstractController
         'ADM-FMA_MG00003055',
         'ADM-FMA_MG00002926',
         'ADM-FMA_MG00002922',
-        'ADM-FMA_MG0002881',
+        'ADM-FMA_MG00002881',
         'ADM-FMA_MG00002853',
         'ADM-FPA_FPA00001614',
         'ADM-FPA_FPA00001684',
@@ -249,26 +318,18 @@ class AffichageController extends AbstractController
             $requete="SELECT DISTINCT userinfo.name,userinfo.street,
             date_format(checkinout.checktime,'%Y-%m-%d') as Dat,min(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMINIMAL,max(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMaximal 
             from userinfo
-            left join checkinout on checkinout.userid = userinfo.userid
+            left join checkinout on checkinout.userid = userinfo.badgenumber
             WHERE userinfo.street in ($admission)  AND CHECKTIME>='$dates 06:00:00' AND CHECKTIME<='$dates 23:59:00' GROUP BY street order by name";
             // dd($salle);
-            $stmt = $this->emAssiduite->getConnection()->prepare($requete);
+            $stmt = $this->emPointage->getConnection()->prepare($requete);
             $newstmt = $stmt->executeQuery();   
             $sean = $newstmt->fetchAll();
-            foreach($sean as $l){
-                $myArray.="'".$l["street"]."',";
-            }
-            $salle2="SELECT DISTINCT userinfo.name,userinfo.street,
-            date_format(checkinout.checktime,'%Y-%m-%d') as Dat,min(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMINIMAL,max(date_format(checkinout.checktime,'%H:%i')) as HEUREDEPOINTAGEMaximal 
-            from userinfo
-            left join checkinout on checkinout.userid = userinfo.userid
-            WHERE userinfo.street in ($admission) and userinfo.street not in (".substr($myArray,0,-1).")
-            order by name";
-            $stmt = $this->emAssiduite->getConnection()->prepare($requete);
-            $newstmt = $stmt->executeQuery();   
-            $sean2 = $newstmt->fetchAll();
 
-            // dd($sean2);
+            // dd($sean);
+            if(!$sean){
+                // dd("hi");
+                $sean = "";
+            }
 
         return $this->render('affichage/indexresi.html.twig', [
         "salle" =>$sean,
